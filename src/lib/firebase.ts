@@ -73,8 +73,7 @@ export async function getDbBlogs(): Promise<Blog[]> {
   }
 }
 
-const DOODLE_PROJECT =
-  import.meta.env.PUBLIC_DOODLE_PROJECT_ID || "doodlenotepad-4d983";
+const DOODLE_PROJECT = import.meta.env.PUBLIC_DOODLE_PROJECT_ID as string;
 
 function parseFirestoreValue(value: Record<string, unknown>): unknown {
   if ("stringValue" in value) return value.stringValue;
