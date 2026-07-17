@@ -6,117 +6,191 @@ export interface CineSlide {
   body: string[];
 }
 
-/** Opening tour — every street / door in Goblin Town. */
+export interface CreditBlock {
+  role?: string;
+  name: string;
+  lines?: string[];
+  gap?: "sm" | "md" | "lg";
+}
+
+/** Short open — after boot shutters, before play. */
 export const INTRO_SLIDES: CineSlide[] = [
   {
-    kicker: "CHAPTER 0",
+    kicker: "WELCOME",
     title: "GOBLIN TOWN",
-    body: [
-      "A playable portfolio.",
-      "Night lamps, open doors, one green traveler.",
-    ],
+    body: ["A playable portfolio.", "Walk the street. Open the doors."],
   },
   {
     kicker: "THE BUILDER",
     title: "VISHAL · GOBLIN",
-    body: [
-      "Nepal → Tokyo.",
-      "Engineer by day. Side quests by night.",
-    ],
-  },
-  {
-    kicker: "HOME STREET",
-    title: "HOUSE DIARY",
-    body: ["Who lives here.", "Open the diary to read his path."],
-  },
-  {
-    kicker: "WORKSHOP",
-    title: "SELECTED BUILDS",
-    body: ["Apps, tools, packages on the board.", "Flip a card — see what shipped."],
-  },
-  {
-    kicker: "LIBRARY LANE",
-    title: "NOTES & POSTS",
-    body: ["Quiet shelves.", "Write-ups land when the ink is ready."],
-  },
-  {
-    kicker: "GALLERY ROW",
-    title: "VISITOR WALL",
-    body: ["Sketches left by travelers.", "Yours can hang here too."],
-  },
-  {
-    kicker: "SKETCH ALLEY",
-    title: "LEAVE A MARK",
-    body: ["Paint pots. Open crates.", "Draw something. Save it to the wall."],
-  },
-  {
-    kicker: "CHURCH GATE",
-    title: "SAY HELLO",
-    body: ["End of the road.", "Email · GitHub · hire · wave from the gate."],
+    body: ["Nepal → Tokyo.", "Engineer by day. Side quests by night."],
   },
   {
     kicker: "HOW TO WALK",
     title: "CONTROLS",
-    body: [
-      "A/D move · Shift run · W jump",
-      "J/X attack · Space talk / heal · M menu",
-    ],
+    body: ["A/D move · Shift run · W jump", "J/X attack · Space talk / heal · M menu"],
   },
   {
     kicker: "READY",
     title: "ENTER THE TOWN",
-    body: ["Walk up to doors and townsfolk.", "Soul gems light the street. Stay sharp."],
+    body: [
+      "Pick up every purple gem. Beat Hell-gato.",
+      "All gems + the boss opens the church gate.",
+    ],
   },
 ];
 
-/** Closing roll — people, art, thanks. */
-export const CREDIT_SLIDES: CineSlide[] = [
+/** Closing movie roll — scrolls upward. */
+export const CREDIT_BLOCKS: CreditBlock[] = [
+  { name: "GOBLIN TOWN", lines: ["A playable portfolio"], gap: "lg" },
   {
-    kicker: "THE END?",
-    title: "GOBLIN TOWN",
-    body: ["Thanks for walking the street.", "The gate stays open."],
+    role: "THE END?",
+    name: "CHURCH GATE CLEAR",
+    lines: ["The road is quiet.", "The gate stays open."],
+    gap: "lg",
+  },
+
+  {
+    role: "BUILT BY",
+    name: "VISHAL GURUNG",
+    lines: ["Online · goblin · g0GobliN", "東京 · 2026"],
+    gap: "md",
+  },
+
+  {
+    role: "STARRING",
+    name: "THE GREEN TRAVELER",
+    lines: ["One goblin. Many side quests."],
+    gap: "sm",
+  },
+  { role: "TOWNSFOLK", name: "BEARDED GUIDE", lines: ["Points you toward the diary."] },
+  { role: "TOWNSFOLK", name: "HAT MAN", lines: ["Keeps the workshop rumors warm."] },
+  { role: "TOWNSFOLK", name: "OLD MAN", lines: ["Knows every lamp on the street."] },
+  {
+    role: "TOWNSFOLK",
+    name: "WOMAN OF THE SQUARE",
+    lines: ["Watches the gems float by."],
+    gap: "md",
+  },
+
+  { role: "FOES OF THE EAST ROAD", name: "BURNING GHOULS", lines: ["Church ash and bad manners."] },
+  { role: "FOES", name: "SKELETON PATROL", lines: ["Bones with a schedule."] },
+  { role: "FOES", name: "CEMETERY GHOSTS", lines: ["Soft float. Hard poke."] },
+  {
+    role: "FINAL GUARDIAN",
+    name: "HELL-GATO",
+    lines: ["Last stand at the church gate."],
+    gap: "lg",
+  },
+
+  {
+    role: "PIXEL ART",
+    name: "GOTHICVANIA TOWN",
+    lines: ["Luis Zuno · ansimuz", "Town streets, houses, lamps"],
   },
   {
-    kicker: "BUILT BY",
-    title: "VISHAL GURUNG",
-    body: ["Online: goblin · g0GobliN", "東京 · 2026"],
+    role: "PIXEL ART",
+    name: "GOTHICVANIA CHURCH",
+    lines: ["Luis Zuno · ansimuz", "Gate, tiles, night sky"],
   },
   {
-    kicker: "PIXEL ART",
-    title: "GOTHICVANIA",
-    body: [
-      "Town & cemetery · ansimuz",
-      "opengameart.org / itch.io",
-    ],
+    role: "PIXEL ART",
+    name: "GOTHICVANIA CEMETERY",
+    lines: ["Luis Zuno · ansimuz", "Ghosts, skeletons, props"],
   },
   {
-    kicker: "PIXEL ART",
-    title: "THE GOBLIN",
-    body: [
-      "Monsters Creatures Fantasy",
-      "LuizMelo · CC0",
-    ],
+    role: "PIXEL ART",
+    name: "THE GOBLIN",
+    lines: ["Monsters Creatures Fantasy", "LuizMelo · CC0"],
+    gap: "md",
+  },
+
+  {
+    role: "MUSIC",
+    name: "TOWN LOOP",
+    lines: ["Pascal Belisle · thetoadz", "patreon.com/thetoadz"],
   },
   {
-    kicker: "ALSO",
-    title: "PICKUPS & UI",
-    body: ["Soul gems · OpenGameArt", "Press-key art · pack UI"],
+    role: "SOUND",
+    name: "UI & COMBAT SFX",
+    lines: ["Kenney.nl · UI Audio + RPG Audio", "CC0"],
+    gap: "md",
   },
+
+  { role: "PICKUPS & UI", name: "SOUL GEMS", lines: ["OpenGameArt pack"] },
+  { role: "UI", name: "PRESS-KEY ART", lines: ["Gothicvania UI pack"], gap: "md" },
+
+  { role: "ENGINE", name: "ASTRO + TYPESCRIPT", lines: ["Canvas town. No framework in the loop."] },
+  { role: "DATA", name: "FIREBASE", lines: ["Workshop, library, visitor wall"] },
   {
-    kicker: "SIDE QUEST",
-    title: "REALITYMAP",
-    body: ["npmjs.com/package/reality-map", "A map I wished existed."],
+    role: "SIDE QUEST",
+    name: "REALITYMAP",
+    lines: ["npmjs.com/package/reality-map", "A map I wished existed."],
+    gap: "lg",
   },
+
   {
-    kicker: "FAREWELL",
-    title: "SEE YOU AT THE GATE",
-    body: [
-      "Hire · collab · or just say hi.",
-      "ENTER — return to town",
-    ],
+    role: "THANKS",
+    name: "YOU",
+    lines: ["For clearing the road.", "For opening the doors.", "For leaving a doodle — or not."],
   },
+  { role: "THANKS", name: "OPEN GAME ART", lines: ["Free pixels keep nights lit."] },
+  { role: "THANKS", name: "TOKYO NIGHTS", lines: ["Nepal → here. Still building."], gap: "lg" },
+
+  {
+    role: "FAREWELL",
+    name: "SEE YOU AT THE GATE",
+    lines: ["Hire · collab · or just say hi.", "The street stays open."],
+    gap: "lg",
+  },
+  { name: "— GOBLIN TOWN —", lines: ["fin"], gap: "lg" },
 ];
 
 export function slidesFor(kind: CineKind): CineSlide[] {
-  return kind === "intro" ? INTRO_SLIDES : CREDIT_SLIDES;
+  return kind === "intro" ? INTRO_SLIDES : [];
+}
+
+/** Pre-fight banter when you first face Hell-gato. */
+export type BossLine = {
+  speaker: "boss" | "player";
+  name: string;
+  line: string;
+};
+
+export const BOSS_INTRO: BossLine[] = [
+  {
+    speaker: "boss",
+    name: "HELL-GATO",
+    line: "Another green spark at my gate… Do you even know what waits beyond?",
+  },
+  {
+    speaker: "player",
+    name: "GOBLIN",
+    line: "I walked the whole street for this. Move — or get moved.",
+  },
+  {
+    speaker: "boss",
+    name: "HELL-GATO",
+    line: "Bold words. I am Hell-gato — last fang of this yard. Cross me and burn.",
+  },
+  {
+    speaker: "player",
+    name: "GOBLIN",
+    line: "Then let's settle it. Tokyo nights taught me worse than you.",
+  },
+  {
+    speaker: "boss",
+    name: "HELL-GATO",
+    line: "Good. Show me your heart… before I take it.",
+  },
+];
+
+export function creditRollHtml(): string {
+  return CREDIT_BLOCKS.map((block) => {
+    const gap =
+      block.gap === "lg" ? " credits-gap-lg" : block.gap === "md" ? " credits-gap-md" : "";
+    const role = block.role ? `<p class="credits-role">${block.role}</p>` : "";
+    const lines = (block.lines ?? []).map((line) => `<p class="credits-line">${line}</p>`).join("");
+    return `<div class="credits-block${gap}">${role}<p class="credits-name">${block.name}</p>${lines}</div>`;
+  }).join("");
 }

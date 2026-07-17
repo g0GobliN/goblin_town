@@ -1,0 +1,248 @@
+.entry-body {
+  min-height: 100vh;
+  color: #1a1210;
+  background: #1a1020;
+  overflow-x: hidden;
+  font-family: "Press Start 2P", ui-monospace, monospace;
+}
+
+.entry-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: #1a1020;
+}
+
+.entry-stage-bg,
+.entry-stage-mid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+.entry-stage-bg {
+  filter: saturate(0.85) brightness(0.55) blur(1.5px);
+  transform: scale(1.04);
+}
+
+.entry-stage-mid {
+  object-position: 50% 72%;
+  opacity: 0.45;
+  filter: saturate(0.8) brightness(0.6) blur(0.5px);
+}
+
+.entry-stage-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 30%, rgba(90, 48, 72, 0.22) 0%, transparent 55%),
+    linear-gradient(
+      180deg,
+      rgba(28, 16, 36, 0.25) 0%,
+      rgba(28, 16, 36, 0.15) 45%,
+      rgba(18, 10, 24, 0.45) 100%
+    );
+}
+
+.entry-page {
+  position: relative;
+  z-index: 1;
+  width: min(760px, calc(100% - 28px));
+  margin: 28px auto 80px;
+  background: #d8c4a4;
+  border: 3px solid #2a1830;
+  outline: 3px solid #0c0610;
+  box-shadow:
+    0 0 0 1px rgba(201, 164, 79, 0.12),
+    0 28px 90px rgba(0, 0, 0, 0.65);
+}
+
+.entry-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #160c16;
+  border-bottom: 3px solid #2a1830;
+}
+
+.entry-nav a {
+  font-size: 8px;
+  color: #c9a44f;
+  text-decoration: none;
+  letter-spacing: 0.06em;
+}
+
+.entry-nav a:hover {
+  color: #ffe08a;
+}
+
+.entry-nav-links {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.entry-cover {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-bottom: 3px solid #2a1830;
+  background: #0c0610;
+}
+
+.entry-body-inner {
+  padding: 24px 22px 32px;
+}
+
+.entry-kicker {
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: #8b1e1e;
+  margin-bottom: 10px;
+}
+
+.entry-title {
+  font-size: clamp(14px, 3.5vw, 18px);
+  line-height: 1.45;
+  color: #160c16;
+  margin-bottom: 10px;
+}
+
+.entry-meta {
+  font-size: 9px;
+  line-height: 1.7;
+  color: #5a4038;
+  margin-bottom: 18px;
+}
+
+.entry-tagline {
+  font-size: 10px;
+  line-height: 1.8;
+  color: #2a1a18;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid rgba(42, 24, 48, 0.2);
+}
+
+.entry-content {
+  font-size: 10px;
+  line-height: 1.9;
+  color: #2a1a18;
+}
+
+.entry-content p + p {
+  margin-top: 14px;
+}
+
+.entry-highlights {
+  margin: 18px 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 8px;
+  font-size: 10px;
+  line-height: 1.7;
+  color: #2a1a18;
+}
+
+.entry-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.entry-chip {
+  font-size: 8px;
+  padding: 6px 8px;
+  background: #160c16;
+  color: #f0e4d4;
+  border: 2px solid #2a1830;
+}
+
+.entry-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.entry-link-btn {
+  display: inline-block;
+  font-size: 9px;
+  padding: 10px 14px;
+  background: #c9a44f;
+  color: #160c16;
+  border: 2px solid #1a0a14;
+  text-decoration: none;
+}
+
+.entry-link-btn:hover {
+  background: #e0c060;
+}
+
+.entry-link-btn.primary {
+  background: #ff3b3b;
+  color: #f0e4d4;
+}
+
+.entry-link-btn.primary:hover {
+  color: #fff;
+}
+
+.entry-status {
+  padding: 40px 22px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.7;
+  color: #5a4038;
+}
+
+.entry-status[data-kind="err"] {
+  color: #8b1e1e;
+}
+
+@media (max-width: 600px) {
+  .entry-page {
+    width: calc(100% - 12px);
+    margin: 8px auto 48px;
+  }
+
+  .entry-body-inner {
+    padding: 18px 14px 28px;
+  }
+
+  .entry-nav {
+    padding: 12px 12px;
+    gap: 12px;
+  }
+
+  .entry-nav a {
+    padding: 8px 4px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .entry-title {
+    font-size: 14px;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+
+  .entry-meta {
+    font-size: 8px;
+  }
+
+  .entry-cover {
+    max-height: 220px;
+  }
+}

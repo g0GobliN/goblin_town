@@ -16,6 +16,13 @@ export function initDoodlePad() {
   const nameEl = document.getElementById("doodle-name") as HTMLInputElement | null;
   const statusEl = document.getElementById("doodle-save-status");
 
+  const CANVAS_BG = "#f4e4bc";
+  const resetCanvas = () => {
+    ctx.fillStyle = CANVAS_BG;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  };
+  resetCanvas();
+
   let color = PALETTE[0]!;
   let drawing = false;
   let lastPoint: { x: number; y: number } | null = null;
@@ -78,7 +85,7 @@ export function initDoodlePad() {
   canvas.addEventListener("pointerleave", endStroke);
 
   clearEl.addEventListener("click", () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    resetCanvas();
   });
 
   saveEl?.addEventListener("click", async () => {

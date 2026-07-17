@@ -30,6 +30,7 @@ export interface Crumb {
 }
 
 export interface Npc {
+  name: string;
   sheetIdle: string;
   sheetWalk: string;
   idleFrames: number;
@@ -114,5 +115,6 @@ export interface DrawContext {
   enemies: EnemyState[];
   found: Set<string>;
   inTown: boolean;
-  pickups: { id: string; x: number; y: number; taken: boolean }[];
+  gateOpen: boolean;
+  pickups: { id: string; x: number; y: number; taken: boolean; kind: "soul" | "heart" }[];
 }

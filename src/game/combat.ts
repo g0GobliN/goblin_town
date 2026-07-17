@@ -82,19 +82,21 @@ function spawn(
 
 /** Mix of town ghouls + cemetery ghosts/skeletons/hound */
 export function createEnemies(): EnemyState[] {
+  // Keep patrols clear of townsfolk so they don't stack / block talk
   return [
-    spawn("g1", "ghoul", 700, 70, 38, ENEMY_MAX_HP),
-    spawn("g2", "skeleton", 1050, 80, 36, ENEMY_MAX_HP),
-    spawn("g3", "ghoul", 1550, 90, 40, ENEMY_MAX_HP),
-    spawn("g4", "ghost", 2050, 110, 50, 2),
-    spawn("g5", "skeleton", 2450, 90, 40, ENEMY_MAX_HP),
-    spawn("g6", "ghoul", 2850, 100, 48, 4),
-    spawn("g7", "ghost", 3300, 120, 55, 2),
-    spawn("g8", "skeleton", 3750, 100, 42, ENEMY_MAX_HP),
-    spawn("g9", "ghoul", 4200, 120, 46, 4),
-    spawn("g10", "ghost", 4550, 100, 52, 3),
-    spawn("g11", "skeleton", 4900, 90, 44, 4),
-    spawn("g12", "hound", 5300, 90, 60, 6),
+    spawn("g1", "ghoul", 620, 50, 38, ENEMY_MAX_HP),
+    spawn("g2", "skeleton", 1180, 70, 36, ENEMY_MAX_HP),
+    spawn("g3", "ghoul", 1680, 70, 40, ENEMY_MAX_HP),
+    spawn("g4", "ghost", 2150, 90, 50, 2),
+    spawn("g5", "skeleton", 2550, 80, 40, ENEMY_MAX_HP),
+    spawn("g6", "ghoul", 2950, 80, 48, 4),
+    spawn("g7", "ghost", 3600, 90, 55, 2),
+    spawn("g8", "skeleton", 4000, 80, 42, ENEMY_MAX_HP),
+    spawn("g9", "ghoul", 4350, 80, 46, 4),
+    spawn("g10", "ghost", 4800, 80, 52, 3),
+    spawn("g11", "skeleton", 5100, 70, 44, 4),
+    // Hell-gato — church gate boss: tankier, faster, wider patrol
+    spawn("g12", "hound", 5350, 120, 78, 12),
   ];
 }
 
@@ -138,12 +140,13 @@ export function resolveCombat(player: PlayerState, enemies: EnemyState[], dt: nu
     if (!enemy.alive || enemy.dying) continue;
     if (!overlaps(body, enemyBody(enemy))) continue;
 
-    player.hp = Math.max(0, player.hp - 1);
+    const dmg = enemy.kind === "hound" ? 2 : 1;
+    player.hp = Math.max(0, player.hp - dmg);
     player.hurtT = HURT_DURATION;
     player.invulnT = INVULN_DURATION;
     player.attackT = 0;
     player.climbing = false;
-    player.vx = -player.facing * 120;
+    player.vx = -player.facing * (enemy.kind === "hound" ? 160 : 120);
     player.vy = -180;
     player.anim = "hurt";
     player.frame = 0;

@@ -1,0 +1,114 @@
+---
+import "../../styles/global.css";
+import "../../styles/entry.css";
+
+export const prerender = false;
+
+const slug = Astro.params.slug ?? "";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Work — Goblin Town</title>
+    <meta name="description" content="Project details from Goblin Town workshop." />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+    />
+  </head>
+  <body class="entry-body">
+    <div class="entry-stage" aria-hidden="true">
+      <img class="entry-stage-bg" src="/img/gothicvania/town/background.png" alt="" />
+      <img class="entry-stage-mid" src="/img/gothicvania/town/middleground.png" alt="" />
+      <div class="entry-stage-veil"></div>
+    </div>
+
+    <article class="entry-page" data-slug={slug}>
+      <nav class="entry-nav">
+        <a href="/info">← Summary</a>
+        <div class="entry-nav-links">
+          <a href="/info#work-list">Workshop</a>
+          <a href="/">Enter Town</a>
+        </div>
+      </nav>
+      <div id="entry-root">
+        <p class="entry-status">&gt; unlocking the workshop shelf...</p>
+      </div>
+    </article>
+
+    <script>
+      import { getDbProject } from "../../lib/firebase";
+
+      function escapeHtml(value: string) {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      function escapeAttr(value: string) {
+        return escapeHtml(value).replaceAll("'", "&#39;");
+      }
+
+      const root = document.getElementById("entry-root")!;
+      const slug = document.querySelector<HTMLElement>(".entry-page")?.dataset.slug?.trim() || "";
+
+      async function load() {
+        if (!slug) {
+          root.innerHTML = `<p class="entry-status" data-kind="err">Missing project slug.</p>`;
+          return;
+        }
+        const project = await getDbProject(slug);
+        if (!project) {
+          root.innerHTML = `<p class="entry-status" data-kind="err">No project found for “${escapeHtml(slug)}”.</p>`;
+          return;
+        }
+
+        document.title = `${project.name || project.slug} — Goblin Town`;
+
+        const cover = project.coverImage
+          ? `<img class="entry-cover" src="${escapeAttr(project.coverImage)}" alt="" />`
+          : "";
+        const stack = (project.stack || [])
+          .map((s) => `<span class="entry-chip">${escapeHtml(s)}</span>`)
+          .join("");
+        const highlights = (project.highlights || [])
+          .map((h) => `<li>${escapeHtml(h)}</li>`)
+          .join("");
+        const links = (project.links || [])
+          .map(
+            (l) =>
+              `<a class="entry-link-btn" href="${escapeAttr(l.href)}" target="_blank" rel="noopener">${escapeHtml(l.label || "Link")}</a>`,
+          )
+          .join("");
+
+        root.innerHTML = `
+          ${cover}
+          <div class="entry-body-inner">
+            <p class="entry-kicker">⚒ WORKSHOP</p>
+            <h1 class="entry-title">${escapeHtml(project.name || project.slug)}</h1>
+            <p class="entry-meta">${escapeHtml([project.year, project.role].filter(Boolean).join(" · "))}</p>
+            ${project.tagline ? `<p class="entry-tagline">${escapeHtml(project.tagline)}</p>` : ""}
+            ${stack ? `<div class="entry-stack">${stack}</div>` : ""}
+            <div class="entry-content">
+              ${project.summary ? `<p>${escapeHtml(project.summary).replaceAll("\n", "<br />")}</p>` : ""}
+            </div>
+            ${highlights ? `<ul class="entry-highlights">${highlights}</ul>` : ""}
+            <div class="entry-links">
+              ${links}
+              <a class="entry-link-btn primary" href="/">Enter Town</a>
+            </div>
+          </div>
+        `;
+      }
+
+      void load();
+    </script>
+  </body>
+</html>

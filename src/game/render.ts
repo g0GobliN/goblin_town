@@ -1,6 +1,7 @@
 import { GROUND_Y, SCALE, VIEW_H, VIEW_W } from "./constants";
 import { getActiveScene } from "./scenes";
 import type { DrawContext } from "./types";
+import { EAST_GATE } from "./world";
 
 function drawSheetFrame(
   ctx: CanvasRenderingContext2D,
@@ -26,7 +27,11 @@ function drawSheetFrame(
   ctx.restore();
 }
 
-function drawGroundStrip(ctx: CanvasRenderingContext2D, tileset: HTMLImageElement, cameraX: number) {
+function drawGroundStrip(
+  ctx: CanvasRenderingContext2D,
+  tileset: HTMLImageElement,
+  cameraX: number,
+) {
   ctx.fillStyle = "#1a1420";
   ctx.fillRect(0, GROUND_Y, VIEW_W, VIEW_H - GROUND_Y + 8);
 
@@ -176,7 +181,7 @@ function drawColumns(ctx: DrawContext) {
 
   const { ctx: c, assets, cameraX } = ctx;
   const baseX = scene.churchMode ? 200 : 5000;
-  const count = scene.churchMode ? 6 : 5;
+  const count = scene.churchMode ? 6 : 4;
 
   for (let i = 0; i < count; i++) {
     const worldX = baseX + i * 140;
@@ -184,6 +189,84 @@ function drawColumns(ctx: DrawContext) {
     if (dx <= -40 || dx >= VIEW_W) continue;
 
     c.drawImage(assets.column, Math.floor(dx), GROUND_Y - assets.column.height + 4);
+  }
+}
+
+function drawEastGate(ctx: DrawContext) {
+  if (!ctx.inTown) return;
+
+  const { ctx: c, assets, cameraX, gateOpen } = ctx;
+  const col = assets.column;
+  const leftDx = EAST_GATE.colL - cameraX;
+  const rightDx = EAST_GATE.colR - cameraX;
+  const gateTop = GROUND_Y - EAST_GATE.h;
+  const y = GROUND_Y - col.height + 4;
+
+  if (leftDx > -80 && leftDx < VIEW_W + 20) {
+    c.drawImage(col, Math.floor(leftDx), y);
+  }
+  if (rightDx > -80 && rightDx < VIEW_W + 20) {
+    c.drawImage(col, Math.floor(rightDx), y);
+  }
+
+  const gx = EAST_GATE.x - cameraX;
+  if (gx > -60 && gx < VIEW_W + 20) {
+    const doorW = EAST_GATE.w;
+    const archY = gateTop + 6;
+    // Sink into the ground a couple px so it doesn't float
+    const doorBottom = GROUND_Y + 3;
+    const doorH = doorBottom - archY;
+
+    // lintel
+    c.fillStyle = "#2a2030";
+    c.fillRect(Math.floor(gx - 4), Math.floor(gateTop), doorW + 8, 10);
+    c.fillStyle = "#4a3048";
+    c.fillRect(Math.floor(gx - 4), Math.floor(gateTop), doorW + 8, 2);
+
+    if (!gateOpen) {
+      // closed iron doors
+      c.fillStyle = "#1a1018";
+      c.fillRect(Math.floor(gx), Math.floor(archY), doorW, doorH);
+      c.fillStyle = "#3a2838";
+      c.fillRect(Math.floor(gx), Math.floor(archY), 3, doorH);
+      c.fillRect(Math.floor(gx + doorW - 3), Math.floor(archY), 3, doorH);
+      c.fillRect(Math.floor(gx + doorW / 2 - 2), Math.floor(archY), 4, doorH);
+
+      const barCount = Math.floor((doorH - 20) / 18);
+      for (let i = 0; i < barCount; i++) {
+        const by = archY + 14 + i * 18;
+        c.fillStyle = "#5a3040";
+        c.fillRect(Math.floor(gx + 6), Math.floor(by), doorW - 12, 3);
+      }
+      // spikes
+      c.fillStyle = "#6a4050";
+      for (let i = 0; i < 6; i++) {
+        const sx = gx + 6 + i * 8;
+        c.beginPath();
+        c.moveTo(Math.floor(sx), Math.floor(archY));
+        c.lineTo(Math.floor(sx + 4), Math.floor(archY - 8));
+        c.lineTo(Math.floor(sx + 8), Math.floor(archY));
+        c.fill();
+      }
+      // lock plate
+      c.fillStyle = "#c9a44f";
+      c.fillRect(Math.floor(gx + doorW / 2 - 4), Math.floor(GROUND_Y - 44), 8, 10);
+      // threshold on the dirt
+      c.fillStyle = "#241820";
+      c.fillRect(Math.floor(gx - 2), doorBottom - 2, doorW + 4, 3);
+    } else {
+      // doors swung open — leave the road clear
+      c.fillStyle = "#1a1018";
+      c.fillRect(Math.floor(gx - 18), Math.floor(archY), 14, doorH);
+      c.fillRect(Math.floor(gx + doorW + 4), Math.floor(archY), 14, doorH);
+      c.fillStyle = "#5a3040";
+      for (let i = 0; i < 4; i++) {
+        const by = archY + 16 + i * 20;
+        if (by >= GROUND_Y - 4) break;
+        c.fillRect(Math.floor(gx - 14), Math.floor(by), 8, 2);
+        c.fillRect(Math.floor(gx + doorW + 8), Math.floor(by), 8, 2);
+      }
+    }
   }
 }
 
@@ -257,13 +340,6 @@ function drawEnemies(ctx: DrawContext) {
       c.drawImage(frame, dx, dy);
     }
     c.restore();
-
-    const barW = enemy.kind === "hound" ? 40 : 28;
-    const hpRatio = enemy.hp / enemy.maxHp;
-    c.fillStyle = "#2a1018";
-    c.fillRect(Math.floor(dx + 10), dy - 6, barW, 3);
-    c.fillStyle = "#ff4a4a";
-    c.fillRect(Math.floor(dx + 10), dy - 6, Math.floor(barW * hpRatio), 3);
   }
 }
 
@@ -330,6 +406,20 @@ export function drawLoading(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
   ctx.fillText("LOADING TOWN...", 16, 24);
 }
 
+function drawHeart(c: CanvasRenderingContext2D, x: number, y: number, t: number) {
+  const bob = Math.sin(t) * 2.5;
+  const px = Math.floor(x);
+  const py = Math.floor(y + bob);
+  c.fillStyle = "#e84858";
+  c.beginPath();
+  c.moveTo(px, py + 3);
+  c.bezierCurveTo(px - 7, py - 4, px - 10, py + 6, px, py + 12);
+  c.bezierCurveTo(px + 10, py + 6, px + 7, py - 4, px, py + 3);
+  c.fill();
+  c.fillStyle = "rgba(255, 200, 200, 0.55)";
+  c.fillRect(px - 3, py + 1, 2, 2);
+}
+
 function drawPickups(ctx: DrawContext) {
   const { ctx: c, assets, cameraX, pickups } = ctx;
   const t = performance.now() / 160;
@@ -338,18 +428,18 @@ function drawPickups(ctx: DrawContext) {
     if (p.taken) continue;
     const dx = p.x - cameraX;
     if (dx < -20 || dx > VIEW_W + 20) continue;
+    const bob = Math.sin(t + p.x * 0.05) * 3;
+
+    if (p.kind === "heart") {
+      drawHeart(c, dx, p.y - 14 + bob, t + p.x * 0.05);
+      continue;
+    }
+
     const frame = assets.pickup[Math.floor(t + p.x * 0.03) % assets.pickup.length]!;
     const scale = 0.65;
     const w = frame.width * scale;
     const h = frame.height * scale;
-    const bob = Math.sin(t + p.x * 0.05) * 3;
-    c.drawImage(
-      frame,
-      Math.floor(dx - w / 2),
-      Math.floor(p.y - h + bob),
-      w,
-      h,
-    );
+    c.drawImage(frame, Math.floor(dx - w / 2), Math.floor(p.y - h + bob), w, h);
   }
 }
 
@@ -364,6 +454,7 @@ export function drawWorld(draw: DrawContext) {
   drawGroundStrip(ctx, draw.assets.tileset, draw.cameraX);
   drawProps(draw);
   drawColumns(draw);
+  drawEastGate(draw);
   drawPlatforms(draw);
   drawLadders(draw);
   drawPickups(draw);

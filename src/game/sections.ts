@@ -1,13 +1,6 @@
 import type { SectionKey } from "./types";
 
-export const SECTION_KEYS: SectionKey[] = [
-  "about",
-  "work",
-  "blog",
-  "gallery",
-  "doodle",
-  "contact",
-];
+export const SECTION_KEYS: SectionKey[] = ["about", "work", "blog", "gallery", "doodle", "contact"];
 
 export const SECTION_ICONS: Record<SectionKey, string> = {
   about: "⌂",

@@ -94,7 +94,7 @@ async function renderWork() {
   list.innerHTML = slice
     .map(
       (p) => `
-      <article class="card">
+      <a class="card card-link" href="/work/${encodeURIComponent(p.slug)}">
         <div class="accent">&gt; ${escapeHtml(p.name || p.slug)}</div>
         <p>${escapeHtml(p.tagline || p.summary || "")}</p>
         <p class="small">${escapeHtml([p.year, p.role].filter(Boolean).join(" · "))}</p>
@@ -103,7 +103,8 @@ async function renderWork() {
             ? `<p class="small">${escapeHtml(p.stack.slice(0, 6).join(" / "))}</p>`
             : ""
         }
-      </article>`,
+        <p class="small card-open">Open page →</p>
+      </a>`,
     )
     .join("");
 
@@ -143,56 +144,19 @@ async function renderBlog() {
   list.innerHTML = slice
     .map(
       (b) => `
-      <article class="card blog-card" data-blog-slug="${escapeAttr(b.slug)}">
+      <a class="card card-link" href="/blog/${encodeURIComponent(b.slug)}">
         <div class="accent">&gt; ${escapeHtml(b.title)}</div>
         <p>${escapeHtml(b.tagline || "")}</p>
         <p class="small">${escapeHtml(b.publishedAt || "")}${
           b.tags?.length ? ` · ${escapeHtml(b.tags.slice(0, 3).join(", "))}` : ""
         }</p>
-      </article>`,
+        <p class="small card-open">Open page →</p>
+      </a>`,
     )
     .join("");
 
-  list.querySelectorAll<HTMLElement>(".blog-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      const slug = card.dataset.blogSlug;
-      const blog = blogs.find((b) => b.slug === slug);
-      if (!blog) return;
-      showBlogDetail(blog);
-    });
-  });
-
   bindPager("blog-pager", blogPage, totalPages, (next) => {
     blogPage = next;
-    void renderBlog();
-  });
-}
-
-function showBlogDetail(blog: Blog) {
-  const detail = document.getElementById("blog-detail");
-  const list = document.getElementById("blog-list");
-  const status = document.getElementById("blog-status");
-  const pager = document.getElementById("blog-pager");
-  if (!detail) return;
-
-  if (list) list.hidden = true;
-  if (status) status.hidden = true;
-  if (pager) pager.hidden = true;
-  detail.hidden = false;
-  detail.innerHTML = `
-    <button type="button" class="pixel-btn blog-back" id="blog-back">← BACK</button>
-    <div class="stack" style="margin-top:12px">
-      <div class="accent">&gt; ${escapeHtml(blog.title)}</div>
-      <p class="small">${escapeHtml(blog.publishedAt || "")}</p>
-      <p>${escapeHtml(blog.tagline || "")}</p>
-      <div class="blog-body">${formatContent(blog.content || "")}</div>
-    </div>
-  `;
-  detail.querySelector("#blog-back")?.addEventListener("click", () => {
-    detail.hidden = true;
-    detail.innerHTML = "";
-    if (list) list.hidden = false;
-    if (status) status.hidden = false;
     void renderBlog();
   });
 }
@@ -227,8 +191,9 @@ export async function renderDoodles() {
   grid.innerHTML = slice
     .map((d) => {
       const title = escapeHtml(d.name || "untitled");
-      const img = d.doodle
-        ? `<img src="${escapeAttr(d.doodle)}" alt="${title}" loading="lazy" />`
+      const src = (d.doodle || "").replaceAll('"', "%22");
+      const img = src
+        ? `<img src="${src}" alt="${title}" loading="lazy" />`
         : `<div class="doodle-empty"></div>`;
       return `<figure class="doodle-card">${img}<figcaption class="small">${title}</figcaption></figure>`;
     })
@@ -263,8 +228,4 @@ function escapeHtml(value: string) {
 
 function escapeAttr(value: string) {
   return escapeHtml(value).replaceAll("'", "&#39;");
-}
-
-function formatContent(content: string) {
-  return escapeHtml(content).replaceAll("\n", "<br />");
 }

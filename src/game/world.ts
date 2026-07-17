@@ -40,14 +40,14 @@ function houseC(x: number) {
   props.push({ img: "house-c", x, y: GROUND_Y - 175 });
 }
 
-/** Real crate art = jumpable ledge */
+/** Real crate art = jumpable ledge (collision only — no coded bar) */
 function crate(x: number) {
   props.push({ img: "crate", x, y: GROUND_Y - 35 });
-  platforms.push({ x: x + 2, y: GROUND_Y - 35, w: 34, h: 8 });
+  platforms.push({ x: x + 2, y: GROUND_Y - 35, w: 34, h: 8, hidden: true });
 }
 function crateStack(x: number) {
   props.push({ img: "crate-stack", x, y: GROUND_Y - 68 });
-  platforms.push({ x: x + 6, y: GROUND_Y - 68, w: 58, h: 8 });
+  platforms.push({ x: x + 6, y: GROUND_Y - 68, w: 58, h: 8, hidden: true });
 }
 function tree(x: number, variant: 1 | 2 | 3 = 1) {
   const h = variant === 3 ? 171 : 117;
@@ -149,6 +149,10 @@ tree(5240, 3);
 bush(5320, true);
 lamp(5350);
 stone(5420, 2);
+// Exit gate pillars (drawn with bars in render)
+lamp(5620);
+stone(5800, 3);
+bush(5900);
 
 export const PROPS: Prop[] = props;
 export const PLATFORMS: Rect[] = platforms;
@@ -160,20 +164,99 @@ export const HEALS: Rect[] = [
   { x: 3960, y: GROUND_Y - 50, w: 65, h: 50 },
 ];
 
-/** Soul shards — walk over to collect (drawn in-engine, gothic gold) */
-export type Pickup = { id: string; x: number; y: number; taken: boolean };
+/** Soul gems + limited heart pickups (heal +1, once each). */
+export type Pickup = {
+  id: string;
+  x: number;
+  y: number;
+  taken: boolean;
+  kind: "soul" | "heart";
+};
+
+/** Open-road gem spots (not inside crates / barrels). */
+export const SOUL_GEM_TOTAL = 12;
+export const GEMS_TO_OPEN_GATE = SOUL_GEM_TOTAL;
 
 export function createPickups(): Pickup[] {
-  const xs = [
-    250, 500, 900, 1100, 1400, 1750, 2000, 2300, 2600, 2900, 3200, 3500, 3800, 4100, 4400,
-    4700, 5000, 5300,
-  ];
-  return xs.map((x, i) => ({
-    id: `gem-${i}`,
+  // Clear walkable X positions along the street
+  const souls = [280, 540, 840, 1240, 1520, 1840, 2360, 2740, 3040, 3920, 4320, 4980].map(
+    (x, i) => ({
+      id: `gem-${i}`,
+      x,
+      y: GROUND_Y - 18,
+      taken: false,
+      kind: "soul" as const,
+    }),
+  );
+
+  const hearts = [1320, 2500, 3700, 4500].map((x, i) => ({
+    id: `heart-${i}`,
     x,
-    y: GROUND_Y - 4,
+    y: GROUND_Y - 18,
     taken: false,
+    kind: "heart" as const,
   }));
+
+  return [...souls, ...hearts];
+}
+
+/** Hell-gato arena — hearts only spawn here while the boss lives. */
+export const BOSS_ARENA = { minX: 5180, maxX: 5660 };
+
+const BOSS_HEART_MAX_TOTAL = 8;
+const BOSS_HEART_INTERVAL = 2.4;
+
+let bossHeartsSpawned = 0;
+let bossHeartTimer = 0;
+
+/**
+ * One heart at a time in the Hell-gato arena — only when HP is low (1–2).
+ * No drops at full / healthy start of the fight.
+ */
+export function tickBossHeartSpawns(
+  pickups: Pickup[],
+  dt: number,
+  bossAlive: boolean,
+  playerX: number,
+  playerHp: number,
+): void {
+  if (!bossAlive) {
+    bossHeartTimer = 0;
+    return;
+  }
+
+  // Only while you're in the fight zone and critically low
+  if (playerX < BOSS_ARENA.minX - 80 || playerX > BOSS_ARENA.maxX + 40) return;
+  if (playerHp > 2 || playerHp <= 0) {
+    bossHeartTimer = 0;
+    return;
+  }
+
+  const activeInArena = pickups.filter(
+    (p) => p.kind === "heart" && !p.taken && p.x >= BOSS_ARENA.minX && p.x <= BOSS_ARENA.maxX,
+  ).length;
+  // One at a time — wait until collected before another can spawn
+  if (activeInArena >= 1) {
+    bossHeartTimer = 0;
+    return;
+  }
+
+  bossHeartTimer += dt;
+  if (bossHeartTimer < BOSS_HEART_INTERVAL) return;
+  bossHeartTimer = 0;
+
+  if (bossHeartsSpawned >= BOSS_HEART_MAX_TOTAL) return;
+  if (Math.random() > 0.8) return;
+
+  bossHeartsSpawned += 1;
+  const x = BOSS_ARENA.minX + 40 + Math.random() * (BOSS_ARENA.maxX - BOSS_ARENA.minX - 80);
+  pickups.push({
+    id: `boss-heart-${bossHeartsSpawned}`,
+    x,
+    y: GROUND_Y - 2,
+    taken: false,
+    kind: "heart",
+  });
 }
 
 export const CRUMBS: Crumb[] = [
@@ -301,6 +384,7 @@ export const CRUMBS: Crumb[] = [
 
 export const NPCS: Npc[] = [
   {
+    name: "NEIGHBOR",
     sheetIdle: "bearded-idle",
     sheetWalk: "bearded-walk",
     idleFrames: 5,
@@ -310,9 +394,10 @@ export const NPCS: Npc[] = [
     x: 320,
     y: GROUND_Y,
     facing: 1,
-    line: "Goblin keeps a diary in that house. Ghouls crept in from the church — clear the east road if you can.",
+    line: "That house is Goblin's. Walk up and press SPACE to open his diary.",
   },
   {
+    name: "HAT GUY",
     sheetIdle: "hat-man-idle",
     sheetWalk: "hat-man-walk",
     idleFrames: 4,
@@ -322,9 +407,10 @@ export const NPCS: Npc[] = [
     x: 1000,
     y: GROUND_Y,
     facing: -1,
-    line: "Workshop's open. Jump the crates, kick the ghouls. Wells heal you — drink with SPACE.",
+    line: "Workshop is next door — SPACE to go in. Hurt? Find a well and press SPACE to heal.",
   },
   {
+    name: "OLD MAN",
     sheetIdle: "oldman-idle",
     sheetWalk: "oldman-walk",
     idleFrames: 8,
@@ -334,9 +420,10 @@ export const NPCS: Npc[] = [
     x: 1450,
     y: GROUND_Y,
     facing: 1,
-    line: "Floating soul gems along the street? Grab them — mana for the long walk east.",
+    line: "Purple gems on the road — walk into them. Collect them all, then beat Hell-gato for the gate.",
   },
   {
+    name: "WOMAN",
     sheetIdle: "woman-idle",
     sheetWalk: "woman-walk",
     idleFrames: 7,
@@ -346,9 +433,10 @@ export const NPCS: Npc[] = [
     x: 1900,
     y: GROUND_Y,
     facing: -1,
-    line: "Sketch Alley's ahead — leave a doodle if you like. Market past that gets rough.",
+    line: "Up ahead you can draw a doodle. Further east it gets dangerous — watch for monsters.",
   },
   {
+    name: "NEIGHBOR",
     sheetIdle: "bearded-idle",
     sheetWalk: "bearded-walk",
     idleFrames: 5,
@@ -358,9 +446,10 @@ export const NPCS: Npc[] = [
     x: 3400,
     y: GROUND_Y,
     facing: -1,
-    line: "East market's haunted. Clear the path and the church gate feels a little friendlier.",
+    line: "Monsters took the east road. Clear them if you want to reach the church gate.",
   },
   {
+    name: "HAT GUY",
     sheetIdle: "hat-man-idle",
     sheetWalk: "hat-man-walk",
     idleFrames: 4,
@@ -370,11 +459,32 @@ export const NPCS: Npc[] = [
     x: 4600,
     y: GROUND_Y,
     facing: 1,
-    line: "Almost at the gate. If you want Goblin — email, GitHub, the plaque — he's listening.",
+    line: "Church gate is that way. Open it with SPACE if you want Goblin's email or GitHub.",
   },
 ];
 
+/** East exit — barred until Hell-gato falls. */
+export const EAST_GATE = {
+  /** Left edge of barred door (player blocked here when locked) */
+  x: 5680,
+  w: 52,
+  h: 118,
+  /** Column world X positions */
+  colL: 5624,
+  colR: 5728,
+};
+
+export function nearEastGate(px: number, py: number): boolean {
+  return (
+    px > EAST_GATE.x - 40 &&
+    px < EAST_GATE.x + EAST_GATE.w + 40 &&
+    py > GROUND_Y - 80 &&
+    py < GROUND_Y + 10
+  );
+}
+
 export function zoneLabel(cameraCenterX: number): string {
+  if (cameraCenterX > 5750) return "ROAD'S END";
   if (cameraCenterX > 5000) return "CHURCH YARD";
   if (cameraCenterX > 4200) return "GRAVEYARD";
   if (cameraCenterX > 2800) return "EAST MARKET";

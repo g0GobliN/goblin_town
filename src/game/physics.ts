@@ -66,7 +66,6 @@ export function tryAttack(player: PlayerState): boolean {
   player.anim = "attack";
   player.frame = 0;
   player.frameT = 0;
-  player.vx = 0;
   return true;
 }
 
@@ -82,11 +81,25 @@ export function movePlayer(player: PlayerState, keys: Set<string>, dt: number): 
     return;
   }
 
+  let move = 0;
+  if (keys.has("ArrowLeft") || keys.has("a") || keys.has("A")) move -= 1;
+  if (keys.has("ArrowRight") || keys.has("d") || keys.has("D")) move += 1;
+  const running = keys.has("Shift");
+  const speed = running ? RUN_SPEED : MOVE_SPEED;
+
+  // Attack while moving — keep slash anim, still honor left/right
   if (player.attackT > 0) {
     player.attackT -= dt;
     player.anim = "attack";
-    player.vx = 0;
+    player.vx = move * speed;
+    if (move) player.facing = move > 0 ? 1 : -1;
     player.vy += GRAVITY * dt;
+    player.x += player.vx * dt;
+    player.x = Math.max(8, Math.min(getSceneWorldW() - player.w - 8, player.x));
+    let hit = solidAt(player.x, player.y + 4, player.w, player.h - 8);
+    if (hit && player.vx !== 0) {
+      player.x = player.vx > 0 ? hit.x - player.w : hit.x + hit.w;
+    }
     player.y += player.vy * dt;
     resolveGround(player);
     const kickFrames = 8;
@@ -142,12 +155,6 @@ export function movePlayer(player: PlayerState, keys: Set<string>, dt: number): 
 
   player.climbing = false;
 
-  let move = 0;
-  if (keys.has("ArrowLeft") || keys.has("a") || keys.has("A")) move -= 1;
-  if (keys.has("ArrowRight") || keys.has("d") || keys.has("D")) move += 1;
-
-  const running = keys.has("Shift");
-  const speed = running ? RUN_SPEED : MOVE_SPEED;
   player.vx = move * speed;
   if (move) player.facing = move > 0 ? 1 : -1;
 
@@ -217,8 +224,13 @@ export function updateEnemy(enemy: EnemyState, dt: number): void {
     enemy.hurtT -= dt;
   } else {
     enemy.x += enemy.facing * enemy.speed * dt;
-    if (enemy.x < enemy.minX || enemy.x > enemy.maxX) {
-      enemy.facing = (enemy.facing * -1) as 1 | -1;
+    // Clamp at patrol ends — bare flip causes stuck jitter on the edge
+    if (enemy.x <= enemy.minX) {
+      enemy.x = enemy.minX;
+      enemy.facing = 1;
+    } else if (enemy.x >= enemy.maxX) {
+      enemy.x = enemy.maxX;
+      enemy.facing = -1;
     }
   }
 

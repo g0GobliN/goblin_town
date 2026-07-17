@@ -4,14 +4,7 @@ import { CRUMBS, LADDERS, NPCS, PLATFORMS, PROPS } from "./world";
 
 export type SceneId = "town" | SectionKey;
 
-export type SceneVibe =
-  | "town"
-  | "home"
-  | "workshop"
-  | "library"
-  | "gallery"
-  | "sketch"
-  | "church";
+export type SceneVibe = "town" | "home" | "workshop" | "library" | "gallery" | "sketch" | "church";
 
 export interface Scene {
   id: SceneId;
@@ -103,6 +96,7 @@ const SCENES: Record<SectionKey, Scene> = {
     ],
     npcs: [
       {
+        name: "NEIGHBOR",
         sheetIdle: "bearded-idle",
         sheetWalk: "bearded-walk",
         idleFrames: 5,
@@ -112,7 +106,7 @@ const SCENES: Record<SectionKey, Scene> = {
         x: 360,
         y: GROUND_Y,
         facing: -1,
-        line: "This is Goblin's street. Diary's in the house — his whole path is in there.",
+        line: "This is Goblin's house. Press SPACE to read about him.",
       },
     ],
     crumbs: [exitCrumb("about")],
@@ -125,7 +119,7 @@ const SCENES: Record<SectionKey, Scene> = {
     worldW: 1100,
     sky: "#141018",
     tint: "rgba(40, 55, 90, 0.22)",
-    tagline: "Build · sharp tools · honest software",
+    tagline: "Projects I've built",
     spawnX: 140,
     showEnemies: false,
     showColumns: false,
@@ -149,6 +143,7 @@ const SCENES: Record<SectionKey, Scene> = {
     ],
     npcs: [
       {
+        name: "HAT GUY",
         sheetIdle: "hat-man-idle",
         sheetWalk: "hat-man-walk",
         idleFrames: 4,
@@ -158,7 +153,7 @@ const SCENES: Record<SectionKey, Scene> = {
         x: 480,
         y: GROUND_Y,
         facing: 1,
-        line: "Blueprints everywhere. RealityMap started as a wish — now it's on npm.",
+        line: "These are Goblin's projects. Have a look around.",
       },
     ],
     crumbs: [exitCrumb("work")],
@@ -171,7 +166,7 @@ const SCENES: Record<SectionKey, Scene> = {
     worldW: 1000,
     sky: "#120e18",
     tint: "rgba(55, 35, 70, 0.28)",
-    tagline: "Notes · write-ups · still drafting",
+    tagline: "Notes and posts",
     spawnX: 150,
     showEnemies: false,
     showColumns: false,
@@ -193,6 +188,7 @@ const SCENES: Record<SectionKey, Scene> = {
     ],
     npcs: [
       {
+        name: "OLD MAN",
         sheetIdle: "oldman-idle",
         sheetWalk: "oldman-walk",
         idleFrames: 8,
@@ -202,7 +198,7 @@ const SCENES: Record<SectionKey, Scene> = {
         x: 520,
         y: GROUND_Y,
         facing: -1,
-        line: "Quiet shelves today. When Goblin finishes a page, it lands here.",
+        line: "Blog posts show up here when Goblin writes them.",
       },
     ],
     crumbs: [exitCrumb("blog")],
@@ -215,7 +211,7 @@ const SCENES: Record<SectionKey, Scene> = {
     worldW: 1040,
     sky: "#18101a",
     tint: "rgba(90, 30, 50, 0.2)",
-    tagline: "The doodle wall · anyone can leave a mark",
+    tagline: "Visitor doodles",
     spawnX: 140,
     showEnemies: false,
     showColumns: false,
@@ -234,6 +230,7 @@ const SCENES: Record<SectionKey, Scene> = {
     ],
     npcs: [
       {
+        name: "WOMAN",
         sheetIdle: "woman-idle",
         sheetWalk: "woman-walk",
         idleFrames: 7,
@@ -243,7 +240,7 @@ const SCENES: Record<SectionKey, Scene> = {
         x: 500,
         y: GROUND_Y,
         facing: 1,
-        line: "Flip through the wall. Every sketch stays — the town just grows.",
+        line: "People leave drawings here. Yours can too.",
       },
     ],
     crumbs: [exitCrumb("gallery")],
@@ -256,12 +253,18 @@ const SCENES: Record<SectionKey, Scene> = {
     worldW: 1080,
     sky: "#2a1a14",
     tint: "rgba(255, 200, 120, 0.12)",
-    tagline: "Paint · play · leave a doodle for the wall",
+    tagline: "Draw something",
     spawnX: 150,
     showEnemies: false,
     showColumns: false,
     churchMode: false,
-    platforms: [ground(), plat(280, 168, 64), plat(480, 140, 80), plat(720, 155, 96), plat(900, 120, 56)],
+    platforms: [
+      ground(),
+      plat(280, 168, 64),
+      plat(480, 140, 80),
+      plat(720, 155, 96),
+      plat(900, 120, 56),
+    ],
     ladders: [
       { x: 498, y: 140, w: 18, h: GROUND_Y - 140 },
       { x: 918, y: 120, w: 18, h: GROUND_Y - 120 },
@@ -280,6 +283,7 @@ const SCENES: Record<SectionKey, Scene> = {
     ],
     npcs: [
       {
+        name: "WOMAN",
         sheetIdle: "woman-idle",
         sheetWalk: "woman-walk",
         idleFrames: 7,
@@ -289,7 +293,7 @@ const SCENES: Record<SectionKey, Scene> = {
         x: 420,
         y: GROUND_Y,
         facing: -1,
-        line: "Grab a color. Draw wild. Save it — the wall remembers.",
+        line: "Pick a color, draw, then press SAVE.",
       },
     ],
     crumbs: [exitCrumb("doodle")],
@@ -302,7 +306,7 @@ const SCENES: Record<SectionKey, Scene> = {
     worldW: 1000,
     sky: "#0c0812",
     tint: "rgba(30, 20, 50, 0.35)",
-    tagline: "Gate's open · say hello · 東京",
+    tagline: "Say hello",
     spawnX: 160,
     showEnemies: false,
     showColumns: true,
@@ -320,6 +324,7 @@ const SCENES: Record<SectionKey, Scene> = {
     ],
     npcs: [
       {
+        name: "NEIGHBOR",
         sheetIdle: "bearded-idle",
         sheetWalk: "bearded-walk",
         idleFrames: 5,
@@ -329,7 +334,7 @@ const SCENES: Record<SectionKey, Scene> = {
         x: 520,
         y: GROUND_Y,
         facing: 1,
-        line: "If you want to build something with Goblin, the gate plaque has his links.",
+        line: "Want to contact Goblin? Open the gate with SPACE.",
       },
     ],
     crumbs: [exitCrumb("contact")],

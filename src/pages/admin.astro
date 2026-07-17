@@ -1,0 +1,662 @@
+---
+import "../styles/global.css";
+import "../styles/admin.css";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Admin — Goblin Town</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Press+Start+2P&display=swap"
+    />
+  </head>
+  <body class="admin-body">
+    <div class="admin-sky" aria-hidden="true">
+      <div class="admin-sky-far"></div>
+      <div class="admin-sky-near"></div>
+      <div class="admin-sky-veil"></div>
+    </div>
+
+    <section id="login-panel" class="admin-gate">
+      <div class="admin-gate-card">
+        <p class="admin-kicker">ENTERING</p>
+        <h1 class="admin-brand">
+          <span class="admin-brand-main">GOBLIN</span>
+          <span class="admin-brand-sub">TOWN</span>
+        </h1>
+        <p class="admin-gate-line" aria-hidden="true"></p>
+        <p class="admin-gate-sub">Keeper's gate</p>
+        <form id="login-form" class="admin-form admin-login-form">
+          <label>
+            Email
+            <input
+              type="email"
+              name="email"
+              required
+              autocomplete="username"
+              placeholder="you@example.com"
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              placeholder="••••••••"
+            />
+          </label>
+          <button type="submit" class="pixel-btn admin-enter-btn">ENTER TOWN</button>
+          <p class="admin-msg" id="login-msg" hidden></p>
+        </form>
+      </div>
+    </section>
+
+    <main id="dash-panel" class="admin-shell" hidden>
+      <header class="admin-header">
+        <div>
+          <p class="admin-kicker">GOBLIN TOWN</p>
+          <h1 class="admin-title">Keep</h1>
+        </div>
+        <div class="admin-header-actions" id="header-actions">
+          <span class="admin-email" id="admin-email"></span>
+          <button type="button" class="pixel-btn" id="logout-btn">LOG OUT</button>
+        </div>
+      </header>
+
+      <section class="admin-dash">
+        <nav class="admin-tabs" role="tablist">
+          <button type="button" class="admin-tab is-active" data-tab="work">Work</button>
+          <button type="button" class="admin-tab" data-tab="blog">Blog</button>
+          <button type="button" class="admin-tab" data-tab="doodles">Doodles</button>
+          <button type="button" class="admin-tab" data-tab="comments">Comments</button>
+          <button type="button" class="admin-tab" data-tab="settings">Settings</button>
+        </nav>
+
+        <p class="admin-msg" id="dash-msg" hidden></p>
+
+        <div class="admin-tab-panel" data-panel="work">
+          <div class="admin-split">
+            <div>
+              <h2>Projects</h2>
+              <div id="work-list" class="admin-list"></div>
+            </div>
+            <form id="work-form" class="admin-form admin-card">
+              <h3 id="work-form-title">New project</h3>
+              <input type="hidden" name="editing" value="" />
+              <label>Slug <input name="slug" required /></label>
+              <label>Name <input name="name" required /></label>
+              <label>Tagline <input name="tagline" /></label>
+              <label>Year <input name="year" /></label>
+              <label>Role <input name="role" /></label>
+              <label>Stack (comma) <input name="stack" /></label>
+              <label>Summary <textarea name="summary" rows="3"></textarea></label>
+              <label
+                >Highlights (one per line) <textarea name="highlights" rows="3"></textarea></label
+              >
+              <label>Links (label|url per line) <textarea name="links" rows="2"></textarea></label>
+              <label>
+                Cover image
+                <input type="file" name="cover" accept="image/*" />
+              </label>
+              <input type="hidden" name="coverImage" />
+              <div class="admin-actions">
+                <button type="submit" class="pixel-btn">SAVE</button>
+                <button type="button" class="pixel-btn admin-btn-ghost" id="work-reset">NEW</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="admin-tab-panel" data-panel="blog" hidden>
+          <div class="admin-split">
+            <div>
+              <h2>Posts</h2>
+              <div id="blog-list" class="admin-list"></div>
+            </div>
+            <form id="blog-form" class="admin-form admin-card">
+              <h3 id="blog-form-title">New post</h3>
+              <label>Slug <input name="slug" required /></label>
+              <label>Title <input name="title" required /></label>
+              <label>Tagline <input name="tagline" /></label>
+              <label>Published <input name="publishedAt" type="date" /></label>
+              <label>Tags (comma) <input name="tags" /></label>
+              <label>Content <textarea name="content" rows="8"></textarea></label>
+              <label>
+                Cover image
+                <input type="file" name="cover" accept="image/*" />
+              </label>
+              <input type="hidden" name="coverImage" />
+              <div class="admin-actions">
+                <button type="submit" class="pixel-btn">SAVE</button>
+                <button type="button" class="pixel-btn admin-btn-ghost" id="blog-reset">NEW</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="admin-tab-panel" data-panel="doodles" hidden>
+          <h2>Doodles</h2>
+          <p class="small">Delete only — travelers still create via Sketch Alley.</p>
+          <div id="doodle-list" class="admin-doodle-grid"></div>
+        </div>
+
+        <div class="admin-tab-panel" data-panel="comments" hidden>
+          <h2>Comments</h2>
+          <p class="small">
+            Community board on /info. Deleting a comment also removes all its replies.
+          </p>
+          <div id="comment-list" class="admin-list"></div>
+        </div>
+
+        <div class="admin-tab-panel" data-panel="settings" hidden>
+          <h2>Settings</h2>
+          <form id="password-form" class="admin-form admin-card admin-settings-card">
+            <h3>Change password</h3>
+            <label>
+              Current password
+              <input type="password" name="current" required autocomplete="current-password" />
+            </label>
+            <label>
+              New password
+              <input
+                type="password"
+                name="next"
+                required
+                minlength="6"
+                autocomplete="new-password"
+              />
+            </label>
+            <label>
+              Confirm new password
+              <input
+                type="password"
+                name="confirm"
+                required
+                minlength="6"
+                autocomplete="new-password"
+              />
+            </label>
+            <button type="submit" class="pixel-btn">UPDATE PASSWORD</button>
+            <p class="admin-msg" id="password-msg" hidden></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      import {
+        auth,
+        getCommunityPosts,
+        getDbBlogs,
+        getDbProjects,
+        getDoodles,
+        type Blog,
+        type CommunityPost,
+        type Doodle,
+        type Project,
+      } from "../lib/firebase";
+      import {
+        EmailAuthProvider,
+        onAuthStateChanged,
+        reauthenticateWithCredential,
+        signInWithEmailAndPassword,
+        signOut,
+        updatePassword,
+        type User,
+      } from "firebase/auth";
+
+      const loginPanel = document.getElementById("login-panel")!;
+      const dashPanel = document.getElementById("dash-panel")!;
+      const adminEmailEl = document.getElementById("admin-email")!;
+      const loginMsg = document.getElementById("login-msg")!;
+      const dashMsg = document.getElementById("dash-msg")!;
+      const passwordMsg = document.getElementById("password-msg")!;
+
+      let currentUser: User | null = null;
+      let projects: Project[] = [];
+      let blogs: Blog[] = [];
+      let doodles: Doodle[] = [];
+      let comments: CommunityPost[] = [];
+
+      function showMsg(el: HTMLElement, text: string, kind: "ok" | "err" = "ok") {
+        el.hidden = false;
+        el.textContent = text;
+        el.dataset.kind = kind;
+      }
+
+      function clearMsg(el: HTMLElement) {
+        el.hidden = true;
+        el.textContent = "";
+      }
+
+      async function token(): Promise<string> {
+        if (!currentUser) throw new Error("Not signed in");
+        return currentUser.getIdToken();
+      }
+
+      async function api(path: string, init: RequestInit = {}) {
+        const t = await token();
+        const headers = new Headers(init.headers);
+        headers.set("Authorization", `Bearer ${t}`);
+        if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
+          headers.set("Content-Type", "application/json");
+        }
+        const res = await fetch(path, { ...init, headers });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+        return data;
+      }
+
+      async function uploadCover(file: File, folder: string): Promise<string> {
+        const form = new FormData();
+        form.set("file", file);
+        form.set("folder", folder);
+        const data = await api("/api/admin/upload", { method: "POST", body: form });
+        return data.url as string;
+      }
+
+      function setAuthed(user: User | null) {
+        currentUser = user;
+        document.body.classList.toggle("is-authed", Boolean(user));
+        if (!user) {
+          loginPanel.hidden = false;
+          dashPanel.hidden = true;
+          return;
+        }
+        loginPanel.hidden = true;
+        dashPanel.hidden = false;
+        adminEmailEl.textContent = user.email || user.uid;
+        void refreshAll();
+      }
+
+      async function refreshAll() {
+        projects = await getDbProjects();
+        blogs = await getDbBlogs();
+        doodles = await getDoodles();
+        comments = await getCommunityPosts();
+        renderWorkList();
+        renderBlogList();
+        renderDoodles();
+        renderComments();
+      }
+
+      function renderWorkList() {
+        const list = document.getElementById("work-list")!;
+        if (!projects.length) {
+          list.innerHTML = `<p class="small">No projects yet.</p>`;
+          return;
+        }
+        list.innerHTML = projects
+          .map(
+            (p) => `
+          <article class="admin-item">
+            <div>
+              <strong>${escapeHtml(p.name)}</strong>
+              <p class="small">${escapeHtml(p.slug)} · ${escapeHtml(p.year || "")}</p>
+            </div>
+            <div class="admin-item-actions">
+              <button type="button" class="pixel-btn" data-edit-project="${escapeAttr(p.slug)}">EDIT</button>
+              <button type="button" class="pixel-btn admin-btn-danger" data-del-project="${escapeAttr(p.slug)}">DEL</button>
+            </div>
+          </article>`,
+          )
+          .join("");
+
+        list.querySelectorAll<HTMLButtonElement>("[data-edit-project]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const p = projects.find((x) => x.slug === btn.dataset.editProject);
+            if (p) fillWorkForm(p);
+          });
+        });
+        list.querySelectorAll<HTMLButtonElement>("[data-del-project]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const slug = btn.dataset.delProject!;
+            if (!confirm(`Delete project “${slug}”?`)) return;
+            try {
+              await api("/api/admin/projects", {
+                method: "DELETE",
+                body: JSON.stringify({ slug }),
+              });
+              showMsg(dashMsg, `Deleted project ${slug}`);
+              await refreshAll();
+            } catch (e) {
+              showMsg(dashMsg, (e as Error).message, "err");
+            }
+          });
+        });
+      }
+
+      function fillWorkForm(p: Project) {
+        const form = document.getElementById("work-form") as HTMLFormElement;
+        document.getElementById("work-form-title")!.textContent = "Edit project";
+        (form.elements.namedItem("slug") as HTMLInputElement).value = p.slug;
+        (form.elements.namedItem("name") as HTMLInputElement).value = p.name || "";
+        (form.elements.namedItem("tagline") as HTMLInputElement).value = p.tagline || "";
+        (form.elements.namedItem("year") as HTMLInputElement).value = p.year || "";
+        (form.elements.namedItem("role") as HTMLInputElement).value = p.role || "";
+        (form.elements.namedItem("stack") as HTMLInputElement).value = (p.stack || []).join(", ");
+        (form.elements.namedItem("summary") as HTMLTextAreaElement).value = p.summary || "";
+        (form.elements.namedItem("highlights") as HTMLTextAreaElement).value = (
+          p.highlights || []
+        ).join("\n");
+        (form.elements.namedItem("links") as HTMLTextAreaElement).value = (p.links || [])
+          .map((l) => `${l.label}|${l.href}`)
+          .join("\n");
+        (form.elements.namedItem("coverImage") as HTMLInputElement).value = p.coverImage || "";
+      }
+
+      function resetWorkForm() {
+        const form = document.getElementById("work-form") as HTMLFormElement;
+        form.reset();
+        (form.elements.namedItem("coverImage") as HTMLInputElement).value = "";
+        document.getElementById("work-form-title")!.textContent = "New project";
+      }
+
+      function renderBlogList() {
+        const list = document.getElementById("blog-list")!;
+        if (!blogs.length) {
+          list.innerHTML = `<p class="small">No posts yet.</p>`;
+          return;
+        }
+        list.innerHTML = blogs
+          .map(
+            (b) => `
+          <article class="admin-item">
+            <div>
+              <strong>${escapeHtml(b.title)}</strong>
+              <p class="small">${escapeHtml(b.slug)} · ${escapeHtml(b.publishedAt || "")}</p>
+            </div>
+            <div class="admin-item-actions">
+              <button type="button" class="pixel-btn" data-edit-blog="${escapeAttr(b.slug)}">EDIT</button>
+              <button type="button" class="pixel-btn admin-btn-danger" data-del-blog="${escapeAttr(b.slug)}">DEL</button>
+            </div>
+          </article>`,
+          )
+          .join("");
+
+        list.querySelectorAll<HTMLButtonElement>("[data-edit-blog]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const b = blogs.find((x) => x.slug === btn.dataset.editBlog);
+            if (b) fillBlogForm(b);
+          });
+        });
+        list.querySelectorAll<HTMLButtonElement>("[data-del-blog]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const slug = btn.dataset.delBlog!;
+            if (!confirm(`Delete blog “${slug}”?`)) return;
+            try {
+              await api("/api/admin/blogs", {
+                method: "DELETE",
+                body: JSON.stringify({ slug }),
+              });
+              showMsg(dashMsg, `Deleted blog ${slug}`);
+              await refreshAll();
+            } catch (e) {
+              showMsg(dashMsg, (e as Error).message, "err");
+            }
+          });
+        });
+      }
+
+      function fillBlogForm(b: Blog) {
+        const form = document.getElementById("blog-form") as HTMLFormElement;
+        document.getElementById("blog-form-title")!.textContent = "Edit post";
+        (form.elements.namedItem("slug") as HTMLInputElement).value = b.slug;
+        (form.elements.namedItem("title") as HTMLInputElement).value = b.title || "";
+        (form.elements.namedItem("tagline") as HTMLInputElement).value = b.tagline || "";
+        (form.elements.namedItem("publishedAt") as HTMLInputElement).value = (
+          b.publishedAt || ""
+        ).slice(0, 10);
+        (form.elements.namedItem("tags") as HTMLInputElement).value = (b.tags || []).join(", ");
+        (form.elements.namedItem("content") as HTMLTextAreaElement).value = b.content || "";
+        (form.elements.namedItem("coverImage") as HTMLInputElement).value = b.coverImage || "";
+      }
+
+      function resetBlogForm() {
+        const form = document.getElementById("blog-form") as HTMLFormElement;
+        form.reset();
+        (form.elements.namedItem("coverImage") as HTMLInputElement).value = "";
+        document.getElementById("blog-form-title")!.textContent = "New post";
+      }
+
+      function renderDoodles() {
+        const list = document.getElementById("doodle-list")!;
+        if (!doodles.length) {
+          list.innerHTML = `<p class="small">No doodles.</p>`;
+          return;
+        }
+        list.innerHTML = doodles
+          .map((d) => {
+            const title = escapeHtml(d.name || "untitled");
+            const img = d.doodle
+              ? `<img src="${escapeAttr(d.doodle)}" alt="${title}" />`
+              : `<div class="admin-doodle-empty"></div>`;
+            return `
+              <figure class="admin-doodle">
+                ${img}
+                <figcaption class="small">${title}</figcaption>
+                <button type="button" class="pixel-btn admin-btn-danger" data-del-doodle="${escapeAttr(d.id)}">DELETE</button>
+              </figure>`;
+          })
+          .join("");
+
+        list.querySelectorAll<HTMLButtonElement>("[data-del-doodle]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.delDoodle!;
+            if (!confirm("Delete this doodle?")) return;
+            try {
+              await api(`/api/admin/doodles/${encodeURIComponent(id)}`, { method: "DELETE" });
+              showMsg(dashMsg, "Doodle deleted");
+              await refreshAll();
+            } catch (e) {
+              showMsg(dashMsg, (e as Error).message, "err");
+            }
+          });
+        });
+      }
+
+      function commentItemHtml(
+        c: CommunityPost,
+        byParent: Map<string, CommunityPost[]>,
+        depth: number,
+      ): string {
+        const kids = byParent.get(c.id) || [];
+        const own = `
+          <article class="admin-item admin-comment" style="margin-left: ${depth * 20}px">
+            <div>
+              <strong>${escapeHtml(c.name || "traveler")}</strong>
+              <p class="small">${escapeHtml((c.timestamp || "").slice(0, 10))}${depth ? " · reply" : ""}</p>
+              <p class="small">${escapeHtml(c.message || "")}</p>
+            </div>
+            <div class="admin-item-actions">
+              <button type="button" class="pixel-btn admin-btn-danger" data-del-comment="${escapeAttr(c.id)}">DEL</button>
+            </div>
+          </article>`;
+        return own + kids.map((k) => commentItemHtml(k, byParent, depth + 1)).join("");
+      }
+
+      function renderComments() {
+        const list = document.getElementById("comment-list")!;
+        if (!comments.length) {
+          list.innerHTML = `<p class="small">No comments yet.</p>`;
+          return;
+        }
+
+        const byParent = new Map<string, CommunityPost[]>();
+        const roots: CommunityPost[] = [];
+        const ids = new Set(comments.map((c) => c.id));
+        for (const c of comments) {
+          if (c.parentId && ids.has(c.parentId)) {
+            byParent.set(c.parentId, [...(byParent.get(c.parentId) || []), c]);
+          } else {
+            roots.push(c);
+          }
+        }
+        for (const kids of byParent.values()) {
+          kids.sort((a, b) => String(a.timestamp || "").localeCompare(String(b.timestamp || "")));
+        }
+
+        list.innerHTML = roots.map((c) => commentItemHtml(c, byParent, 0)).join("");
+
+        list.querySelectorAll<HTMLButtonElement>("[data-del-comment]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.delComment!;
+            if (!confirm("Delete this comment (and its replies)?")) return;
+            try {
+              await api(`/api/admin/comments/${encodeURIComponent(id)}`, { method: "DELETE" });
+              showMsg(dashMsg, "Comment deleted");
+              await refreshAll();
+            } catch (e) {
+              showMsg(dashMsg, (e as Error).message, "err");
+            }
+          });
+        });
+      }
+
+      function escapeHtml(value: string) {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      function escapeAttr(value: string) {
+        return escapeHtml(value).replaceAll("'", "&#39;");
+      }
+
+      document.getElementById("login-form")!.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearMsg(loginMsg);
+        const form = e.target as HTMLFormElement;
+        const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
+        const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+          showMsg(loginMsg, (err as Error).message, "err");
+        }
+      });
+
+      document.getElementById("logout-btn")!.addEventListener("click", () => {
+        void signOut(auth);
+      });
+
+      document.querySelectorAll<HTMLButtonElement>(".admin-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const key = tab.dataset.tab!;
+          document.querySelectorAll(".admin-tab").forEach((t) => t.classList.remove("is-active"));
+          tab.classList.add("is-active");
+          document.querySelectorAll<HTMLElement>(".admin-tab-panel").forEach((panel) => {
+            panel.hidden = panel.dataset.panel !== key;
+          });
+        });
+      });
+
+      document.getElementById("work-reset")!.addEventListener("click", resetWorkForm);
+      document.getElementById("blog-reset")!.addEventListener("click", resetBlogForm);
+
+      document.getElementById("work-form")!.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearMsg(dashMsg);
+        const form = e.target as HTMLFormElement;
+        const fd = new FormData(form);
+        try {
+          let coverImage = String(fd.get("coverImage") || "");
+          const file = fd.get("cover");
+          if (file instanceof File && file.size > 0) {
+            coverImage = await uploadCover(file, "project-covers");
+          }
+          await api("/api/admin/projects", {
+            method: "POST",
+            body: JSON.stringify({
+              slug: fd.get("slug"),
+              name: fd.get("name"),
+              tagline: fd.get("tagline"),
+              year: fd.get("year"),
+              role: fd.get("role"),
+              stack: fd.get("stack"),
+              summary: fd.get("summary"),
+              highlights: fd.get("highlights"),
+              links: fd.get("links"),
+              coverImage: coverImage || undefined,
+            }),
+          });
+          showMsg(dashMsg, "Project saved");
+          resetWorkForm();
+          await refreshAll();
+        } catch (err) {
+          showMsg(dashMsg, (err as Error).message, "err");
+        }
+      });
+
+      document.getElementById("blog-form")!.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearMsg(dashMsg);
+        const form = e.target as HTMLFormElement;
+        const fd = new FormData(form);
+        try {
+          let coverImage = String(fd.get("coverImage") || "");
+          const file = fd.get("cover");
+          if (file instanceof File && file.size > 0) {
+            coverImage = await uploadCover(file, "blog-covers");
+          }
+          await api("/api/admin/blogs", {
+            method: "POST",
+            body: JSON.stringify({
+              slug: fd.get("slug"),
+              title: fd.get("title"),
+              tagline: fd.get("tagline"),
+              publishedAt: fd.get("publishedAt"),
+              tags: fd.get("tags"),
+              content: fd.get("content"),
+              coverImage: coverImage || undefined,
+            }),
+          });
+          showMsg(dashMsg, "Blog saved");
+          resetBlogForm();
+          await refreshAll();
+        } catch (err) {
+          showMsg(dashMsg, (err as Error).message, "err");
+        }
+      });
+
+      document.getElementById("password-form")!.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearMsg(passwordMsg);
+        if (!currentUser?.email) {
+          showMsg(passwordMsg, "Not signed in", "err");
+          return;
+        }
+        const form = e.target as HTMLFormElement;
+        const current = (form.elements.namedItem("current") as HTMLInputElement).value;
+        const next = (form.elements.namedItem("next") as HTMLInputElement).value;
+        const confirmPw = (form.elements.namedItem("confirm") as HTMLInputElement).value;
+        if (next !== confirmPw) {
+          showMsg(passwordMsg, "New passwords do not match", "err");
+          return;
+        }
+        try {
+          const cred = EmailAuthProvider.credential(currentUser.email, current);
+          await reauthenticateWithCredential(currentUser, cred);
+          await updatePassword(currentUser, next);
+          form.reset();
+          showMsg(passwordMsg, "Password updated");
+        } catch (err) {
+          showMsg(passwordMsg, (err as Error).message, "err");
+        }
+      });
+
+      onAuthStateChanged(auth, setAuthed);
+    </script>
+  </body>
+</html>

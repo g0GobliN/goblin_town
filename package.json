@@ -3,19 +3,27 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --host",
     "build": "astro build",
     "preview": "astro preview",
+    "lint": "prettier --check . && astro check",
+    "test": "node --test tests/",
+    "deploy": "astro build && wrangler pages deploy ./dist",
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.6.13",
+    "@astrojs/sitemap": "^3.7.3",
     "astro": "^5.7.0",
-    "firebase": "^12.16.0"
+    "firebase": "^12.16.0",
+    "firebase-admin": "^13.10.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "prettier": "^3.7.3",
     "prettier-plugin-astro": "^0.14.1",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "wrangler": "^4.111.0"
   }
 }

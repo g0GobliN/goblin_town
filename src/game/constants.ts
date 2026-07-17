@@ -1,6 +1,6 @@
 export const VIEW_W = 480;
 export const VIEW_H = 270;
-export const WORLD_W = 5600;
+export const WORLD_W = 6100;
 export const GROUND_Y = 222;
 export const GRAVITY = 1250;
 export const MOVE_SPEED = 140;
