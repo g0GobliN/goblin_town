@@ -4,11 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --host",
-    "build": "astro build",
+    "build": "astro build && node scripts/flatten-for-pages.mjs",
+    "build:astro": "astro build",
     "preview": "astro preview",
     "lint": "prettier --check . && astro check",
     "test": "node --test tests/**/*.mjs",
-    "deploy": "astro build && wrangler pages deploy ./dist/client",
+    "deploy": "npm run build && wrangler pages deploy ./dist --project-name=goblin-town",
     "format": "prettier --write ."
   },
   "dependencies": {

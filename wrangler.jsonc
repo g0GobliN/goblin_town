@@ -2,11 +2,4 @@
   "name": "goblin-town",
   "compatibility_date": "2026-07-17",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@astrojs/cloudflare/entrypoints/server",
-  "assets": {
-    // Astro emits site files here (HTML + /_astro). Not ./dist.
-    "directory": "./dist/client",
-    "binding": "ASSETS",
-    "html_handling": "auto-trailing-slash",
-  },
 }
