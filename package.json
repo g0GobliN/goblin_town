@@ -15,8 +15,7 @@
     "@astrojs/cloudflare": "^12.6.13",
     "@astrojs/sitemap": "^3.7.3",
     "astro": "^5.7.0",
-    "firebase": "^12.16.0",
-    "firebase-admin": "^13.10.0"
+    "firebase": "^12.16.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",

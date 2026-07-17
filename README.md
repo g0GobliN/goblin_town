@@ -21,4 +21,3 @@ Grew up in Nepal. Live in Tokyo. IT engineer by day; side projects, open source,
 ## Art & sound
 
 Pixel assets from the Gothicvania packs (Ansimuz / itch.io) — see licenses under `public/img/gothicvania/`. Site code is MIT; those packs keep their own terms.
-

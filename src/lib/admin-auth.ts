@@ -1,8 +1,8 @@
-import type { DecodedIdToken } from "firebase-admin/auth";
-import { adminAuth } from "./firebase-admin";
+import { getEnv } from "./env";
+import { verifyFirebaseIdToken, type VerifiedIdToken } from "./verify-id-token";
 
 export type AdminResult =
-  { ok: true; user: DecodedIdToken } | { ok: false; status: number; error: string };
+  { ok: true; user: VerifiedIdToken } | { ok: false; status: number; error: string };
 
 export async function requireAdmin(request: Request): Promise<AdminResult> {
   const header = request.headers.get("authorization") || "";
@@ -11,19 +11,23 @@ export async function requireAdmin(request: Request): Promise<AdminResult> {
     return { ok: false, status: 401, error: "Missing Authorization bearer token" };
   }
 
-  let user: DecodedIdToken;
+  let user: VerifiedIdToken;
   try {
-    user = await adminAuth().verifyIdToken(match[1]!);
+    user = await verifyFirebaseIdToken(match[1]!);
   } catch (err) {
     const message = err instanceof Error ? err.message : "";
-    if (message.includes("FIREBASE_SERVICE_ACCOUNT")) {
-      return { ok: false, status: 500, error: "FIREBASE_SERVICE_ACCOUNT is not set" };
+    if (
+      message.includes("PUBLIC_FIREBASE_API_KEY") ||
+      message.includes("FIREBASE_SERVICE_ACCOUNT")
+    ) {
+      return { ok: false, status: 500, error: message };
     }
+    console.error("verifyIdToken failed:", message);
     return { ok: false, status: 401, error: "Invalid or expired token" };
   }
 
-  const adminEmail = (import.meta.env.ADMIN_EMAIL as string | undefined)?.toLowerCase();
-  const adminUid = import.meta.env.ADMIN_UID as string | undefined;
+  const adminEmail = getEnv("ADMIN_EMAIL")?.toLowerCase();
+  const adminUid = getEnv("ADMIN_UID");
 
   if (!adminEmail && !adminUid) {
     return { ok: false, status: 500, error: "ADMIN_EMAIL or ADMIN_UID is not configured" };

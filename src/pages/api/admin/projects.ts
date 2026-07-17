@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { json, jsonError, requireAdmin } from "../../../lib/admin-auth";
-import { adminDb } from "../../../lib/firebase-admin";
+import { firestoreDelete, firestoreSet } from "../../../lib/firestore-rest";
 import type { Project } from "../../../lib/firebase";
 
 export const prerender = false;
@@ -54,43 +54,51 @@ function parseProject(body: Record<string, unknown>): Project | null {
 }
 
 export const POST: APIRoute = async ({ request }) => {
-  const auth = await requireAdmin(request);
-  if (!auth.ok) return jsonError(auth.error, auth.status);
-
-  let body: Record<string, unknown>;
   try {
-    body = await request.json();
-  } catch {
-    return jsonError("Invalid JSON", 400);
+    const auth = await requireAdmin(request);
+    if (!auth.ok) return jsonError(auth.error, auth.status);
+
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonError("Invalid JSON", 400);
+    }
+
+    const project = parseProject(body);
+    if (!project) return jsonError("slug and name are required", 400);
+
+    await firestoreSet("projects", project.slug, {
+      ...project,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return json({ ok: true, slug: project.slug });
+  } catch (err) {
+    return jsonError(err instanceof Error ? err.message : "Save failed", 500);
   }
-
-  const project = parseProject(body);
-  if (!project) return jsonError("slug and name are required", 400);
-
-  await adminDb()
-    .collection("projects")
-    .doc(project.slug)
-    .set({ ...project, updatedAt: new Date().toISOString() }, { merge: true });
-
-  return json({ ok: true, slug: project.slug });
 };
 
 export const PUT: APIRoute = async (ctx) => POST(ctx);
 
 export const DELETE: APIRoute = async ({ request }) => {
-  const auth = await requireAdmin(request);
-  if (!auth.ok) return jsonError(auth.error, auth.status);
-
-  let body: Record<string, unknown>;
   try {
-    body = await request.json();
-  } catch {
-    return jsonError("Invalid JSON", 400);
+    const auth = await requireAdmin(request);
+    if (!auth.ok) return jsonError(auth.error, auth.status);
+
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonError("Invalid JSON", 400);
+    }
+
+    const slug = String(body.slug || "").trim();
+    if (!slug) return jsonError("slug is required", 400);
+
+    await firestoreDelete("projects", slug);
+    return json({ ok: true });
+  } catch (err) {
+    return jsonError(err instanceof Error ? err.message : "Delete failed", 500);
   }
-
-  const slug = String(body.slug || "").trim();
-  if (!slug) return jsonError("slug is required", 400);
-
-  await adminDb().collection("projects").doc(slug).delete();
-  return json({ ok: true });
 };

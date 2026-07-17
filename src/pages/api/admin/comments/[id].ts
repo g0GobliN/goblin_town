@@ -1,39 +1,35 @@
 import type { APIRoute } from "astro";
-import { adminDb } from "../../../../lib/firebase-admin";
 import { json, jsonError, requireAdmin } from "../../../../lib/admin-auth";
+import { firestoreDelete, firestoreList } from "../../../../lib/firestore-rest";
 
 export const prerender = false;
 
-// A comment's replies reference it via parentId; deleting a comment removes
-// the whole subtree so no orphaned replies float up as top-level comments.
-function collectSubtree(rootId: string, childrenOf: Map<string, string[]>): string[] {
-  const toDelete: string[] = [];
-  const queue = [rootId];
-  while (queue.length) {
-    const id = queue.pop()!;
-    toDelete.push(id);
-    queue.push(...(childrenOf.get(id) || []));
-  }
-  return toDelete;
-}
-
 export const DELETE: APIRoute = async ({ request, params }) => {
-  const auth = await requireAdmin(request);
-  if (!auth.ok) return jsonError(auth.error, auth.status);
+  try {
+    const auth = await requireAdmin(request);
+    if (!auth.ok) return jsonError(auth.error, auth.status);
 
-  const id = params.id?.trim();
-  if (!id) return jsonError("comment id is required", 400);
+    const id = params.id?.trim();
+    if (!id) return jsonError("comment id is required", 400);
 
-  const db = adminDb();
-  const snap = await db.collection("community").get();
-  const childrenOf = new Map<string, string[]>();
-  for (const doc of snap.docs) {
-    const parentId = doc.get("parentId") as string | undefined;
-    if (parentId) childrenOf.set(parentId, [...(childrenOf.get(parentId) || []), doc.id]);
+    // Cascade: delete replies that point at this comment, then the comment itself.
+    const posts = await firestoreList("community");
+    const toDelete = new Set<string>([id]);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const post of posts) {
+        const parentId = post.data.parentId;
+        if (typeof parentId === "string" && toDelete.has(parentId) && !toDelete.has(post.id)) {
+          toDelete.add(post.id);
+          changed = true;
+        }
+      }
+    }
+
+    await Promise.all([...toDelete].map((docId) => firestoreDelete("community", docId)));
+    return json({ ok: true, deleted: [...toDelete] });
+  } catch (err) {
+    return jsonError(err instanceof Error ? err.message : "Delete failed", 500);
   }
-
-  const toDelete = collectSubtree(id, childrenOf);
-  await Promise.all(toDelete.map((docId) => db.collection("community").doc(docId).delete()));
-
-  return json({ ok: true, deleted: toDelete.length });
 };
