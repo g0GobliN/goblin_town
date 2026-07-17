@@ -1,0 +1,31 @@
+// Rules for the DOODLE Firebase project (PUBLIC_DOODLE_PROJECT_ID).
+// Apply in that project's Firebase console → Firestore Database → Rules.
+//
+// Model: doodles are read and created anonymously over the Firestore REST
+// API (src/lib/firebase.ts). Creates must look like what the sketch canvas
+// actually sends: a data:image/ URL plus short text fields. Deletes happen
+// via /api/admin/* with a service account, which bypasses these rules.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /doodles/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['name', 'text', 'doodle', 'timestamp', 'createInDarkMode'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 400
+        && request.resource.data.doodle is string
+        && request.resource.data.doodle.size() <= 400000
+        && request.resource.data.doodle.matches('data:image/.*')
+        && request.resource.data.timestamp is string
+        && request.resource.data.timestamp.size() <= 40
+        && request.resource.data.createInDarkMode is bool;
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

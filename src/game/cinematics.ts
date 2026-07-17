@@ -18,26 +18,29 @@ export const INTRO_SLIDES: CineSlide[] = [
   {
     kicker: "WELCOME",
     title: "GOBLIN TOWN",
-    body: ["A playable portfolio.", "Walk the street. Open the doors."],
+    body: ["This little town is my portfolio.", "Walk around, open doors, stay a while."],
   },
   {
     kicker: "THE BUILDER",
     title: "VISHAL · GOBLIN",
-    body: ["Nepal → Tokyo.", "Engineer by day. Side quests by night."],
+    body: ["Grew up in Nepal, living in Tokyo.", "IT engineer who builds things for fun."],
   },
   {
     kicker: "HOW TO WALK",
     title: "CONTROLS",
-    body: ["A/D move · Shift run · W jump", "J/X attack · Space talk / heal · M menu"],
+    body: ["Walk A/D · run SHIFT · jump W", "Attack J/X · talk & heal SPACE · menu M"],
   },
   {
     kicker: "READY",
     title: "ENTER THE TOWN",
-    body: [
-      "Pick up every purple gem. Beat Hell-gato.",
-      "All gems + the boss opens the church gate.",
-    ],
+    body: ["Collect every purple gem on the road.", "Beat Hell-gato to open the church gate."],
   },
+];
+
+/** Same slide, phone edition — stick + JUMP/HIT/ACT buttons. */
+const TOUCH_CONTROLS_BODY = [
+  "Stick to walk — push far to run",
+  "JUMP to jump · HIT to attack · ACT to talk",
 ];
 
 /** Closing movie roll — scrolls upward. */
@@ -111,9 +114,14 @@ export const CREDIT_BLOCKS: CreditBlock[] = [
     lines: ["Pascal Belisle · thetoadz", "patreon.com/thetoadz"],
   },
   {
+    role: "MUSIC",
+    name: "CREDITS THEME",
+    lines: ["forgotten path · johndekale", "OpenGameArt · CC0"],
+  },
+  {
     role: "SOUND",
     name: "UI & COMBAT SFX",
-    lines: ["Kenney.nl · UI Audio + RPG Audio", "CC0"],
+    lines: ["Kenney.nl · UI, RPG + Digital Audio", "CC0"],
     gap: "md",
   },
 
@@ -146,8 +154,12 @@ export const CREDIT_BLOCKS: CreditBlock[] = [
   { name: "— GOBLIN TOWN —", lines: ["fin"], gap: "lg" },
 ];
 
-export function slidesFor(kind: CineKind): CineSlide[] {
-  return kind === "intro" ? INTRO_SLIDES : [];
+export function slidesFor(kind: CineKind, touch = false): CineSlide[] {
+  if (kind !== "intro") return [];
+  if (!touch) return INTRO_SLIDES;
+  return INTRO_SLIDES.map((slide) =>
+    slide.title === "CONTROLS" ? { ...slide, body: TOUCH_CONTROLS_BODY } : slide,
+  );
 }
 
 /** Pre-fight banter when you first face Hell-gato. */

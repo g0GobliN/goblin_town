@@ -1,6 +1,7 @@
-import { GROUND_Y, SCALE, VIEW_H, VIEW_W } from "./constants";
+import { enemyBody } from "./combat";
+import { ENEMY_HURT_DURATION, GROUND_Y, SCALE, VIEW_H, VIEW_W } from "./constants";
 import { getActiveScene } from "./scenes";
-import type { DrawContext } from "./types";
+import type { DrawContext, EnemyState } from "./types";
 import { EAST_GATE } from "./world";
 
 function drawSheetFrame(
@@ -293,6 +294,66 @@ function drawNpcs(ctx: DrawContext) {
   }
 }
 
+// Offscreen scratch for the hit flash — source-atop keeps the sprite's alpha
+let flashCanvas: HTMLCanvasElement | null = null;
+
+function whiteFlashFrame(frame: HTMLImageElement, alpha: number): HTMLCanvasElement {
+  if (!flashCanvas) flashCanvas = document.createElement("canvas");
+  // Resizing also clears pixels and resets context state
+  flashCanvas.width = frame.width;
+  flashCanvas.height = frame.height;
+  const fc = flashCanvas.getContext("2d")!;
+  fc.imageSmoothingEnabled = false;
+  fc.drawImage(frame, 0, 0);
+  fc.globalCompositeOperation = "source-atop";
+  fc.fillStyle = `rgba(255, 244, 214, ${alpha})`;
+  fc.fillRect(0, 0, frame.width, frame.height);
+  return flashCanvas;
+}
+
+function drawHitSpark(c: CanvasRenderingContext2D, enemy: EnemyState, cameraX: number) {
+  const age = ENEMY_HURT_DURATION - enemy.hurtT;
+  if (age >= 0.15) return;
+
+  const p = age / 0.15;
+  const body = enemyBody(enemy);
+  const sx = body.x + body.w / 2 - cameraX;
+  const sy = body.y + body.h / 2;
+
+  c.save();
+  c.globalAlpha = 1 - p;
+  for (let i = 0; i < 6; i++) {
+    const ang = (i / 6) * Math.PI * 2 + 0.5;
+    const len = 3 + p * 10;
+    c.fillStyle = i % 2 ? "#ffd93d" : "#fff6e0";
+    c.fillRect(
+      Math.floor(sx + Math.cos(ang) * len) - 1,
+      Math.floor(sy + Math.sin(ang) * len) - 1,
+      2,
+      2,
+    );
+  }
+  c.restore();
+}
+
+function drawEnemyHpBar(
+  c: CanvasRenderingContext2D,
+  enemy: EnemyState,
+  cameraX: number,
+  spriteTop: number,
+) {
+  const body = enemyBody(enemy);
+  const bw = enemy.kind === "hound" ? 36 : 22;
+  const bx = Math.floor(body.x + body.w / 2 - cameraX - bw / 2);
+  const by = Math.floor(spriteTop) - 7;
+  const ratio = Math.max(0, enemy.hp / enemy.maxHp);
+
+  c.fillStyle = "rgba(10, 4, 14, 0.78)";
+  c.fillRect(bx - 1, by - 1, bw + 2, 5);
+  c.fillStyle = ratio > 0.5 ? "#57c24f" : ratio > 0.25 ? "#ffd93d" : "#ff3b3b";
+  c.fillRect(bx, by, Math.max(1, Math.round(bw * ratio)), 3);
+}
+
 function drawEnemies(ctx: DrawContext) {
   const scene = getActiveScene();
   if (!scene.showEnemies) return;
@@ -329,17 +390,25 @@ function drawEnemies(ctx: DrawContext) {
     const float = enemy.kind === "ghost" ? Math.sin(performance.now() / 280 + enemy.x) * 4 : 0;
     const dy = GROUND_Y - frame.height + 2 + float;
 
+    // Fresh hit → sprite blazes white, then the tint fades out with hurtT
+    const hurt = enemy.hurtT > 0;
+    const img = hurt
+      ? whiteFlashFrame(frame, 0.85 * Math.min(1, enemy.hurtT / ENEMY_HURT_DURATION))
+      : frame;
+
     c.save();
-    if (enemy.hurtT > 0) c.globalAlpha = 0.65;
-    if (enemy.kind === "ghost") c.globalAlpha = Math.min(c.globalAlpha, 0.85);
+    if (enemy.kind === "ghost") c.globalAlpha = 0.85;
     if (enemy.facing < 0) {
       c.translate(dx + frame.width / 2, dy);
       c.scale(-1, 1);
-      c.drawImage(frame, -frame.width / 2, 0);
+      c.drawImage(img, -frame.width / 2, 0);
     } else {
-      c.drawImage(frame, dx, dy);
+      c.drawImage(img, dx, dy);
     }
     c.restore();
+
+    if (hurt) drawHitSpark(c, enemy, cameraX);
+    drawEnemyHpBar(c, enemy, cameraX, dy);
   }
 }
 

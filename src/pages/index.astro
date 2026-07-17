@@ -25,7 +25,7 @@ import "../styles/global.css";
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://g0.monster/" />
-    <meta property="og:image" content="https://g0.monster/favicon.png" />
+    <meta property="og:image" content="https://g0.monster/logo/logo-512.png" />
     <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Goblin Town — Vishal Gurung" />
@@ -39,13 +39,14 @@ import "../styles/global.css";
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Press+Start+2P&display=swap"
     />
-    <script type="application/ld+json">
+    <script is:inline type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -78,7 +79,7 @@ import "../styles/global.css";
         </div>
         <h2 class="rotate-title">Turn your phone</h2>
         <p class="rotate-copy">Play sideways for the full town view.</p>
-        <a class="rotate-info" href="/info">Or read the summary upright →</a>
+        <a class="rotate-info" href="/info">Read about me instead</a>
       </div>
     </div>
 
@@ -100,7 +101,6 @@ import "../styles/global.css";
           <span class="brand-main">GOBLIN</span>
           <span class="brand-sub">TOWN</span>
         </h1>
-        <a class="brand-info-link" href="/info">Prefer text? Open summary →</a>
       </header>
 
       <div class="game-frame">
@@ -120,7 +120,7 @@ import "../styles/global.css";
         <div id="hp-hud" class="hud-hp">HP ♥♥♥♥♥</div>
         <div id="kill-hud" class="hud-kills">KILLS 0/12</div>
         <div id="gem-hud" class="hud-gems">GEMS 0/12</div>
-        <div id="crumb-count" class="hud-crumbs">0/12</div>
+        <div id="crumb-count" class="hud-crumbs">0/6</div>
 
         <div id="dialogue-box" class="dialogue" hidden>
           <div id="dialogue-name" class="dialogue-name">TOWNSFOLK</div>
@@ -139,6 +139,9 @@ import "../styles/global.css";
             <div class="touch-stick-knob"></div>
           </div>
           <div class="touch-actions">
+            <button class="tc-btn tc-jump" data-tc="jump" type="button" aria-label="Jump">
+              JUMP
+            </button>
             <button class="tc-btn tc-hit" data-tc="attack" type="button" aria-label="Attack">
               HIT
             </button>
@@ -158,9 +161,12 @@ import "../styles/global.css";
           height="16"
         />
         <span class="controls-keys"
-          >A/D move · Shift run · W jump · J/X attack · Space talk/heal · M menu</span
+          >Walk with A/D · run with SHIFT · jump with W · attack with J or X · talk &amp; heal with
+          SPACE · menu with M</span
         >
-        <span class="controls-touch">Left stick move · Pull up jump · HIT fight · ACT talk</span>
+        <span class="controls-touch"
+          >Stick to walk &amp; run · JUMP to jump · HIT to attack · ACT to talk</span
+        >
       </p>
     </main>
 
@@ -200,9 +206,9 @@ import "../styles/global.css";
                 working on.
               </p>
               <p>
-                I grew up in Nepal, live in Tokyo now, and work as an IT engineer (システム開発).
-                Outside of work I build side projects — apps, tools, small open source stuff, and
-                weird experiments like this page.
+                I grew up in Nepal, live in Tokyo now, and work as an IT engineer
+                (システムエンジニア). Outside of work I build side projects — apps, tools, small
+                open source stuff, and weird experiments like this page.
               </p>
               <p>
                 I've always liked taking things apart: games, phones, code. Japanese came through

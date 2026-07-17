@@ -7,14 +7,14 @@
     "build": "astro build",
     "preview": "astro preview",
     "lint": "prettier --check . && astro check",
-    "test": "node --test tests/",
-    "deploy": "astro build && wrangler pages deploy ./dist",
+    "test": "node --test tests/**/*.mjs",
+    "deploy": "astro build && wrangler deploy",
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^12.6.13",
+    "@astrojs/cloudflare": "^14.1.3",
     "@astrojs/sitemap": "^3.7.3",
-    "astro": "^5.7.0",
+    "astro": "^7.1.1",
     "firebase": "^12.16.0"
   },
   "devDependencies": {
@@ -23,6 +23,6 @@
     "prettier": "^3.7.3",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^5.8.3",
-    "wrangler": "^4.111.0"
+    "wrangler": "^4.112.0"
   }
 }

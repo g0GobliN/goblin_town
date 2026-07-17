@@ -1,0 +1,43 @@
+// Rules for the MAIN Firebase project (PUBLIC_FIREBASE_PROJECT_ID).
+// Apply in Firebase console → Firestore Database → Rules, or with
+// `firebase deploy --only firestore:rules` if you set up firebase.json.
+//
+// Model: the site reads projects/blogs/community anonymously; the only
+// anonymous write is creating a community comment. Admin edits and deletes
+// go through /api/admin/* with a service account, which bypasses these rules.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /blogs/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /community/{id} {
+      allow read: if true;
+      // The form caps name at 40 and message at 280; the slack here only
+      // covers older clients, not abuse.
+      allow create: if request.resource.data.keys().hasOnly(['name', 'message', 'timestamp', 'parentId'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 600
+        && request.resource.data.timestamp is string
+        && request.resource.data.timestamp.size() <= 40
+        && (!('parentId' in request.resource.data)
+          || (request.resource.data.parentId is string
+            && request.resource.data.parentId.size() <= 128));
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

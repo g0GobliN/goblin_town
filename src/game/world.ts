@@ -259,6 +259,10 @@ export function tickBossHeartSpawns(
   });
 }
 
+/**
+ * One landmark per section — hints stay quiet elsewhere so the street
+ * doesn't nag. {KEY} becomes SPACE / ACT per device.
+ */
 export const CRUMBS: Crumb[] = [
   {
     id: "house-diary",
@@ -268,17 +272,7 @@ export const CRUMBS: Crumb[] = [
     y: GROUND_Y - 40,
     w: 100,
     h: 40,
-    hint: "SPACE — open the house diary",
-  },
-  {
-    id: "npc-about",
-    key: "about",
-    label: "Townsfolk",
-    x: 300,
-    y: GROUND_Y - 40,
-    w: 50,
-    h: 40,
-    hint: "SPACE — ask who lives here",
+    hint: "Goblin's front door — {KEY} to peek at his diary",
   },
   {
     id: "workshop",
@@ -288,17 +282,7 @@ export const CRUMBS: Crumb[] = [
     y: GROUND_Y - 40,
     w: 120,
     h: 40,
-    hint: "SPACE — enter the workshop",
-  },
-  {
-    id: "work-sign",
-    key: "work",
-    label: "Project sign",
-    x: 1070,
-    y: GROUND_Y - 40,
-    w: 50,
-    h: 40,
-    hint: "SPACE — read the project board",
+    hint: "The workshop's open — {KEY} to see the builds",
   },
   {
     id: "library",
@@ -308,17 +292,7 @@ export const CRUMBS: Crumb[] = [
     y: GROUND_Y - 40,
     w: 110,
     h: 40,
-    hint: "SPACE — browse the library",
-  },
-  {
-    id: "bench-note",
-    key: "blog",
-    label: "Torn page",
-    x: 1580,
-    y: GROUND_Y - 30,
-    w: 40,
-    h: 30,
-    hint: "SPACE — read a torn page",
+    hint: "Warm lamplight — {KEY} to browse the shelves",
   },
   {
     id: "gallery-wagon",
@@ -328,17 +302,7 @@ export const CRUMBS: Crumb[] = [
     y: GROUND_Y - 40,
     w: 100,
     h: 40,
-    hint: "SPACE — view the gallery wall",
-  },
-  {
-    id: "gallery-sign",
-    key: "gallery",
-    label: "Gallery sign",
-    x: 1820,
-    y: GROUND_Y - 40,
-    w: 50,
-    h: 40,
-    hint: "SPACE — study a street sketch",
+    hint: "The art wagon! {KEY} to see visitor doodles",
   },
   {
     id: "sketch-hut",
@@ -348,17 +312,7 @@ export const CRUMBS: Crumb[] = [
     y: GROUND_Y - 40,
     w: 90,
     h: 40,
-    hint: "SPACE — open the sketch pad",
-  },
-  {
-    id: "paint-pot",
-    key: "doodle",
-    label: "Paint pot",
-    x: 2580,
-    y: GROUND_Y - 40,
-    w: 60,
-    h: 40,
-    hint: "SPACE — dip into the paint pots",
+    hint: "Paint and crates — {KEY} to doodle something",
   },
   {
     id: "church-gate",
@@ -368,17 +322,7 @@ export const CRUMBS: Crumb[] = [
     y: GROUND_Y - 50,
     w: 100,
     h: 50,
-    hint: "SPACE — approach the church gate",
-  },
-  {
-    id: "church-plaque",
-    key: "contact",
-    label: "Plaque",
-    x: 5200,
-    y: GROUND_Y - 40,
-    w: 80,
-    h: 40,
-    hint: "SPACE — read the gate plaque",
+    hint: "The old gate looms — {KEY} to pay a visit",
   },
 ];
 
@@ -394,7 +338,7 @@ export const NPCS: Npc[] = [
     x: 320,
     y: GROUND_Y,
     facing: 1,
-    line: "That house is Goblin's. Walk up and press SPACE to open his diary.",
+    line: "Evening, traveler! That's Goblin's house right there. Walk up, press {KEY}, and have a peek at his diary — he won't mind.",
   },
   {
     name: "HAT GUY",
@@ -407,7 +351,7 @@ export const NPCS: Npc[] = [
     x: 1000,
     y: GROUND_Y,
     facing: -1,
-    line: "Workshop is next door — SPACE to go in. Hurt? Find a well and press SPACE to heal.",
+    line: "The workshop's next door — {KEY} takes you inside. Oh, and if you get banged up out there, any well and a press of {KEY} patches you right up.",
   },
   {
     name: "OLD MAN",
@@ -420,7 +364,7 @@ export const NPCS: Npc[] = [
     x: 1450,
     y: GROUND_Y,
     facing: 1,
-    line: "Purple gems on the road — walk into them. Collect them all, then beat Hell-gato for the gate.",
+    line: "See those purple gems glinting on the road? Just walk into 'em. Gather every last one, see off that Hell-gato beast, and the church gate opens.",
   },
   {
     name: "WOMAN",
@@ -433,7 +377,7 @@ export const NPCS: Npc[] = [
     x: 1900,
     y: GROUND_Y,
     facing: -1,
-    line: "Up ahead you can draw a doodle. Further east it gets dangerous — watch for monsters.",
+    line: "Sketch Alley's just ahead — leave us a little doodle, won't you? But past the market it gets dangerous… do watch for monsters.",
   },
   {
     name: "NEIGHBOR",
@@ -446,7 +390,7 @@ export const NPCS: Npc[] = [
     x: 3400,
     y: GROUND_Y,
     facing: -1,
-    line: "Monsters took the east road. Clear them if you want to reach the church gate.",
+    line: "Ugh, monsters all over the east road. Someone brave ought to clear them out… say, you look the type.",
   },
   {
     name: "HAT GUY",
@@ -459,7 +403,7 @@ export const NPCS: Npc[] = [
     x: 4600,
     y: GROUND_Y,
     facing: 1,
-    line: "Church gate is that way. Open it with SPACE if you want Goblin's email or GitHub.",
+    line: "Nearly there! The church gate sits just east. Press {KEY} at the gate for Goblin's email and GitHub — go on, say hello.",
   },
 ];
 

@@ -225,7 +225,3 @@ function escapeHtml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
 }
-
-function escapeAttr(value: string) {
-  return escapeHtml(value).replaceAll("'", "&#39;");
-}

@@ -1,5 +1,6 @@
 import {
   ATTACK_DURATION,
+  ENEMY_HURT_DURATION,
   ENEMY_MAX_HP,
   GROUND_Y,
   HURT_DURATION,
@@ -119,7 +120,7 @@ export function resolveCombat(player: PlayerState, enemies: EnemyState[], dt: nu
 
       player.attackHit = true;
       enemy.hp -= 1;
-      enemy.hurtT = 0.25;
+      enemy.hurtT = ENEMY_HURT_DURATION;
       enemy.x += player.facing * 18;
       event = "hit";
 

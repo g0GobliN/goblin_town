@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, type Auth } from "firebase/auth";
 import {
   getFirestore,
   addDoc,
@@ -9,6 +9,7 @@ import {
   getDocs,
   query,
   orderBy,
+  type Firestore,
 } from "firebase/firestore";
 
 export type Project = {
@@ -52,9 +53,21 @@ const firebaseConfig = {
   appId: import.meta.env.PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+// Never throw at module load: the game page imports this module, so an
+// uncaught error here (getAuth asserts the API key) freezes the whole town
+// on the intro screen. On bad/missing PUBLIC_FIREBASE_* vars, warn and export
+// inert handles — every consumer already treats failed requests as "no data".
+let _db: Firestore | null = null;
+let _auth: Auth | null = null;
+try {
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  _db = getFirestore(app);
+  _auth = getAuth(app);
+} catch (error) {
+  console.warn("Firebase unavailable — check PUBLIC_FIREBASE_* vars in .env.local:", error);
+}
+export const db = _db as Firestore;
+export const auth = _auth as Auth;
 
 export async function getDbProjects(): Promise<Project[]> {
   try {
@@ -167,7 +180,13 @@ export async function getDoodles(): Promise<Doodle[]> {
       for (const [key, val] of Object.entries(fields)) {
         parsed[key] = parseFirestoreValue(val);
       }
-      return parsed as Doodle;
+      const doodle = parsed as Doodle;
+      // Doodle strings are rendered as raw <img src>, so anything but an
+      // inline image (e.g. a remote tracking-pixel URL) must be dropped here.
+      if (doodle.doodle && !doodle.doodle.startsWith("data:image/")) {
+        delete doodle.doodle;
+      }
+      return doodle;
     });
 
     doodles.sort((a, b) => String(b.timestamp || "").localeCompare(String(a.timestamp || "")));

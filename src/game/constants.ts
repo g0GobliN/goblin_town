@@ -13,7 +13,9 @@ export const PLAYER_MAX_HP = 5;
 export const ENEMY_MAX_HP = 3;
 export const ATTACK_DURATION = 0.48;
 export const HURT_DURATION = 0.35;
+export const ENEMY_HURT_DURATION = 0.25;
 export const INVULN_DURATION = 0.9;
 
 export const ASSET_BASE = "/img/gothicvania";
 export const MUSIC_SRC = `${ASSET_BASE}/music/town-loop.ogg`;
+export const CREDITS_MUSIC_SRC = `${ASSET_BASE}/music/credits-loop.ogg`;

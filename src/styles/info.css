@@ -191,11 +191,11 @@
 .info-cta {
   display: inline-block;
   font-family: var(--pixel-font);
-  font-size: 11px;
-  padding: 16px 24px;
+  font-size: 10px;
+  padding: 13px 20px;
   background: var(--gold);
   color: #17111c;
-  border-radius: 10px;
+  border-radius: 9px;
   text-decoration: none;
   box-shadow: 0 4px 0 #8a6d1f;
   transition:
@@ -346,6 +346,10 @@
   height: 64px;
   width: 100%;
   object-fit: contain;
+}
+
+.info-shot-row figcaption {
+  grid-column: 1 / -1;
 }
 
 /* live sections */
@@ -624,13 +628,21 @@
     padding-bottom: max(24px, env(safe-area-inset-bottom));
   }
 
+  .info-page .small {
+    font-size: 14px;
+  }
+
   .info-kicker {
     font-size: 8px;
     letter-spacing: 0.26em;
   }
 
+  .info-logo {
+    font-size: clamp(2.2rem, 7vw, 3.2rem);
+  }
+
   .info-hero-sub {
-    font-size: 18px;
+    font-size: 16px;
     padding: 0 8px;
   }
 
@@ -652,7 +664,8 @@
   }
 
   .info-tags li {
-    padding: 8px 11px;
+    font-size: 7px;
+    padding: 7px 10px;
   }
 
   .info-cta-bar {
@@ -663,8 +676,14 @@
 
   .info-cta {
     width: 100%;
-    max-width: 320px;
+    max-width: 260px;
+    font-size: 9px;
+    padding: 12px 18px;
     text-align: center;
+  }
+
+  .info-cta-note {
+    font-size: 16px;
   }
 
   .info-layout {
@@ -674,11 +693,15 @@
   }
 
   .info-main {
-    font-size: 19px;
+    font-size: 17px;
+  }
+
+  .info-title {
+    font-size: clamp(26px, 6vw, 32px);
   }
 
   .info-lead {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .info-side {
@@ -706,9 +729,18 @@
     row-gap: 4px;
   }
 
+  .info-section-head h3 {
+    font-size: 10px;
+  }
+
   .info-card {
     flex-direction: column;
     align-items: stretch;
+    padding: 13px 15px;
+  }
+
+  .info-card strong {
+    font-size: 18px;
   }
 
   .info-card-btn {
@@ -716,12 +748,35 @@
   }
 
   .info-doodles {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 10px;
+  }
+
+  .info-doodle figcaption {
+    font-size: 13px;
+  }
+
+  /* 16px keeps iOS from auto-zooming the form fields */
+  .info-community-form input,
+  .info-community-form textarea {
+    font-size: 16px;
+    padding: 10px 12px;
   }
 
   .info-comment {
     padding: 12px 13px;
+  }
+
+  .info-comment strong {
+    font-size: 17px;
+  }
+
+  .info-comment p {
+    font-size: 16px;
+  }
+
+  .info-comment .small {
+    font-size: 13px;
   }
 
   .info-replies {
@@ -735,7 +790,7 @@
 
 @media (max-width: 380px) {
   .info-logo {
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
 
   .info-sprite {
@@ -747,7 +802,7 @@
   }
 
   .info-main {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .info-side {

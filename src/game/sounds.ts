@@ -1,4 +1,4 @@
-/** Action-specific SFX (Kenney CC0: UI Audio + RPG Audio). */
+/** Action-specific SFX (Kenney CC0: UI Audio + RPG Audio + Digital Audio). */
 
 export type SfxName =
   | "jump"
@@ -12,7 +12,8 @@ export type SfxName =
   | "secret"
   | "hit"
   | "hurt"
-  | "kill";
+  | "kill"
+  | "win";
 
 const SFX_FILES: Record<SfxName, string> = {
   jump: "/img/gothicvania/sfx/jump.ogg",
@@ -25,8 +26,9 @@ const SFX_FILES: Record<SfxName, string> = {
   deny: "/img/gothicvania/sfx/deny.ogg",
   secret: "/img/gothicvania/sfx/secret.ogg",
   hit: "/img/gothicvania/sfx/hit.ogg",
-  hurt: "/img/gothicvania/sfx/hurt.ogg",
-  kill: "/img/gothicvania/sfx/kill.ogg",
+  hurt: "/img/gothicvania/sfx/player-hurt.ogg",
+  kill: "/img/gothicvania/sfx/enemy-death.ogg",
+  win: "/img/gothicvania/sfx/win.ogg",
 };
 
 const VOLUME: Record<SfxName, number> = {
@@ -40,8 +42,9 @@ const VOLUME: Record<SfxName, number> = {
   deny: 0.35,
   secret: 0.5,
   hit: 0.55,
-  hurt: 0.5,
+  hurt: 0.4,
   kill: 0.55,
+  win: 0.6,
 };
 
 const buffers = new Map<SfxName, AudioBuffer>();

@@ -4,7 +4,7 @@
 import { loadAssets } from "./assets";
 import { BOSS_INTRO, type CineKind, creditRollHtml, slidesFor } from "./cinematics";
 import { createEnemies, enemiesKilled, makePlayer, resolveCombat } from "./combat";
-import { GROUND_Y, MUSIC_SRC, SCALE, VIEW_H, VIEW_W } from "./constants";
+import { CREDITS_MUSIC_SRC, GROUND_Y, MUSIC_SRC, SCALE, VIEW_H, VIEW_W } from "./constants";
 import { loadSectionContent } from "./content";
 import { initDoodlePad } from "./doodle";
 import { cameraFollow, ladderAt, movePlayer, tryAttack, tryJump, updateEnemy } from "./physics";
@@ -139,7 +139,7 @@ export function initPixelRoom() {
 
   const renderCineSlide = () => {
     if (!cineOverlay || !cineTitle || !cineBody) return;
-    const slides = slidesFor("intro");
+    const slides = slidesFor("intro", isTouch);
     const slide = slides[cineIndex];
     if (!slide) return;
 
@@ -183,6 +183,7 @@ export function initPixelRoom() {
     creditY = window.innerHeight * 0.85;
     creditsTrack.style.transform = `translateY(${creditY}px)`;
     cineOverlay.hidden = false;
+    if (musicStarted) playMusic(CREDITS_MUSIC_SRC, 0.45);
     playSfx("open");
   };
 
@@ -214,6 +215,7 @@ export function initPixelRoom() {
     if (creditsHint) creditsHint.hidden = true;
     if (creditsSkip) creditsSkip.hidden = true;
     creditFast = false;
+    if (phase === "credits" && musicStarted) playMusic(MUSIC_SRC, 0.35);
     phase = "play";
     dismissStartPrompt();
     playSfx("secret");
@@ -221,7 +223,7 @@ export function initPixelRoom() {
 
   const advanceCine = () => {
     if (phase !== "intro") return;
-    const slides = slidesFor("intro");
+    const slides = slidesFor("intro", isTouch);
     if (cineIndex < slides.length - 1) {
       cineIndex += 1;
       renderCineSlide();
@@ -442,7 +444,7 @@ export function initPixelRoom() {
 
   creditsBtn?.addEventListener("click", () => {
     if (!gateUnlocked()) {
-      showDialogue("Finish the path first, then credits unlock.");
+      showDialogue("Credits roll once the road is walked — finish the journey first!");
       playSfx("deny");
       return;
     }
@@ -463,37 +465,39 @@ export function initPixelRoom() {
     const npc = nearbyNpc(player);
     if (npc) {
       hint.hidden = false;
-      hint.textContent = `> ${actKey} — talk to townsfolk`;
+      hint.textContent = `> A friendly face — ${actKey} to say hi`;
       return;
     }
 
     const crumb = nearbyCrumb(player);
     if (crumb) {
       hint.hidden = false;
-      hint.textContent = `> ${crumb.hint}`;
+      hint.textContent = `> ${crumb.hint.replaceAll("{KEY}", actKey)}`;
       return;
     }
 
     if (nearHeal(player.x + player.w / 2, player.y + player.h / 2)) {
       hint.hidden = false;
-      hint.textContent = `> ${actKey} — drink from the well`;
+      hint.textContent = `> Cool well water — ${actKey} for a sip`;
       return;
     }
 
     if (ladderAt(player.x, player.y, player.w, player.h)) {
       hint.hidden = false;
-      hint.textContent = isTouch ? "> drag ▲/▼ — climb the sign" : "> W/S — climb the sign";
+      hint.textContent = isTouch
+        ? "> Climbable! Drag ▲/▼ to scale the sign"
+        : "> Climbable! W/S to scale the sign";
       return;
     }
 
     if (nearEastGate(player.x + player.w / 2, player.y + player.h / 2)) {
       hint.hidden = false;
       if (!bossDown) {
-        hint.textContent = `> ${actKey} — beat Hell-gato first`;
+        hint.textContent = `> A sealed gate — ${actKey} to size it up`;
       } else if (!gateUnlocked()) {
-        hint.textContent = `> Need ${GEMS_TO_OPEN_GATE} gems (${souls}/${GEMS_TO_OPEN_GATE})`;
+        hint.textContent = `> The gate wants gems — ${souls}/${GEMS_TO_OPEN_GATE} found`;
       } else {
-        hint.textContent = "> Gate open — walk east to the road's end";
+        hint.textContent = "> The gate stands open — stroll east, hero";
       }
       return;
     }
@@ -505,7 +509,7 @@ export function initPixelRoom() {
     // Townsfolk first — crumbs nearby were stealing SPACE
     const npc = nearbyNpc(player);
     if (npc) {
-      showDialogue(npc.line, npc.name);
+      showDialogue(npc.line.replaceAll("{KEY}", actKey), npc.name);
       playSfx("talk");
       return;
     }
@@ -528,9 +532,9 @@ export function initPixelRoom() {
         player.hp = player.maxHp;
         updateHpHud();
         playSfx("secret");
-        showDialogue("Cool well water. Heart's full again.");
+        showDialogue("Ahh — cool well water. Hearts topped right up!");
       } else {
-        showDialogue("Already at full heart — save a sip for later.");
+        showDialogue("Hearts already full! Save a sip for the road.");
         playSfx("talk");
       }
       return;
@@ -538,16 +542,20 @@ export function initPixelRoom() {
 
     if (nearEastGate(player.x + player.w / 2, player.y + player.h / 2)) {
       if (!bossDown) {
-        showDialogue("Beat Hell-gato first. Then come back with soul gems.");
+        showDialogue(
+          "The gate won't budge — Hell-gato still prowls this yard. Deal with the beast, then we'll talk.",
+        );
         playSfx("deny");
       } else if (!gateUnlocked()) {
         showDialogue(
-          `Gate needs ${GEMS_TO_OPEN_GATE} soul gems. You have ${souls}. Walk the street and pick up the purple ones.`,
+          `The gate hums softly… it wants ${GEMS_TO_OPEN_GATE} soul gems and you carry ${souls}. The purple ones glinting along the street — go gather the rest!`,
         );
         playSfx("deny");
       } else {
-        showDialogue("Gems and Hell-gato down — the gate opens. Walk east to the end.");
-        playSfx("open");
+        showDialogue(
+          "Every gem gathered, Hell-gato bested… the gate swings open! The road's end waits just east.",
+        );
+        playSfx("win");
       }
       return;
     }
@@ -622,32 +630,38 @@ export function initPixelRoom() {
       Boolean,
     ) as HTMLElement[];
 
-    const requestOn = (node: HTMLElement): Promise<void> => {
+    const requestOn = async (node: HTMLElement): Promise<void> => {
       const el = node as HTMLElement & {
         requestFullscreen?: (opts?: FullscreenOptions) => Promise<void>;
         webkitRequestFullscreen?: () => void;
       };
       // Bare call first — { navigationUI: "hide" } rejects on many Chrome builds
       if (typeof el.requestFullscreen === "function") {
-        return el.requestFullscreen().catch(() => el.requestFullscreen!({ navigationUI: "hide" }));
+        try {
+          await el.requestFullscreen();
+        } catch {
+          await el.requestFullscreen!({ navigationUI: "hide" });
+        }
+        return;
       }
       if (typeof el.webkitRequestFullscreen === "function") {
         el.webkitRequestFullscreen();
-        return Promise.resolve();
+        return;
       }
-      return Promise.reject(new Error("no fs"));
+      throw new Error("no fs");
     };
 
-    const attempt = (i: number): Promise<boolean> => {
-      if (i >= targets.length) return Promise.resolve(false);
-      return requestOn(targets[i])
-        .then(() => {
-          document.documentElement.classList.add("is-fullscreen");
-          lockLandscape();
-          syncFsBtn();
-          return true;
-        })
-        .catch(() => attempt(i + 1));
+    const attempt = async (i: number): Promise<boolean> => {
+      if (i >= targets.length) return false;
+      try {
+        await requestOn(targets[i]);
+        document.documentElement.classList.add("is-fullscreen");
+        lockLandscape();
+        syncFsBtn();
+        return true;
+      } catch {
+        return attempt(i + 1);
+      }
     };
 
     return attempt(0);
@@ -719,18 +733,27 @@ export function initPixelRoom() {
     controlsHint?.classList.add("is-playing");
   };
 
+  let musicEl: HTMLAudioElement | null = null;
+  let musicSrc = "";
+
+  const playMusic = (src: string, volume: number) => {
+    if (musicEl && musicSrc === src) return;
+    musicEl?.pause();
+    musicEl = new Audio(src);
+    musicEl.loop = true;
+    musicEl.volume = volume;
+    musicSrc = src;
+    musicEl.play().catch(() => {
+      /* autoplay blocked until gesture */
+    });
+  };
+
   const startMusic = () => {
     if (musicStarted) return;
     musicStarted = true;
     unlockAudio();
     dismissStartPrompt();
-
-    const audio = new Audio(MUSIC_SRC);
-    audio.loop = true;
-    audio.volume = 0.35;
-    audio.play().catch(() => {
-      /* autoplay blocked until gesture */
-    });
+    playMusic(MUSIC_SRC, 0.35);
   };
 
   window.addEventListener("keydown", (event) => {
@@ -863,7 +886,7 @@ export function initPixelRoom() {
     if (event.key === " " || event.key === "Enter") creditFast = false;
   });
 
-  // --- touch: left stick move, right HIT / ACT ---
+  // --- touch: left stick move/run, right JUMP / HIT / ACT ---
 
   const STICK_DEAD = 14;
   const STICK_MAX = 52;
@@ -873,7 +896,6 @@ export function initPixelRoom() {
   let gestureStartX = 0;
   let gestureStartY = 0;
   let stickDragging = false;
-  let jumpedThisGesture = false;
 
   const clearMoveKeys = () => {
     keys.delete("ArrowLeft");
@@ -923,13 +945,8 @@ export function initPixelRoom() {
 
     if (nx < -0.32) keys.add("ArrowLeft");
     if (nx > 0.32) keys.add("ArrowRight");
-    if (ny < -0.38) {
-      keys.add("w");
-      if (!jumpedThisGesture && tryJump(player)) {
-        jumpedThisGesture = true;
-        playSfx("jump");
-      }
-    }
+    // Up/down only steer ladder climbs — jumping lives on the JUMP button.
+    if (ny < -0.38) keys.add("w");
     if (ny > 0.38) keys.add("s");
     if (dist >= STICK_RUN) keys.add("Shift");
   };
@@ -966,6 +983,21 @@ export function initPixelRoom() {
       return;
     }
     if (tryAttack(player)) playSfx("select");
+  };
+
+  const touchJump = () => {
+    if (phase === "intro") {
+      advanceCine();
+      return;
+    }
+    if (phase === "credits" || open || bossIntro) return;
+    if (phase !== "play") return;
+    if (dialogueShowing()) {
+      hideDialogue();
+      updateHint();
+      return;
+    }
+    if (tryJump(player)) playSfx("jump");
   };
 
   const isGesturePointer = (event: PointerEvent) =>
@@ -1006,7 +1038,6 @@ export function initPixelRoom() {
         gestureStartX = event.clientX;
         gestureStartY = event.clientY;
         stickDragging = false;
-        jumpedThisGesture = false;
         moveZone.setPointerCapture(event.pointerId);
         placeStick(event.clientX, event.clientY);
       });
@@ -1053,6 +1084,7 @@ export function initPixelRoom() {
         dismissStartPrompt();
         if (action === "act") touchAct();
         if (action === "attack") touchAttack();
+        if (action === "jump") touchJump();
       });
       const release = () => btn.classList.remove("is-held");
       btn.addEventListener("pointerup", release);
@@ -1154,7 +1186,7 @@ export function initPixelRoom() {
             `Hell-gato falls. Gate still needs ${GEMS_TO_OPEN_GATE} gems (you have ${souls}). Collect more, then return.`,
           );
         }
-        playSfx("secret");
+        playSfx(gateUnlocked() ? "win" : "secret");
       }
     }
 
@@ -1192,7 +1224,7 @@ export function initPixelRoom() {
         playSfx("select");
         if (souls === GEMS_TO_OPEN_GATE && bossDown) {
           showDialogue("That's enough gems — the church gate will open now.");
-          playSfx("secret");
+          playSfx("win");
         }
       }
     }

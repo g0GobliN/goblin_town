@@ -232,20 +232,6 @@ body {
   gap: 10px;
 }
 
-.brand-info-link {
-  font-size: 8px;
-  letter-spacing: 0.06em;
-  color: #c9a44f;
-  text-decoration: none;
-  opacity: 0.85;
-  z-index: 2;
-}
-
-.brand-info-link:hover {
-  color: #ffe08a;
-  opacity: 1;
-}
-
 .brand-title {
   display: flex;
   flex-direction: column;
@@ -428,7 +414,11 @@ body {
   border: 2px solid var(--pixel-frame-edge);
   padding: 8px 12px;
   font-size: 9px;
-  white-space: nowrap;
+  /* one line when it fits, wrap instead of overflowing on small screens */
+  width: max-content;
+  max-width: calc(100% - 24px);
+  text-align: center;
+  line-height: 1.6;
   color: #f2d9c0;
   pointer-events: none;
 }
@@ -1152,6 +1142,11 @@ a.card-link:hover {
   color: #ffd93d;
 }
 
+.tc-jump {
+  border-color: #57c24f;
+  color: #b6f2a3;
+}
+
 .tc-btn.is-held {
   background: rgba(90, 24, 40, 0.92);
   transform: scale(0.94);
@@ -1160,6 +1155,11 @@ a.card-link:hover {
 .tc-act.is-held {
   background: rgba(255, 217, 61, 0.85);
   color: #1a0a14;
+}
+
+.tc-jump.is-held {
+  background: rgba(87, 194, 79, 0.85);
+  color: #0d2408;
 }
 
 html.is-touch,
@@ -1214,12 +1214,18 @@ html.is-touch .touch-controls.is-active {
     right: max(14px, env(safe-area-inset-right));
     bottom: max(12px, env(safe-area-inset-bottom));
     flex-direction: row-reverse;
+    align-items: flex-end;
     gap: 12px;
   }
 
   .tc-btn {
     width: 62px;
     height: 62px;
+  }
+
+  .tc-jump {
+    width: 70px;
+    height: 70px;
   }
 }
 
@@ -1839,10 +1845,15 @@ html.game-portrait-block #boot-gate {
   margin-top: 8px;
   font-size: 8px;
   letter-spacing: 0.06em;
-  color: #c9a44f;
+  padding: 12px 18px;
+  color: #ffd93d;
+  background: rgba(255, 217, 61, 0.08);
+  border: 1px solid rgba(255, 217, 61, 0.5);
+  border-radius: 8px;
   text-decoration: none;
 }
 
 .rotate-info:hover {
   color: #ffe08a;
+  background: rgba(255, 217, 61, 0.16);
 }
