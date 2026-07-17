@@ -3,6 +3,21 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: fullscreen=(self)
+
+# HTML must revalidate so deploys aren't stuck behind week-long CDN cache
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/info/
+  Cache-Control: public, max-age=0, must-revalidate
+/info/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/admin/
+  Cache-Control: public, max-age=0, must-revalidate
+/admin/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
 /admin
   X-Robots-Tag: noindex, nofollow
 
@@ -10,4 +25,6 @@
   X-Robots-Tag: noindex, nofollow
 
 /img/*
+  Cache-Control: public, max-age=31536000, immutable
+/_astro/*
   Cache-Control: public, max-age=31536000, immutable
