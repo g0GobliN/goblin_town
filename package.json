@@ -1,0 +1,21 @@
+{
+  "name": "pixel-room-portfolio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "astro": "^5.7.0",
+    "firebase": "^12.16.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "prettier": "^3.7.3",
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^5.8.3"
+  }
+}

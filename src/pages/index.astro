@@ -1,0 +1,271 @@
+---
+import "../styles/global.css";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Goblin Town — Vishal Gurung</title>
+    <meta
+      name="description"
+      content="Welcome to Goblin Town. Vishal Gurung — engineer in Tokyo, builder by night. Walk the streets: work, doodles, and a way to say hello."
+    />
+    <meta property="og:title" content="Goblin Town — Vishal Gurung" />
+    <meta
+      property="og:description"
+      content="A playable portfolio. Explore the town, open houses for work and notes, leave a doodle, find the church gate."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Press+Start+2P&display=swap"
+    />
+  </head>
+  <body>
+    <div class="sky" aria-hidden="true">
+      <div class="sky-far"></div>
+      <div class="sky-near"></div>
+      <div class="sky-veil"></div>
+    </div>
+
+    <main class="stage">
+      <header class="brand">
+        <h1 class="brand-title">
+          <span class="brand-main">GOBLIN</span>
+          <span class="brand-sub">TOWN</span>
+        </h1>
+      </header>
+
+      <div class="game-frame">
+        <canvas id="room-canvas" width="960" height="540"></canvas>
+
+        <button
+          id="menu-toggle"
+          class="menu-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="room-nav"
+        >
+          MENU
+        </button>
+
+        <div id="zone-label" class="hud-zone">TOWN SQUARE</div>
+        <div id="hp-hud" class="hud-hp">HP ♥♥♥♥♥</div>
+        <div id="kill-hud" class="hud-kills">FOES 0/12</div>
+        <div id="crumb-count" class="hud-crumbs">0/12</div>
+
+        <div id="dialogue-box" class="dialogue" hidden>
+          <div class="dialogue-name">TOWNSFOLK</div>
+          <p id="dialogue-text"></p>
+        </div>
+
+        <div id="room-hint" class="hint" hidden></div>
+
+        <nav id="room-nav" class="menu-panel" aria-label="Sections" hidden></nav>
+      </div>
+
+      <p id="controls-hint" class="controls-hint">
+        <img
+          class="press-key"
+          src="/img/gothicvania/ui/press-enter-text.png"
+          alt=""
+          width="120"
+          height="16"
+        />
+        <span class="controls-keys"
+          >A/D move · Shift run · W jump · J/X attack · Space talk/heal · M menu</span
+        >
+      </p>
+    </main>
+
+    <div id="cine-overlay" class="cine" hidden>
+      <div class="cine-panel">
+        <p id="cine-kicker" class="cine-kicker"></p>
+        <h2 id="cine-title" class="cine-title"></h2>
+        <div id="cine-body" class="cine-body"></div>
+        <p id="cine-prompt" class="cine-prompt">ENTER — continue</p>
+        <p id="cine-progress" class="cine-progress"></p>
+      </div>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay">
+      <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div id="modal-title" class="modal-title"></div>
+          <button id="modal-close" class="pixel-btn modal-close-btn">X</button>
+        </div>
+        <div class="modal-body">
+          <div data-section="about" hidden>
+            <div class="stack about-copy">
+              <p class="small accent">⌂ HOUSE DIARY · who lives here</p>
+              <p>
+                <strong>Vishal Gurung.</strong> Online, they call me
+                <strong>goblin</strong>.
+              </p>
+              <p>
+                This town is my portfolio. Walk it, open the doors, see what I've
+                been building.
+              </p>
+              <p>
+                Nepal → Tokyo. By day I'm an IT engineer (システム開発). By night I
+                ship side projects, open source, and little experiments like this
+                place.
+              </p>
+              <p>
+                Grew up with games, a phone, and a computer. Curiosity stuck —
+                poking, breaking, fixing. Learned Japanese in school, found my way
+                to Japan early, and kept building: real systems, real bugs, a little
+                better than yesterday.
+              </p>
+              <p>
+                One tool I wished existed while reading codebases:
+                <strong> RealityMap</strong>. So I made it.
+              </p>
+              <div class="about-pillars">
+                <div class="card">
+                  <div class="accent">01 · BUILD</div>
+                  <p class="small">
+                    Web apps, tools, npm packages — sharp, fast, stays out of the
+                    way.
+                  </p>
+                </div>
+                <div class="card">
+                  <div class="accent">02 · SIDE QUESTS</div>
+                  <p class="small">
+                    Projects I ship because I needed them first. Open source welcome.
+                  </p>
+                </div>
+                <div class="card">
+                  <div class="accent">03 · TOKYO</div>
+                  <p class="small">
+                    日本語 &amp; English · still leveling up · home for now.
+                  </p>
+                </div>
+              </div>
+              <p class="small">
+                I like software that actually works. No flash spell — just honest
+                builds.
+              </p>
+              <p class="small accent">— Vishal · 東京 · Goblin Town 2026</p>
+            </div>
+          </div>
+
+          <div data-section="work" hidden>
+            <div class="stack section-panel">
+              <p class="small accent">⚒ WORKSHOP · selected builds</p>
+              <p class="small">
+                Projects pinned to the board — apps, tools, packages. Flip a card to
+                see what shipped.
+              </p>
+              <p id="work-status" class="small">&gt; unlocking the workshop...</p>
+              <div id="work-list" class="stack"></div>
+              <nav id="work-pager" class="pager" hidden></nav>
+            </div>
+          </div>
+
+          <div data-section="blog" hidden>
+            <div class="stack section-panel">
+              <p class="small accent">❒ LIBRARY · notes &amp; posts</p>
+              <p class="small">
+                Quiet shelves for write-ups. When a page is ready, it lands here.
+              </p>
+              <p id="blog-status" class="small">&gt; lighting the reading lamps...</p>
+              <div id="blog-list" class="stack"></div>
+              <nav id="blog-pager" class="pager" hidden></nav>
+              <div id="blog-detail" hidden></div>
+            </div>
+          </div>
+
+          <div data-section="gallery" hidden>
+            <div class="stack section-panel">
+              <p class="small accent">▦ GALLERY WALL · visitor doodles</p>
+              <p class="small">
+                Sketches left by travelers. Yours can hang here too — draw in Sketch
+                Alley, then check back.
+              </p>
+              <p id="doodle-status" class="small">&gt; dusting the wall...</p>
+              <div id="doodle-grid" class="doodle-grid"></div>
+              <nav id="doodle-pager" class="pager" hidden></nav>
+            </div>
+          </div>
+
+          <div data-section="doodle" hidden>
+            <div class="stack">
+              <p class="small accent">✎ SKETCH ALLEY · leave a mark</p>
+              <p class="small">
+                Paint pots and open crates. Draw something, name it, save it to the
+                gallery wall.
+              </p>
+              <p class="small">&gt; CLICK &amp; DRAG · then SAVE</p>
+              <canvas id="doodle-canvas" width="320" height="200"></canvas>
+              <div class="doodle-controls">
+                <div id="doodle-palette" class="doodle-palette"></div>
+                <label class="small doodle-size-label">
+                  SIZE
+                  <input id="doodle-size" type="range" min="1" max="16" value="4" />
+                </label>
+                <button id="doodle-clear" class="pixel-btn doodle-clear-btn" type="button">CLEAR</button>
+              </div>
+              <label class="small doodle-name-label">
+                NAME
+                <input id="doodle-name" class="doodle-name" type="text" maxlength="40" value="goblin-sketch" />
+              </label>
+              <button id="doodle-save" class="pixel-btn" type="button">SAVE DOODLE</button>
+              <p id="doodle-save-status" class="small"></p>
+            </div>
+          </div>
+
+          <div data-section="contact" hidden>
+            <div class="stack">
+              <p class="small accent">⚑ CHURCH GATE · say hello</p>
+              <p>
+                End of the road. Want to build something together, hire goblin, or
+                just wave from the gate? Reach out.
+              </p>
+              <ul class="list">
+                <li>
+                  &gt; Email:
+                  <a href="mailto:grgvishal.gurung17@gmail.com"
+                    >grgvishal.gurung17@gmail.com</a
+                  >
+                </li>
+                <li>
+                  &gt; GitHub:
+                  <a href="https://github.com/g0GobliN" target="_blank" rel="noopener"
+                    >g0GobliN</a
+                  >
+                </li>
+                <li>
+                  &gt; Instagram:
+                  <a href="https://instagram.com/goblin01_" target="_blank" rel="noopener"
+                    >goblin01_</a
+                  >
+                </li>
+                <li>
+                  &gt; npm · RealityMap:
+                  <a
+                    href="https://www.npmjs.com/package/reality-map"
+                    target="_blank"
+                    rel="noopener">reality-map</a
+                  >
+                </li>
+              </ul>
+              <button id="credits-btn" class="pixel-btn" type="button">WATCH CREDITS</button>
+              <p class="small accent">— Vishal · 東京 · the gate stays open</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      import { initPixelRoom } from "../game/room";
+      initPixelRoom();
+    </script>
+  </body>
+</html>
