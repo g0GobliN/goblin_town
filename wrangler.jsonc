@@ -6,5 +6,6 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
   },
 }

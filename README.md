@@ -2,7 +2,7 @@
 
 Playable portfolio by **Vishal Gurung** (goblin) — live at [g0.monster](https://g0.monster).
 
-A little night town you can walk through. Houses open onto work, notes, doodles, and a way to say hello. Prefer reading? There’s a plain summary at [/info](https://g0.monster/info).
+A little night town you can walk through. Houses open onto work, notes, doodles, and a way to say hello. Prefer reading? There’s a plain summary at [/info](https://g0.monster/info/).
 
 ## What’s here
 

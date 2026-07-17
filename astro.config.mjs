@@ -6,6 +6,7 @@ import basicSsl from "@vitejs/plugin-basic-ssl";
 export default defineConfig({
   site: "https://g0.monster",
   output: "static",
+  trailingSlash: "always",
   adapter: cloudflare(),
   integrations: [
     sitemap({
