@@ -122,6 +122,8 @@ import "../styles/global.css";
         >
           MENU
         </button>
+        <!-- Always in HTML (not JS / not display:none) so Google can discover /info/ -->
+        <a id="info-page-link" class="info-page-link" href="/info/">INFO</a>
 
         <div id="zone-label" class="hud-zone">TOWN SQUARE</div>
         <div id="hp-hud" class="hud-hp">HP ♥♥♥♥♥</div>
@@ -177,7 +179,13 @@ import "../styles/global.css";
         <span class="controls-touch"
           >Stick to walk · hold RUN to sprint · JUMP to jump · HIT to attack · ACT to talk</span
         >
+        <a class="controls-info-link" href="/info/">Prefer reading? Text summary</a>
       </p>
+      <noscript>
+        <p class="controls-hint">
+          <a href="/info/">Goblin Town summary — Vishal Gurung, work, notes, contact</a>
+        </p>
+      </noscript>
     </main>
 
     <div id="cine-overlay" class="cine" hidden>

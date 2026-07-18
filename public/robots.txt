@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://g0.monster/sitemap-index.xml
+Sitemap: https://g0.monster/sitemap.xml

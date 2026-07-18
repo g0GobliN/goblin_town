@@ -449,6 +449,26 @@ body {
   background: rgba(40, 10, 24, 0.92);
 }
 
+.info-page-link {
+  position: absolute;
+  top: 8px;
+  left: 58px;
+  z-index: 40;
+  font-family: inherit;
+  font-size: 8px;
+  color: #c9a44f;
+  background: rgba(10, 4, 14, 0.8);
+  border: 1px solid #4a2038;
+  padding: 5px 8px;
+  text-decoration: none;
+}
+
+.info-page-link:hover {
+  color: #ffd93d;
+  border-color: var(--pixel-accent-soft);
+  background: rgba(40, 10, 24, 0.92);
+}
+
 .menu-panel {
   position: absolute;
   top: 36px;
@@ -526,6 +546,16 @@ body {
   color: #f2d9c0;
   text-shadow: 0 1px 0 #1a0a14;
   max-width: 20rem;
+}
+
+.controls-info-link {
+  color: #c9a44f;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.controls-info-link:hover {
+  color: #ffd93d;
 }
 
 .press-key {
@@ -1586,6 +1616,13 @@ html.is-touch .dialogue {
     font-size: 6px;
     padding: 3px 6px;
     min-height: 0;
+  }
+
+  .game-page .info-page-link {
+    top: 4px;
+    left: 42px;
+    font-size: 6px;
+    padding: 3px 6px;
   }
 
   .game-page .menu-panel {
