@@ -1,3 +1,4 @@
+import { getEnv } from "./env";
 import {
   getDoodleServiceAccount,
   getGoogleAccessToken,
@@ -13,6 +14,19 @@ function colPath(projectId: string, collection: string) {
   return `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${collection}`;
 }
 
+/** Prefer PUBLIC_* project id so SA credentials hit the same DB the site reads. */
+function projectIdFor(sa: ServiceAccount, publicEnvKey?: string): string {
+  if (publicEnvKey) {
+    const fromEnv = getEnv(publicEnvKey)?.trim();
+    if (fromEnv) return fromEnv;
+  }
+  return sa.project_id;
+}
+
+function mainProjectId(sa: ServiceAccount): string {
+  return projectIdFor(sa, "PUBLIC_FIREBASE_PROJECT_ID");
+}
+
 async function authedFetch(sa: ServiceAccount, url: string, init: RequestInit = {}) {
   const token = await getGoogleAccessToken(sa, [
     "https://www.googleapis.com/auth/datastore",
@@ -25,7 +39,8 @@ async function authedFetch(sa: ServiceAccount, url: string, init: RequestInit = 
   }
   const res = await fetch(url, { ...init, headers });
   if (!res.ok) {
-    throw new Error(`Firestore REST ${init.method || "GET"} failed: ${await res.text()}`);
+    const body = await res.text();
+    throw new Error(`Firestore REST ${init.method || "GET"} ${res.status}: ${body.slice(0, 400)}`);
   }
   return res;
 }
@@ -86,18 +101,23 @@ export async function firestoreDelete(
   collection: string,
   id: string,
   sa: ServiceAccount = getMainServiceAccount(),
+  projectId = mainProjectId(sa),
 ) {
   const token = await getGoogleAccessToken(sa, [
     "https://www.googleapis.com/auth/datastore",
     "https://www.googleapis.com/auth/cloud-platform",
   ]);
-  const res = await fetch(docPath(sa.project_id, collection, id), {
+  const url = docPath(projectId, collection, id);
+  const res = await fetch(url, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
   // 404 = already gone (fine for cascade deletes)
   if (!res.ok && res.status !== 404) {
-    throw new Error(`Firestore REST DELETE failed: ${await res.text()}`);
+    const body = await res.text();
+    throw new Error(
+      `Firestore DELETE ${res.status} (${projectId}/${collection}/${id}): ${body.slice(0, 400)}`,
+    );
   }
 }
 
@@ -114,7 +134,7 @@ export async function firestoreSet(
   }
   const keys = Object.keys(fields);
   const mask = keys.map((k) => `updateMask.fieldPaths=${encodeURIComponent(k)}`).join("&");
-  const url = `${docPath(sa.project_id, collection, id)}?${mask}`;
+  const url = `${docPath(mainProjectId(sa), collection, id)}?${mask}`;
   await authedFetch(sa, url, {
     method: "PATCH",
     body: JSON.stringify({ fields }),
@@ -125,7 +145,7 @@ export async function firestoreList(
   collection: string,
   sa: ServiceAccount = getMainServiceAccount(),
 ): Promise<Array<{ id: string; data: Record<string, unknown> }>> {
-  const res = await authedFetch(sa, `${colPath(sa.project_id, collection)}?pageSize=300`);
+  const res = await authedFetch(sa, `${colPath(mainProjectId(sa), collection)}?pageSize=300`);
   const body = (await res.json()) as {
     documents?: Array<{ name: string; fields?: Record<string, unknown> }>;
   };
@@ -138,5 +158,6 @@ export async function firestoreList(
 export async function firestoreDeleteDoodle(id: string) {
   const sa = getDoodleServiceAccount();
   if (!sa) throw new Error("DOODLE_SERVICE_ACCOUNT is not set");
-  await firestoreDelete("doodles", id, sa);
+  const projectId = projectIdFor(sa, "PUBLIC_DOODLE_PROJECT_ID");
+  await firestoreDelete("doodles", id, sa, projectId);
 }

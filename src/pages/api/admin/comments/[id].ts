@@ -33,22 +33,17 @@ export const DELETE: APIRoute = async ({ request, params }) => {
       console.error("community list for cascade failed:", err);
     }
 
-    const results = await Promise.allSettled(
-      [...toDelete].map((docId) => firestoreDelete("community", docId)),
-    );
-    const failed = results.filter((r) => r.status === "rejected");
-    if (failed.length === results.length) {
-      const reason = failed[0]!.status === "rejected" ? failed[0].reason : null;
-      const message = reason instanceof Error ? reason.message : "Delete failed";
-      return jsonError(message, 500);
+    // Delete the root comment first so a cascade-list failure can't block it.
+    await firestoreDelete("community", id);
+    const others = [...toDelete].filter((docId) => docId !== id);
+    if (others.length) {
+      await Promise.allSettled(others.map((docId) => firestoreDelete("community", docId)));
     }
 
-    return json({
-      ok: true,
-      deleted: [...toDelete],
-      partial: failed.length > 0,
-    });
+    return json({ ok: true, deleted: [...toDelete] });
   } catch (err) {
-    return jsonError(err instanceof Error ? err.message : "Delete failed", 500);
+    const message = err instanceof Error ? err.message : "Delete failed";
+    console.error("comment delete failed:", message);
+    return jsonError(message, 500);
   }
 };

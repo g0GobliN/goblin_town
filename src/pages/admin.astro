@@ -247,12 +247,23 @@ import "../styles/admin.css";
         const t = await token();
         const headers = new Headers(init.headers);
         headers.set("Authorization", `Bearer ${t}`);
-        if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
+        // Astro CSRF: DELETE/POST without Content-Type is blocked when Origin
+        // is missing/mismatched. Always send JSON content-type for API calls.
+        if (!(init.body instanceof FormData) && !headers.has("Content-Type")) {
           headers.set("Content-Type", "application/json");
         }
         const res = await fetch(path, { ...init, headers });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+        if (!res.ok) {
+          const msg =
+            typeof data.error === "string" && data.error
+              ? data.error
+              : typeof data === "string" && data
+                ? data
+                : `Request failed (${res.status})`;
+          console.error("admin api error:", path, res.status, msg);
+          throw new Error(msg);
+        }
         return data;
       }
 

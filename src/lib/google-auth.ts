@@ -26,7 +26,38 @@ function pemToPkcs8(pem: string): ArrayBuffer {
 }
 
 export function parseServiceAccount(raw: string): ServiceAccount {
-  const sa = JSON.parse(raw) as ServiceAccount;
+  let text = raw.trim().replace(/^\uFEFF/, "");
+
+  // .env / Cloudflare often wrap the whole JSON in quotes
+  if (
+    (text.startsWith('"') && text.endsWith('"')) ||
+    (text.startsWith("'") && text.endsWith("'"))
+  ) {
+    const quote = text[0]!;
+    const inner = text.slice(1, -1);
+    if (quote === '"') {
+      // May be a JSON string value ("{...}") or a quoted blob with \" escapes
+      try {
+        const once = JSON.parse(text) as unknown;
+        text = typeof once === "string" ? once : text;
+      } catch {
+        text = inner.replace(/\\"/g, '"').replace(/\\n/g, "\n").replace(/\\\\/g, "\\");
+      }
+    } else {
+      text = inner;
+    }
+  }
+
+  text = text.trim();
+
+  let sa: ServiceAccount;
+  try {
+    sa = JSON.parse(text) as ServiceAccount;
+  } catch {
+    throw new Error(
+      "FIREBASE_SERVICE_ACCOUNT is not valid JSON — put it on ONE line in .env.local wrapped in single quotes (private_key uses \\n, not real line breaks)",
+    );
+  }
   if (!sa.project_id || !sa.client_email || !sa.private_key) {
     throw new Error("Service account JSON missing project_id, client_email, or private_key");
   }

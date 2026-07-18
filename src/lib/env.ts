@@ -1,6 +1,6 @@
 import { env as cfEnv } from "cloudflare:workers";
 
-/** Read env from Cloudflare bindings first, then Vite/Astro import.meta.env. */
+/** Read env from Cloudflare bindings, then Vite/Astro, then process.env (local .env). */
 export function getEnv(name: string): string | undefined {
   try {
     const v = (cfEnv as Record<string, unknown>)[name];
@@ -10,5 +10,14 @@ export function getEnv(name: string): string | undefined {
   }
 
   const meta = (import.meta.env as Record<string, string | undefined>)[name];
-  return typeof meta === "string" && meta.length > 0 ? meta : undefined;
+  if (typeof meta === "string" && meta.length > 0) return meta;
+
+  try {
+    const fromProcess = process.env[name];
+    if (typeof fromProcess === "string" && fromProcess.length > 0) return fromProcess;
+  } catch {
+    /* process may be unavailable */
+  }
+
+  return undefined;
 }
