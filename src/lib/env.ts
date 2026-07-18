@@ -1,23 +1,30 @@
 import { env as cfEnv } from "cloudflare:workers";
 
-/** Read env from Cloudflare bindings, then Vite/Astro, then process.env (local .env). */
-export function getEnv(name: string): string | undefined {
+/** Collect all non-empty values for a key (Cloudflare runtime, process, Vite). */
+export function getEnvCandidates(name: string): string[] {
+  const out: string[] = [];
+  const add = (v: unknown) => {
+    if (typeof v === "string" && v.trim().length > 0) out.push(v);
+  };
+
   try {
-    const v = (cfEnv as Record<string, unknown>)[name];
-    if (typeof v === "string" && v.length > 0) return v;
+    add((cfEnv as Record<string, unknown>)[name]);
   } catch {
-    /* cloudflare:workers unavailable in some local contexts */
+    /* cloudflare:workers unavailable locally sometimes */
   }
 
-  const meta = (import.meta.env as Record<string, string | undefined>)[name];
-  if (typeof meta === "string" && meta.length > 0) return meta;
-
   try {
-    const fromProcess = process.env[name];
-    if (typeof fromProcess === "string" && fromProcess.length > 0) return fromProcess;
+    add(process.env[name]);
   } catch {
     /* process may be unavailable */
   }
 
-  return undefined;
+  add((import.meta.env as Record<string, string | undefined>)[name]);
+
+  return out;
+}
+
+/** Read env from Cloudflare bindings, then process.env, then Vite/Astro. */
+export function getEnv(name: string): string | undefined {
+  return getEnvCandidates(name)[0];
 }

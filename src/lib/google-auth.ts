@@ -1,4 +1,4 @@
-import { getEnv } from "./env";
+import { getEnvCandidates } from "./env";
 
 export type ServiceAccount = {
   project_id: string;
@@ -25,37 +25,80 @@ function pemToPkcs8(pem: string): ArrayBuffer {
   return buf.buffer;
 }
 
-export function parseServiceAccount(raw: string): ServiceAccount {
-  let text = raw.trim().replace(/^\uFEFF/, "");
-
-  // .env / Cloudflare often wrap the whole JSON in quotes
-  if (
-    (text.startsWith('"') && text.endsWith('"')) ||
-    (text.startsWith("'") && text.endsWith("'"))
-  ) {
-    const quote = text[0]!;
-    const inner = text.slice(1, -1);
-    if (quote === '"') {
-      // May be a JSON string value ("{...}") or a quoted blob with \" escapes
-      try {
-        const once = JSON.parse(text) as unknown;
-        text = typeof once === "string" ? once : text;
-      } catch {
-        text = inner.replace(/\\"/g, '"').replace(/\\n/g, "\n").replace(/\\\\/g, "\\");
+function unwrapQuotes(text: string): string {
+  let t = text.trim().replace(/^\uFEFF/, "");
+  for (let i = 0; i < 3; i++) {
+    if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
+      const q = t[0]!;
+      const inner = t.slice(1, -1);
+      if (q === '"') {
+        try {
+          const once = JSON.parse(t) as unknown;
+          t = typeof once === "string" ? once.trim() : inner.trim();
+          continue;
+        } catch {
+          t = inner.trim();
+          continue;
+        }
       }
-    } else {
-      text = inner;
+      t = inner.trim();
+      continue;
+    }
+    break;
+  }
+  if (t.startsWith("'") && !t.endsWith("'")) t = t.slice(1).trim();
+  return t;
+}
+
+/** First complete `{...}` object (drops duplicated paste garbage after it). */
+function firstJsonObject(text: string): string {
+  const start = text.indexOf("{");
+  if (start < 0) return text;
+  let depth = 0;
+  let inStr = false;
+  let esc = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i]!;
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === "\\") esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
     }
   }
+  return text.slice(start);
+}
 
-  text = text.trim();
+function repairPrivateKeyNewlines(text: string): string {
+  return text.replace(/"private_key"\s*:\s*"([\s\S]*?)"\s*,/, (_m, pk: string) => {
+    const one = pk.replace(/\r?\n/g, "\\n").replace(/(?<!\\)"/g, '\\"');
+    return `"private_key":"${one}",`;
+  });
+}
 
-  let sa: ServiceAccount;
-  try {
-    sa = JSON.parse(text) as ServiceAccount;
-  } catch {
+export function parseServiceAccount(raw: string): ServiceAccount {
+  let text = unwrapQuotes(raw);
+  text = firstJsonObject(text);
+
+  let sa: ServiceAccount | undefined;
+  const attempts = [text, repairPrivateKeyNewlines(text)];
+  for (const attempt of attempts) {
+    try {
+      sa = JSON.parse(attempt) as ServiceAccount;
+      break;
+    } catch {
+      /* try next */
+    }
+  }
+  if (!sa) {
     throw new Error(
-      "FIREBASE_SERVICE_ACCOUNT is not valid JSON — put it on ONE line in .env.local wrapped in single quotes (private_key uses \\n, not real line breaks)",
+      "FIREBASE_SERVICE_ACCOUNT is not valid JSON (Cloudflare secret must be raw one-line JSON, no quotes around it)",
     );
   }
   if (!sa.project_id || !sa.client_email || !sa.private_key) {
@@ -66,15 +109,31 @@ export function parseServiceAccount(raw: string): ServiceAccount {
 }
 
 export function getMainServiceAccount(): ServiceAccount {
-  const raw = getEnv("FIREBASE_SERVICE_ACCOUNT");
-  if (!raw) throw new Error("FIREBASE_SERVICE_ACCOUNT is not set");
-  return parseServiceAccount(raw);
+  const candidates = getEnvCandidates("FIREBASE_SERVICE_ACCOUNT");
+  if (!candidates.length) throw new Error("FIREBASE_SERVICE_ACCOUNT is not set");
+  let lastErr: Error | undefined;
+  for (const raw of candidates) {
+    try {
+      return parseServiceAccount(raw);
+    } catch (err) {
+      lastErr = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+  throw lastErr ?? new Error("FIREBASE_SERVICE_ACCOUNT is not valid JSON");
 }
 
 export function getDoodleServiceAccount(): ServiceAccount | null {
-  const raw = getEnv("DOODLE_SERVICE_ACCOUNT");
-  if (!raw) return null;
-  return parseServiceAccount(raw);
+  const candidates = getEnvCandidates("DOODLE_SERVICE_ACCOUNT");
+  if (!candidates.length) return null;
+  let lastErr: Error | undefined;
+  for (const raw of candidates) {
+    try {
+      return parseServiceAccount(raw);
+    } catch (err) {
+      lastErr = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+  throw lastErr ?? new Error("DOODLE_SERVICE_ACCOUNT is not valid JSON");
 }
 
 const tokenCache = new Map<string, { token: string; exp: number }>();
