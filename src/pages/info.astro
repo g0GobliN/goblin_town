@@ -99,9 +99,10 @@ import "../styles/info.css";
                 <code
                   >This is my portfolio — a small pixel town that runs right in the browser. The
                   houses hold my work and notes, the gallery wall shows visitor doodles, and the
-                  church gate is where you can say hello.
-
-I'm Vishal Gurung — online just goblin. I grew up in Nepal, live in Tokyo, and work as an IT engineer (システムエンジニア). Outside work I build side projects — apps, tools, open source, and fun experiments like this town.</code
+                  church gate is where you can say hello. I'm Vishal Gurung — online just goblin. I
+                  grew up in Nepal, live in Tokyo, and work as an IT engineer (システムエンジニア).
+                  Outside work I build side projects — apps, tools, open source, and fun experiments
+                  like this town.</code
                 >
               </p>
 
@@ -115,20 +116,17 @@ I'm Vishal Gurung — online just goblin. I grew up in Nepal, live in Tokyo, and
 
               <h3>Town Streets</h3>
               <pre>
-Every door goes somewhere — House Diary, Workshop, Library, Gallery Wall, and the Church Gate.</pre
-              >
+Every door goes somewhere — House Diary, Workshop, Library, Gallery Wall, and the Church Gate.</pre>
 
               <h4>Controls</h4>
               <pre>
 Desktop — walk A/D · run SHIFT · jump W · attack J or X · talk & heal SPACE · menu M
 Phone — stick walks · hold RUN · JUMP · HIT · ACT to talk
-Collect the gems, beat Hell-gato, and the church gate opens.</pre
-              >
+Collect the gems, beat Hell-gato, and the church gate opens.</pre>
 
               <h4>Side Quests</h4>
               <pre>
-Leave a doodle on the gallery wall, post in the town square, or just wander and talk to the townsfolk.</pre
-              >
+Leave a doodle on the gallery wall, post in the town square, or just wander and talk to the townsfolk.</pre>
 
               <h3>Credits</h3>
               <div class="info-credits" id="info-credits-list"></div>
@@ -149,8 +147,7 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
                     );
                   }
                   function tag(name, icon, href) {
-                    const img =
-                      '<img class="info-credit-avatar" src="' + icon + '" alt="" />';
+                    const img = '<img class="info-credit-avatar" src="' + icon + '" alt="" />';
                     const inner = "@" + name + img;
                     if (href) {
                       return (
@@ -179,7 +176,11 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
                     [
                       "Music",
                       tag("PascalBelisle", av("PB", "#4a2036", "#ffb100")),
-                      tag("thetoadz", av("TZ", "#1a3040", "#aedeea"), "https://www.patreon.com/thetoadz"),
+                      tag(
+                        "thetoadz",
+                        av("TZ", "#1a3040", "#aedeea"),
+                        "https://www.patreon.com/thetoadz",
+                      ),
                       tag("johndekale", av("JD", "#303018", "#ffe08a")),
                       tag("ForgottenPath", av("FP", "#182830", "#aedeea")),
                     ],
@@ -191,21 +192,33 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
                     ],
                     [
                       "Assets",
-                      tag("OpenGameArt", av("OGA", "#2a3a20", "#9ccc65"), "https://opengameart.org"),
+                      tag(
+                        "OpenGameArt",
+                        av("OGA", "#2a3a20", "#9ccc65"),
+                        "https://opengameart.org",
+                      ),
                       tag("SoulGems", av("SG", "#201830", "#c56cf0")),
                       tag("PressKeyArt", av("PK", "#302818", "#ffb100")),
                     ],
                     [
                       "Engine",
                       tag("Astro", av("A", "#ff5d01", "#fff"), "https://astro.build"),
-                      tag("TypeScript", av("TS", "#3178c6", "#fff"), "https://www.typescriptlang.org"),
+                      tag(
+                        "TypeScript",
+                        av("TS", "#3178c6", "#fff"),
+                        "https://www.typescriptlang.org",
+                      ),
                       tag("Vite", av("V", "#646cff", "#fff"), "https://vitejs.dev"),
                       tag("Canvas", av("CV", "#222c2e", "#aedeea")),
                     ],
                     [
                       "Data",
                       tag("Firebase", av("Fb", "#ffa000", "#111"), "https://firebase.google.com"),
-                      tag("CloudFirestore", av("FS", "#ffca28", "#111"), "https://firebase.google.com"),
+                      tag(
+                        "CloudFirestore",
+                        av("FS", "#ffca28", "#111"),
+                        "https://firebase.google.com",
+                      ),
                     ],
                     [
                       "Hosting",
@@ -214,8 +227,16 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
                     ],
                     [
                       "Side Quest",
-                      tag("RealityMap", av("RM", "#0c4a6e", "#aedeea"), "https://www.npmjs.com/package/reality-map"),
-                      tag("npm", av("npm", "#cb3837", "#fff"), "https://www.npmjs.com/package/reality-map"),
+                      tag(
+                        "RealityMap",
+                        av("RM", "#0c4a6e", "#aedeea"),
+                        "https://www.npmjs.com/package/reality-map",
+                      ),
+                      tag(
+                        "npm",
+                        av("npm", "#cb3837", "#fff"),
+                        "https://www.npmjs.com/package/reality-map",
+                      ),
                     ],
                   ];
                   const el = document.getElementById("info-credits-list");
@@ -223,17 +244,12 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
                   el.innerHTML = rows
                     .map(function (row) {
                       return (
-                        "<p><strong>" +
-                        row[0] +
-                        ":</strong> " +
-                        row.slice(1).join("") +
-                        "</p>"
+                        "<p><strong>" + row[0] + ":</strong> " + row.slice(1).join("") + "</p>"
                       );
                     })
                     .join("");
                 })();
               </script>
-
             </div>
           </div>
 
@@ -311,7 +327,9 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
                 <td>
                   <a href="mailto:grgvishal.gurung17@gmail.com">Email</a>,
                   <a href="https://github.com/g0GobliN" target="_blank" rel="noopener">GitHub</a>,
-                  <a href="https://instagram.com/goblin01_" target="_blank" rel="noopener">Instagram</a>,
+                  <a href="https://instagram.com/goblin01_" target="_blank" rel="noopener"
+                    >Instagram</a
+                  >,
                   <a href="https://www.npmjs.com/package/reality-map" target="_blank" rel="noopener"
                     >RealityMap · npm</a
                   >
@@ -526,7 +544,12 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
         const blogs = await getDbBlogs();
         if (!blogs.length) {
           status.textContent = "> shelves waiting for ink";
-          list.innerHTML = rowHtml("/", "No pages yet", "Notes show up here when they're ready.", "");
+          list.innerHTML = rowHtml(
+            "/",
+            "No pages yet",
+            "Notes show up here when they're ready.",
+            "",
+          );
           return;
         }
         status.textContent = `> ${blogs.length} post${blogs.length === 1 ? "" : "s"}`;

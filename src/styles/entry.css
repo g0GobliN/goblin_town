@@ -51,8 +51,12 @@
     ),
     url("/img/gothicvania/town/background.png");
   background-repeat: no-repeat;
-  background-position: 0 0, 50% 0;
-  background-size: 100% 100vh, 1600px 100vh;
+  background-position:
+    0 0,
+    50% 0;
+  background-size:
+    100% 100vh,
+    1600px 100vh;
   background-attachment: scroll;
   image-rendering: pixelated;
 }

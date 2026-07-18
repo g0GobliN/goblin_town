@@ -20,7 +20,7 @@
   color: var(--itchio_text_color);
   background: var(--itchio_bg_color);
   font-family: var(--itchio_font_family) !important;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
   letter-spacing: normal;
   overflow-x: hidden;
@@ -46,8 +46,12 @@
     ),
     url("/img/gothicvania/town/background.png");
   background-repeat: no-repeat;
-  background-position: 0 0, 50% 0;
-  background-size: 100% 100vh, 1600px 100vh;
+  background-position:
+    0 0,
+    50% 0;
+  background-size:
+    100% 100vh,
+    1600px 100vh;
   background-attachment: scroll;
   image-rendering: pixelated;
 }
