@@ -778,10 +778,13 @@ a.card-link:hover {
 }
 
 .doodle-swatch {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border: 2px solid #5a3048;
+  border-radius: 50%;
+  padding: 0;
   cursor: pointer;
+  flex-shrink: 0;
 }
 .doodle-swatch.active {
   border-color: #ff3b3b;
@@ -816,48 +819,49 @@ a.card-link:hover {
   width: 26px;
   height: 26px;
   padding: 0;
-  border: 1px solid rgba(244, 228, 188, 0.28);
+  border: 1px solid rgba(244, 228, 188, 0.35);
   border-radius: 6px;
-  background: rgba(13, 9, 18, 0.45);
+  background: rgba(13, 9, 18, 0.55);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-.doodle-size-btn i {
+.doodle-size-dot {
   display: block;
   border-radius: 50%;
   background: #e8dcc4;
   pointer-events: none;
 }
 
-.doodle-size-btn[data-size="2"] i {
+.doodle-size-btn[data-size="2"] .doodle-size-dot {
   width: 4px;
   height: 4px;
 }
-.doodle-size-btn[data-size="4"] i {
+.doodle-size-btn[data-size="4"] .doodle-size-dot {
   width: 7px;
   height: 7px;
 }
-.doodle-size-btn[data-size="7"] i,
-.doodle-size-btn[data-size="8"] i {
+.doodle-size-btn[data-size="7"] .doodle-size-dot,
+.doodle-size-btn[data-size="8"] .doodle-size-dot {
   width: 11px;
   height: 11px;
 }
-.doodle-size-btn[data-size="10"] i,
-.doodle-size-btn[data-size="16"] i {
+.doodle-size-btn[data-size="10"] .doodle-size-dot,
+.doodle-size-btn[data-size="16"] .doodle-size-dot {
   width: 15px;
   height: 15px;
 }
-.doodle-size-btn[data-size="28"] i {
+.doodle-size-btn[data-size="28"] .doodle-size-dot {
   width: 18px;
   height: 18px;
 }
 
 .doodle-size-btn.is-active {
   border-color: #e0c56a;
-  background: rgba(224, 197, 106, 0.14);
+  background: rgba(224, 197, 106, 0.18);
 }
 
-.doodle-size-btn.is-active i {
+.doodle-size-btn.is-active .doodle-size-dot {
   background: #e0c56a;
 }
 
