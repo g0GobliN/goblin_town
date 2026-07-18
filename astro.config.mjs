@@ -10,7 +10,11 @@ export default defineConfig({
   adapter: cloudflare(),
   integrations: [
     sitemap({
-      filter: (page) => !page.includes("/admin") && !page.includes("/api/"),
+      filter: (page) =>
+        !page.includes("/admin") &&
+        !page.includes("/api/") &&
+        !page.includes("/404") &&
+        !page.includes("/500"),
     }),
   ],
   server: { port: 4321, host: true },

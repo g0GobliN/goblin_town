@@ -39,8 +39,8 @@ export const INTRO_SLIDES: CineSlide[] = [
 
 /** Same slide, phone edition — stick + JUMP/HIT/ACT buttons. */
 const TOUCH_CONTROLS_BODY = [
-  "Stick to walk — push far to run",
-  "JUMP to jump · HIT to attack · ACT to talk",
+  "Stick to walk — hold RUN to sprint",
+  "JUMP to jump · HIT to attack · hold RUN to sprint · ACT to talk",
 ];
 
 /** Closing movie roll — scrolls upward. */

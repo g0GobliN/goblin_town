@@ -25,9 +25,16 @@ import "../styles/global.css";
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://g0.monster/" />
-    <meta property="og:image" content="https://g0.monster/logo/logo-512.png" />
+    <meta property="og:image" content="https://g0.monster/og/goblin-town-og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Pixel-art night town with a grinning goblin — Goblin Town, a playable portfolio at g0.monster"
+    />
     <meta property="og:locale" content="en_US" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://g0.monster/og/goblin-town-og.png" />
     <meta name="twitter:title" content="Goblin Town — Vishal Gurung" />
     <meta
       name="twitter:description"
@@ -139,14 +146,17 @@ import "../styles/global.css";
             <div class="touch-stick-knob"></div>
           </div>
           <div class="touch-actions">
-            <button class="tc-btn tc-jump" data-tc="jump" type="button" aria-label="Jump">
-              JUMP
+            <button class="tc-btn tc-act" data-tc="act" type="button" aria-label="Talk / interact">
+              ACT
+            </button>
+            <button class="tc-btn tc-run" data-tc="run" type="button" aria-label="Run (hold)">
+              RUN
             </button>
             <button class="tc-btn tc-hit" data-tc="attack" type="button" aria-label="Attack">
               HIT
             </button>
-            <button class="tc-btn tc-act" data-tc="act" type="button" aria-label="Talk / interact">
-              ACT
+            <button class="tc-btn tc-jump" data-tc="jump" type="button" aria-label="Jump">
+              JUMP
             </button>
           </div>
         </div>
@@ -165,7 +175,7 @@ import "../styles/global.css";
           SPACE · menu with M</span
         >
         <span class="controls-touch"
-          >Stick to walk &amp; run · JUMP to jump · HIT to attack · ACT to talk</span
+          >Stick to walk · hold RUN to sprint · JUMP to jump · HIT to attack · ACT to talk</span
         >
       </p>
     </main>
@@ -258,10 +268,7 @@ import "../styles/global.css";
           <div data-section="doodle" hidden>
             <div class="stack">
               <p class="small accent">✎ SKETCH ALLEY · leave a mark</p>
-              <p class="small">
-                Paint pots and open crates. Draw something, name it, save it to the gallery wall.
-              </p>
-              <p class="small">&gt; CLICK &amp; DRAG · then SAVE</p>
+              <p class="small">&gt; CLICK &amp; DRAG to draw · then SAVE — it hangs on the wall</p>
               <canvas id="doodle-canvas" width="640" height="400"></canvas>
               <div class="doodle-controls">
                 <div id="doodle-palette" class="doodle-palette"></div>
@@ -273,17 +280,19 @@ import "../styles/global.css";
                   >CLEAR</button
                 >
               </div>
-              <label class="small doodle-name-label">
-                NAME
-                <input
-                  id="doodle-name"
-                  class="doodle-name"
-                  type="text"
-                  maxlength="40"
-                  value="goblin-sketch"
-                />
-              </label>
-              <button id="doodle-save" class="pixel-btn" type="button">SAVE DOODLE</button>
+              <div class="doodle-submit-row">
+                <label class="small doodle-name-label">
+                  NAME
+                  <input
+                    id="doodle-name"
+                    class="doodle-name"
+                    type="text"
+                    maxlength="40"
+                    value="goblin-sketch"
+                  />
+                </label>
+                <button id="doodle-save" class="pixel-btn" type="button">SAVE DOODLE</button>
+              </div>
               <p id="doodle-save-status" class="small"></p>
             </div>
           </div>

@@ -13,6 +13,15 @@ const slug = Astro.params.slug ?? "";
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Blog — Goblin Town</title>
     <meta name="description" content="A note from the Goblin Town library." />
+    <meta property="og:site_name" content="Goblin Town" />
+    <meta property="og:title" content="Blog — Goblin Town" />
+    <meta property="og:description" content="A note from the Goblin Town library." />
+    <meta property="og:type" content="article" />
+    <meta property="og:image" content="https://g0.monster/og/goblin-town-og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://g0.monster/og/goblin-town-og.png" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -33,7 +42,7 @@ const slug = Astro.params.slug ?? "";
         <a href="/info/">← Summary</a>
         <div class="entry-nav-links">
           <a href="/info/#blog-list">Library</a>
-          <a href="/">Enter Town</a>
+          <a href="/">Enter Game</a>
         </div>
       </nav>
       <div id="entry-root">
@@ -97,7 +106,7 @@ const slug = Astro.params.slug ?? "";
             <div class="entry-content">${formatContent(blog.content || "")}</div>
             <div class="entry-links">
               <a class="entry-link-btn" href="/info/#blog-list">More notes</a>
-              <a class="entry-link-btn primary" href="/">Enter Town</a>
+              <a class="entry-link-btn primary" href="/">Enter Game</a>
             </div>
           </div>
         `;

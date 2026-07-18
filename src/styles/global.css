@@ -748,10 +748,16 @@ a.card-link:hover {
   font-size: 10px;
 }
 
+/* let the sketch panel use more of the screen so SAVE fits without scrolling */
+.modal-body:has(div[data-section="doodle"]:not([hidden])) {
+  max-height: min(82vh, 640px);
+}
+
 #doodle-canvas {
   display: block;
   margin-inline: auto;
-  width: min(100%, calc(52vh * 1.6));
+  /* sized against viewport height so canvas + controls + save all fit the dialog */
+  width: min(100%, max(200px, calc((82vh - 270px) * 1.6)));
   background: #f4e4bc;
   border: 2px solid #4a2038;
   touch-action: none;
@@ -795,6 +801,18 @@ a.card-link:hover {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.doodle-submit-row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.doodle-submit-row .doodle-name-label {
+  flex: 1;
+  min-width: 150px;
 }
 
 .doodle-name {
@@ -1103,26 +1121,66 @@ a.card-link:hover {
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
 }
 
+/* gamepad diamond: ACT top (Y), HIT right (B), JUMP bottom (A) */
 .touch-actions {
+  --tc-size: 58px;
+  /* center-to-center offset — near-touching diamond */
+  --tc-spread: 41px;
   position: absolute;
   right: max(10px, env(safe-area-inset-right));
   bottom: max(10px, env(safe-area-inset-bottom));
   z-index: 38;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  width: calc(var(--tc-spread) * 2 + var(--tc-size));
+  height: calc(var(--tc-spread) * 2 + var(--tc-size));
   pointer-events: auto;
 }
 
+.tc-act {
+  position: absolute;
+  top: calc(50% - var(--tc-spread));
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffd93d;
+}
+
+.tc-hit {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + var(--tc-spread));
+  transform: translate(-50%, -50%);
+  color: #ff7b7b;
+}
+
+.tc-run {
+  position: absolute;
+  top: 50%;
+  left: calc(50% - var(--tc-spread));
+  transform: translate(-50%, -50%);
+  color: #7cc7ff;
+}
+
+.tc-jump {
+  position: absolute;
+  top: calc(50% + var(--tc-spread));
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #7de08a;
+}
+
+/* console-gamepad look: solid dark circle, bold colored label */
 .tc-btn {
-  width: 58px;
-  height: 58px;
+  width: var(--tc-size);
+  height: var(--tc-size);
   border-radius: 50%;
   font-family: inherit;
-  font-size: 9px;
-  color: #f2d9c0;
-  background: rgba(18, 8, 20, 0.78);
-  border: 2px solid #5a3048;
+  font-size: 10px;
+  background: radial-gradient(circle at 35% 28%, #1e1e24 0%, #0a0a0d 72%);
+  border: none;
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 2px 3px rgba(255, 255, 255, 0.07),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -1132,29 +1190,12 @@ a.card-link:hover {
   cursor: pointer;
 }
 
-.tc-hit {
-  border-color: #ff3b3b;
-  color: #ffb0b0;
-}
-
-.tc-act {
-  border-color: #c9a44f;
-  color: #ffd93d;
-}
-
-.tc-jump {
-  border-color: #57c24f;
-  color: #b6f2a3;
-}
-
 .tc-btn.is-held {
-  background: rgba(90, 24, 40, 0.92);
-  transform: scale(0.94);
-}
-
-.tc-act.is-held {
-  background: rgba(255, 217, 61, 0.85);
-  color: #1a0a14;
+  transform: translate(-50%, -50%) scale(0.9);
+  background: radial-gradient(circle at 35% 28%, #2c2c34 0%, #131318 72%);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .tc-jump.is-held {
@@ -1213,19 +1254,17 @@ html.is-touch .touch-controls.is-active {
   .touch-actions {
     right: max(14px, env(safe-area-inset-right));
     bottom: max(12px, env(safe-area-inset-bottom));
-    flex-direction: row-reverse;
-    align-items: flex-end;
-    gap: 12px;
   }
+}
 
-  .tc-btn {
-    width: 62px;
-    height: 62px;
-  }
+/* keep the dialogue box clear of the touch buttons (diamond ~126px + edge offset) */
+html.is-touch .dialogue {
+  right: 148px;
+}
 
-  .tc-jump {
-    width: 70px;
-    height: 70px;
+@media (orientation: landscape) {
+  html.is-touch .dialogue {
+    right: 156px;
   }
 }
 
@@ -1560,16 +1599,19 @@ html.is-touch .touch-controls.is-active {
     text-align: center;
   }
 
+  .game-page .touch-actions {
+    --tc-size: 48px;
+    --tc-spread: 35px;
+    right: 8px;
+    bottom: 8px;
+  }
+
   .game-page .tc-btn {
-    width: 48px;
-    height: 48px;
     font-size: 8px;
   }
 
-  .game-page .touch-actions {
-    right: 8px;
-    bottom: 8px;
-    gap: 8px;
+  .game-page .tc-run {
+    font-size: 7px;
   }
 
   /* compact panels while playing sideways */
@@ -1614,8 +1656,12 @@ html.is-touch .touch-controls.is-active {
     gap: 3px;
   }
 
+  .game-page .modal-body:has(div[data-section="doodle"]:not([hidden])) {
+    max-height: min(82svh, 340px);
+  }
+
   .game-page #doodle-canvas {
-    max-height: 140px;
+    width: min(100%, max(180px, calc((82svh - 190px) * 1.6)));
   }
 }
 

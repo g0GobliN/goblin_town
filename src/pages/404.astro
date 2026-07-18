@@ -1,0 +1,127 @@
+---
+import "../styles/global.css";
+import "../styles/entry.css";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>404 — Lost in the Fog · Goblin Town</title>
+    <meta name="description" content="This path leads nowhere. Head back to Goblin Town." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0c0610" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+    />
+  </head>
+  <body class="entry-body">
+    <div class="entry-stage" aria-hidden="true">
+      <img class="entry-stage-bg" src="/img/gothicvania/town/background.png" alt="" />
+      <img class="entry-stage-mid" src="/img/gothicvania/town/middleground.png" alt="" />
+      <div class="entry-stage-veil"></div>
+    </div>
+
+    <article class="entry-page">
+      <nav class="entry-nav">
+        <a href="/">← Enter Game</a>
+        <div class="entry-nav-links">
+          <a href="/info/">Summary</a>
+        </div>
+      </nav>
+      <div class="entry-body-inner">
+        <img
+          class="lost-ghost"
+          src="/img/gothicvania/cemetery/ghost/ghost-1.png"
+          alt=""
+          aria-hidden="true"
+        />
+        <p class="entry-kicker">❒ LOST IN THE FOG</p>
+        <h1 class="entry-title">404 — this path leads nowhere</h1>
+        <p class="entry-content">
+          You wandered off the map. The page you were looking for was moved, renamed, or never
+          existed — even the ghosts here haven't seen it.
+        </p>
+        <div class="entry-links">
+          <a class="entry-link-btn" href="/info/">Read the summary</a>
+          <a class="entry-link-btn primary" href="/">Return to town</a>
+        </div>
+      </div>
+    </article>
+
+    <style>
+      .entry-body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .entry-page {
+        margin: 28px auto;
+      }
+      .entry-body-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .entry-links {
+        justify-content: center;
+      }
+      .lost-ghost {
+        width: 96px;
+        image-rendering: pixelated;
+        margin-bottom: 0.75rem;
+        animation: lost-ghost-drift 3s ease-in-out infinite;
+      }
+      @keyframes lost-ghost-drift {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+      @media (max-width: 600px) {
+        .entry-page {
+          width: min(400px, calc(100% - 40px));
+        }
+        .lost-ghost {
+          width: 40px;
+          margin-bottom: 0.4rem;
+        }
+        .entry-body-inner {
+          padding: 14px 12px 18px;
+        }
+        .entry-kicker {
+          font-size: 7px;
+          margin-bottom: 6px;
+        }
+        .entry-title {
+          font-size: 10px;
+          margin-bottom: 6px;
+        }
+        .entry-content {
+          font-size: 8px;
+          line-height: 1.7;
+        }
+        .entry-links {
+          margin-top: 12px;
+          gap: 8px;
+        }
+        .entry-link-btn {
+          font-size: 7px;
+          padding: 7px 10px;
+        }
+        .entry-nav {
+          font-size: 8px;
+        }
+      }
+    </style>
+  </body>
+</html>

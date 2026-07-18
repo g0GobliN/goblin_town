@@ -1,14 +1,31 @@
 # Goblin Town
 
-Playable portfolio by **Vishal Gurung** (goblin) — live at [g0.monster](https://g0.monster).
+![Walking through Goblin Town](public/extra/ss-small.gif)
 
-A little night town you can walk through. Houses open onto work, notes, doodles, and a way to say hello. Prefer reading? There’s a plain summary at [/info](https://g0.monster/info/).
+**A portfolio you play.** A little pixel-art night town you can walk through — houses open onto work, notes, doodles, and a way to say hello.
 
-## What’s here
+**▶ Play it live at [g0.monster](https://g0.monster)** · Prefer reading? There's a plain summary at [g0.monster/info](https://g0.monster/info/).
 
-- **/** — the town (move, talk, fight, open doors)
+## What's here
+
+- **/** — the town (move, talk, fight, open doors, leave a doodle)
 - **/info** — text summary of everything
 - **/work/[slug]** · **/blog/[slug]** — project & post pages
+
+## Built with
+
+- [Astro](https://astro.build) + vanilla TypeScript canvas engine (no game framework)
+- [Cloudflare Pages + Workers](https://pages.cloudflare.com) for hosting and server routes
+- [Firebase](https://firebase.google.com) (Firestore) for blogs, comments, and the visitor doodle wall
+- Pixel art from the Gothicvania packs (Ansimuz / itch.io)
+
+## Run it locally
+
+```bash
+npm install
+npm run dev      # https://localhost:4321
+npm run build    # production build into dist/
+```
 
 ## Me
 

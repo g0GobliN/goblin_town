@@ -90,12 +90,14 @@ export function initPixelRoom() {
   const creditsSkip = document.getElementById("credits-skip");
   const touchControls = document.getElementById("touch-controls");
 
-  // Coarse pointer / phones — also UA fallback (some Chrome builds report fine pointer)
+  // Coarse pointer / phones — also UA fallback (some Chrome builds report fine pointer).
+  // NOTE: don't use bare maxTouchPoints here — touchscreen Windows laptops (and Firefox
+  // after Responsive Design Mode) report touch points while driving with a mouse.
   const isTouch =
     window.matchMedia("(pointer: coarse)").matches ||
     window.matchMedia("(hover: none)").matches ||
-    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
-    (navigator.maxTouchPoints ?? 0) > 0;
+    (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) &&
+      (navigator.maxTouchPoints ?? 0) > 0);
   const actKey = isTouch ? "ACT" : "SPACE";
   const stickEl = document.getElementById("touch-stick");
   const stickKnob = stickEl?.querySelector<HTMLElement>(".touch-stick-knob");
@@ -890,12 +892,12 @@ export function initPixelRoom() {
 
   const STICK_DEAD = 14;
   const STICK_MAX = 52;
-  const STICK_RUN = 38;
 
   let gestureId: number | null = null;
   let gestureStartX = 0;
   let gestureStartY = 0;
   let stickDragging = false;
+  let runHeld = false; // RUN button held — acts like Shift on desktop
 
   const clearMoveKeys = () => {
     keys.delete("ArrowLeft");
@@ -948,7 +950,8 @@ export function initPixelRoom() {
     // Up/down only steer ladder climbs — jumping lives on the JUMP button.
     if (ny < -0.38) keys.add("w");
     if (ny > 0.38) keys.add("s");
-    if (dist >= STICK_RUN) keys.add("Shift");
+    // Run only via RUN button (or Shift on desktop) — stick stays walk.
+    if (runHeld) keys.add("Shift");
   };
 
   const touchAct = () => {
@@ -1085,8 +1088,18 @@ export function initPixelRoom() {
         if (action === "act") touchAct();
         if (action === "attack") touchAttack();
         if (action === "jump") touchJump();
+        if (action === "run") {
+          runHeld = true;
+          keys.add("Shift");
+        }
       });
-      const release = () => btn.classList.remove("is-held");
+      const release = () => {
+        btn.classList.remove("is-held");
+        if (action === "run") {
+          runHeld = false;
+          keys.delete("Shift");
+        }
+      };
       btn.addEventListener("pointerup", release);
       btn.addEventListener("pointercancel", release);
       btn.addEventListener("lostpointercapture", release);
