@@ -526,8 +526,7 @@
 
 .info-doodle-pad .doodle-eraser-swatch {
   background:
-    linear-gradient(135deg, transparent 46%, #5a3048 46%, #5a3048 54%, transparent 54%),
-    #f4e4bc;
+    linear-gradient(135deg, transparent 46%, #5a3048 46%, #5a3048 54%, transparent 54%), #f4e4bc;
   border-color: rgba(244, 228, 188, 0.45);
 }
 

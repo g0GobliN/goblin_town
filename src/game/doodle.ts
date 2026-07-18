@@ -27,7 +27,8 @@ export function initDoodlePad() {
   resetCanvas();
 
   let color = PALETTE[0]!;
-  let brushSize = Number(sizeBtns.find((b) => b.classList.contains("is-active"))?.dataset.size) || 8;
+  let brushSize =
+    Number(sizeBtns.find((b) => b.classList.contains("is-active"))?.dataset.size) || 8;
   let erasing = false;
   let drawing = false;
   let lastPoint: { x: number; y: number } | null = null;
