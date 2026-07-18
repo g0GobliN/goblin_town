@@ -94,7 +94,7 @@ async function renderWork() {
   list.innerHTML = slice
     .map(
       (p) => `
-      <a class="card card-link" href="/work/${encodeURIComponent(p.slug)}">
+      <a class="card card-link" href="/work/${encodeURIComponent(p.slug)}/">
         <div class="accent">&gt; ${escapeHtml(p.name || p.slug)}</div>
         <p>${escapeHtml(p.tagline || p.summary || "")}</p>
         <p class="small">${escapeHtml([p.year, p.role].filter(Boolean).join(" · "))}</p>
@@ -144,7 +144,7 @@ async function renderBlog() {
   list.innerHTML = slice
     .map(
       (b) => `
-      <a class="card card-link" href="/blog/${encodeURIComponent(b.slug)}">
+      <a class="card card-link" href="/blog/${encodeURIComponent(b.slug)}/">
         <div class="accent">&gt; ${escapeHtml(b.title)}</div>
         <p>${escapeHtml(b.tagline || "")}</p>
         <p class="small">${escapeHtml(b.publishedAt || "")}${

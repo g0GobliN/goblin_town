@@ -548,16 +548,6 @@ body {
   max-width: 20rem;
 }
 
-.controls-info-link {
-  color: #c9a44f;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.controls-info-link:hover {
-  color: #ffd93d;
-}
-
 .press-key {
   image-rendering: pixelated;
   height: 14px;

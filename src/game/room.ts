@@ -758,6 +758,10 @@ export function initPixelRoom() {
     playMusic(MUSIC_SRC, 0.35);
   };
 
+  // Dev cheat: type "outro" during play to roll the credits without clearing the road.
+  let cheatBuffer = "";
+  const CHEAT_OUTRO = "outro";
+
   window.addEventListener("keydown", (event) => {
     keys.add(event.key);
     startMusic();
@@ -796,6 +800,22 @@ export function initPixelRoom() {
         advanceBossIntro();
       }
       return;
+    }
+
+    if (event.key.length === 1) {
+      const target = event.target as HTMLElement | null;
+      const typing = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA");
+      if (!typing) {
+        cheatBuffer = (cheatBuffer + event.key.toLowerCase()).slice(-CHEAT_OUTRO.length);
+        if (cheatBuffer === CHEAT_OUTRO) {
+          cheatBuffer = "";
+          if (open) closeSection();
+          setMenuOpen(false, false);
+          playSfx("secret");
+          startCine("credits");
+          return;
+        }
+      }
     }
 
     if (event.key === "m" || event.key === "M") {

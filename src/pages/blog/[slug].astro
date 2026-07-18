@@ -22,21 +22,16 @@ const slug = Astro.params.slug ?? "";
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://g0.monster/og/goblin-town-og.png" />
+    <meta name="theme-color" content="#000000" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap"
     />
   </head>
   <body class="entry-body">
-    <div class="entry-stage" aria-hidden="true">
-      <img class="entry-stage-bg" src="/img/gothicvania/town/background.png" alt="" />
-      <img class="entry-stage-mid" src="/img/gothicvania/town/middleground.png" alt="" />
-      <div class="entry-stage-veil"></div>
-    </div>
-
     <article class="entry-page" data-slug={slug}>
       <nav class="entry-nav">
         <a href="/info/">← Summary</a>
@@ -98,7 +93,7 @@ const slug = Astro.params.slug ?? "";
         root.innerHTML = `
           ${cover}
           <div class="entry-body-inner">
-            <p class="entry-kicker">❒ LIBRARY</p>
+            <p class="entry-kicker">Library</p>
             <h1 class="entry-title">${escapeHtml(blog.title)}</h1>
             <p class="entry-meta">${escapeHtml(blog.publishedAt || "")}</p>
             ${blog.tagline ? `<p class="entry-tagline">${escapeHtml(blog.tagline)}</p>` : ""}
