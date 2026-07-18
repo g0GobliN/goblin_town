@@ -87,7 +87,18 @@ export async function firestoreDelete(
   id: string,
   sa: ServiceAccount = getMainServiceAccount(),
 ) {
-  await authedFetch(sa, docPath(sa.project_id, collection, id), { method: "DELETE" });
+  const token = await getGoogleAccessToken(sa, [
+    "https://www.googleapis.com/auth/datastore",
+    "https://www.googleapis.com/auth/cloud-platform",
+  ]);
+  const res = await fetch(docPath(sa.project_id, collection, id), {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  // 404 = already gone (fine for cascade deletes)
+  if (!res.ok && res.status !== 404) {
+    throw new Error(`Firestore REST DELETE failed: ${await res.text()}`);
+  }
 }
 
 export async function firestoreSet(

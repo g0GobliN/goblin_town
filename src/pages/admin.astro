@@ -454,7 +454,7 @@ import "../styles/admin.css";
             const id = btn.dataset.delDoodle!;
             if (!confirm("Delete this doodle?")) return;
             try {
-              await api(`/api/admin/doodles/${encodeURIComponent(id)}`, { method: "DELETE" });
+              await api(`/api/admin/doodles/${encodeURIComponent(id)}/`, { method: "DELETE" });
               showMsg(dashMsg, "Doodle deleted");
               await refreshAll();
             } catch (e) {
@@ -512,7 +512,7 @@ import "../styles/admin.css";
             const id = btn.dataset.delComment!;
             if (!confirm("Delete this comment (and its replies)?")) return;
             try {
-              await api(`/api/admin/comments/${encodeURIComponent(id)}`, { method: "DELETE" });
+              await api(`/api/admin/comments/${encodeURIComponent(id)}/`, { method: "DELETE" });
               showMsg(dashMsg, "Comment deleted");
               await refreshAll();
             } catch (e) {

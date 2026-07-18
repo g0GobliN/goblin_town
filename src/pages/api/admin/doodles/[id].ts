@@ -10,7 +10,7 @@ export const DELETE: APIRoute = async ({ request, params }) => {
     const auth = await requireAdmin(request);
     if (!auth.ok) return jsonError(auth.error, auth.status);
 
-    const id = params.id?.trim();
+    const id = params.id?.trim().replace(/\/+$/, "");
     if (!id) return jsonError("doodle id is required", 400);
 
     try {
