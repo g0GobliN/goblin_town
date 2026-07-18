@@ -787,10 +787,78 @@ a.card-link:hover {
   border-color: #ff3b3b;
 }
 
+.doodle-eraser-swatch {
+  background:
+    linear-gradient(135deg, transparent 46%, #5a3048 46%, #5a3048 54%, transparent 54%), #f4e4bc;
+}
+
+.doodle-eraser-swatch.is-active,
+.doodle-eraser-swatch.active {
+  border-color: #ff3b3b;
+}
+
 .doodle-size-label {
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+
+.doodle-size-presets {
+  display: inline-flex;
+  align-items: center;
   gap: 4px;
+}
+
+.doodle-size-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(244, 228, 188, 0.28);
+  border-radius: 6px;
+  background: rgba(13, 9, 18, 0.45);
+  cursor: pointer;
+}
+
+.doodle-size-btn i {
+  display: block;
+  border-radius: 50%;
+  background: #e8dcc4;
+  pointer-events: none;
+}
+
+.doodle-size-btn[data-size="2"] i {
+  width: 4px;
+  height: 4px;
+}
+.doodle-size-btn[data-size="4"] i {
+  width: 7px;
+  height: 7px;
+}
+.doodle-size-btn[data-size="7"] i,
+.doodle-size-btn[data-size="8"] i {
+  width: 11px;
+  height: 11px;
+}
+.doodle-size-btn[data-size="10"] i,
+.doodle-size-btn[data-size="16"] i {
+  width: 15px;
+  height: 15px;
+}
+.doodle-size-btn[data-size="28"] i {
+  width: 18px;
+  height: 18px;
+}
+
+.doodle-size-btn.is-active {
+  border-color: #e0c56a;
+  background: rgba(224, 197, 106, 0.14);
+}
+
+.doodle-size-btn.is-active i {
+  background: #e0c56a;
 }
 
 .doodle-clear-btn {

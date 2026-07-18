@@ -7,7 +7,7 @@ export const SECTION_ICONS: Record<SectionKey, string> = {
   work: "⚒",
   blog: "❒",
   gallery: "▦",
-  doodle: "✎",
+  doodle: "▣",
   contact: "⚑",
 };
 

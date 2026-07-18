@@ -221,20 +221,41 @@ import "../styles/info.css";
         </div>
         <div class="info-doodle-cta">
           <button id="doodle-open-btn" class="info-card-btn" type="button">
-            ✎ WANT TO DOODLE? CLICK HERE
+            WANT TO DOODLE? CLICK HERE
           </button>
           <p class="small">Draw something — it hangs on this wall for everyone to see.</p>
         </div>
         <div id="doodle-pad" class="info-doodle-pad" hidden>
           <div class="info-doodle-modal" role="dialog" aria-label="Doodle pad">
-            <p class="small accent info-doodle-kicker">✎ SKETCH ALLEY · leave a mark</p>
+            <p class="small accent info-doodle-kicker">SKETCH ALLEY · leave a mark</p>
             <canvas id="info-doodle-canvas" width="360" height="240"></canvas>
             <div class="info-doodle-tools">
-              <div id="info-doodle-palette" class="info-doodle-palette"></div>
-              <label class="small info-doodle-size">
-                size
-                <input id="info-doodle-size" type="range" min="2" max="10" value="4" />
-              </label>
+              <div id="info-doodle-palette" class="info-doodle-palette">
+                <button
+                  id="info-doodle-eraser"
+                  class="doodle-swatch doodle-eraser-swatch"
+                  type="button"
+                  aria-label="Eraser"
+                  title="Eraser"
+                ></button>
+              </div>
+              <div class="info-doodle-size" role="group" aria-label="Brush size">
+                <span class="small">size</span>
+                <div id="info-doodle-sizes" class="doodle-size-presets">
+                  <button type="button" class="doodle-size-btn" data-size="2" aria-label="Thin"
+                    ><i></i></button
+                  >
+                  <button type="button" class="doodle-size-btn is-active" data-size="4" aria-label="Medium"
+                    ><i></i></button
+                  >
+                  <button type="button" class="doodle-size-btn" data-size="7" aria-label="Thick"
+                    ><i></i></button
+                  >
+                  <button type="button" class="doodle-size-btn" data-size="10" aria-label="Bold"
+                    ><i></i></button
+                  >
+                </div>
+              </div>
             </div>
             <input
               id="info-doodle-name"
@@ -390,7 +411,10 @@ import "../styles/info.css";
 
         const ctx = canvas.getContext("2d")!;
         const paletteEl = document.getElementById("info-doodle-palette")!;
-        const sizeEl = document.getElementById("info-doodle-size") as HTMLInputElement;
+        const sizeBtns = [
+          ...document.querySelectorAll<HTMLButtonElement>("#info-doodle-sizes .doodle-size-btn"),
+        ];
+        const eraserEl = document.getElementById("info-doodle-eraser");
         const nameEl = document.getElementById("info-doodle-name") as HTMLInputElement;
         const saveEl = document.getElementById("info-doodle-save") as HTMLButtonElement;
         const clearEl = document.getElementById("info-doodle-clear")!;
@@ -400,9 +424,19 @@ import "../styles/info.css";
         const PALETTE = ["#000000", "#ff6b6b", "#4d96ff", "#6bcb77", "#c56cf0", "#ffd93d"];
         const CANVAS_BG = "#f4e4bc";
         let color = PALETTE[0]!;
+        let brushSize =
+          Number(sizeBtns.find((b) => b.classList.contains("is-active"))?.dataset.size) || 4;
+        let erasing = false;
         let drawing = false;
         let hasDrawn = false;
         let lastPoint: { x: number; y: number } | null = null;
+
+        for (const btn of sizeBtns) {
+          btn.addEventListener("click", () => {
+            brushSize = Number(btn.dataset.size) || brushSize;
+            for (const other of sizeBtns) other.classList.toggle("is-active", other === btn);
+          });
+        }
 
         const resetCanvas = () => {
           ctx.fillStyle = CANVAS_BG;
@@ -412,6 +446,14 @@ import "../styles/info.css";
         resetCanvas();
 
         const swatches: HTMLButtonElement[] = [];
+        const setErasing = (on: boolean) => {
+          erasing = on;
+          eraserEl?.classList.toggle("is-active", on);
+          if (on) {
+            for (const swatch of swatches) swatch.classList.remove("active");
+          }
+        };
+
         for (const swatchColor of PALETTE) {
           const button = document.createElement("button");
           button.className = "doodle-swatch";
@@ -420,12 +462,18 @@ import "../styles/info.css";
           button.setAttribute("aria-label", `pen color ${swatchColor}`);
           button.addEventListener("click", () => {
             color = swatchColor;
+            setErasing(false);
             for (const swatch of swatches) swatch.classList.toggle("active", swatch === button);
           });
           paletteEl.appendChild(button);
           swatches.push(button);
         }
         swatches[0]!.classList.add("active");
+        if (eraserEl) paletteEl.appendChild(eraserEl);
+
+        eraserEl?.addEventListener("click", () => {
+          setErasing(!erasing);
+        });
 
         const pointerPos = (event: PointerEvent) => {
           const rect = canvas.getBoundingClientRect();
@@ -444,8 +492,8 @@ import "../styles/info.css";
         canvas.addEventListener("pointermove", (event) => {
           if (!drawing || !lastPoint) return;
           const point = pointerPos(event);
-          ctx.strokeStyle = color;
-          ctx.lineWidth = Number(sizeEl.value);
+          ctx.strokeStyle = erasing ? CANVAS_BG : color;
+          ctx.lineWidth = brushSize;
           ctx.lineCap = "round";
           ctx.beginPath();
           ctx.moveTo(lastPoint.x, lastPoint.y);

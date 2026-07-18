@@ -10,7 +10,10 @@ export function initDoodlePad() {
 
   const ctx = canvas.getContext("2d")!;
   const paletteEl = document.getElementById("doodle-palette")!;
-  const sizeEl = document.getElementById("doodle-size") as HTMLInputElement;
+  const sizeBtns = [
+    ...document.querySelectorAll<HTMLButtonElement>("#doodle-sizes .doodle-size-btn"),
+  ];
+  const eraserEl = document.getElementById("doodle-eraser");
   const clearEl = document.getElementById("doodle-clear")!;
   const saveEl = document.getElementById("doodle-save") as HTMLButtonElement | null;
   const nameEl = document.getElementById("doodle-name") as HTMLInputElement | null;
@@ -24,9 +27,26 @@ export function initDoodlePad() {
   resetCanvas();
 
   let color = PALETTE[0]!;
+  let brushSize = Number(sizeBtns.find((b) => b.classList.contains("is-active"))?.dataset.size) || 8;
+  let erasing = false;
   let drawing = false;
   let lastPoint: { x: number; y: number } | null = null;
   const swatches: HTMLButtonElement[] = [];
+
+  for (const btn of sizeBtns) {
+    btn.addEventListener("click", () => {
+      brushSize = Number(btn.dataset.size) || brushSize;
+      for (const other of sizeBtns) other.classList.toggle("is-active", other === btn);
+    });
+  }
+
+  const setErasing = (on: boolean) => {
+    erasing = on;
+    eraserEl?.classList.toggle("is-active", on);
+    if (on) {
+      for (const swatch of swatches) swatch.classList.remove("active");
+    }
+  };
 
   for (const swatchColor of PALETTE) {
     const button = document.createElement("button");
@@ -37,6 +57,7 @@ export function initDoodlePad() {
 
     button.addEventListener("click", () => {
       color = swatchColor;
+      setErasing(false);
       for (const swatch of swatches) {
         swatch.classList.toggle("active", swatch === button);
       }
@@ -47,6 +68,11 @@ export function initDoodlePad() {
   }
 
   swatches[0]!.classList.add("active");
+  if (eraserEl) paletteEl.appendChild(eraserEl);
+
+  eraserEl?.addEventListener("click", () => {
+    setErasing(!erasing);
+  });
 
   const pointerPos = (event: PointerEvent) => {
     const rect = canvas.getBoundingClientRect();
@@ -66,8 +92,8 @@ export function initDoodlePad() {
     if (!drawing || !lastPoint) return;
 
     const point = pointerPos(event);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = Number(sizeEl.value);
+    ctx.strokeStyle = erasing ? CANVAS_BG : color;
+    ctx.lineWidth = brushSize;
     ctx.lineCap = "round";
     ctx.beginPath();
     ctx.moveTo(lastPoint.x, lastPoint.y);
