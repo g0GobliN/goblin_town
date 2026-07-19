@@ -449,24 +449,16 @@ body {
   background: rgba(40, 10, 24, 0.92);
 }
 
+/* Kept out of the HUD visually (not a MENU-row button anymore), but never
+   display:none/visibility:hidden — this link is how Google discovers
+   /info/, and hidden-via-display links get discounted by crawlers. */
 .info-page-link {
   position: absolute;
-  top: 8px;
-  left: 58px;
-  z-index: 40;
-  font-family: inherit;
-  font-size: 8px;
-  color: #c9a44f;
-  background: rgba(10, 4, 14, 0.8);
-  border: 1px solid #4a2038;
-  padding: 5px 8px;
-  text-decoration: none;
-}
-
-.info-page-link:hover {
-  color: #ffd93d;
-  border-color: var(--pixel-accent-soft);
-  background: rgba(40, 10, 24, 0.92);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 .menu-panel {
@@ -1606,13 +1598,6 @@ html.is-touch .dialogue {
     font-size: 6px;
     padding: 3px 6px;
     min-height: 0;
-  }
-
-  .game-page .info-page-link {
-    top: 4px;
-    left: 42px;
-    font-size: 6px;
-    padding: 3px 6px;
   }
 
   .game-page .menu-panel {

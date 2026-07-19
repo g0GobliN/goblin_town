@@ -20,8 +20,11 @@ function barrel(x: number) {
 /** Hanging shop sign — climbable, stand on the board */
 function sign(x: number) {
   const y = GROUND_Y - 64;
+  // sign.png is only 45px tall — a taller climb zone reaches below the
+  // art into blank canvas, which reads as climbing on thin air.
+  const artH = 45;
   props.push({ img: "sign", x, y });
-  ladders.push({ x: x + 11, y, w: 14, h: 64 });
+  ladders.push({ x: x + 11, y, w: 14, h: artH });
   platforms.push({ x: x + 2, y: y + 10, w: 32, h: 8, hidden: true });
 }
 function well(x: number) {

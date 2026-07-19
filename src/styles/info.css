@@ -482,6 +482,10 @@ a.info-credit-tag:hover {
   padding: 6px 0;
   text-decoration: none;
   color: inherit;
+  /* Without this, the nowrap .info-row-sub text below forces this grid
+     item wider than the viewport instead of ellipsis-truncating, and the
+     overflow gets silently clipped by .info-body's overflow-x: hidden. */
+  min-width: 0;
 }
 
 .info-row-main {
@@ -569,6 +573,27 @@ a.info-credit-tag:hover {
 .info-community-form textarea {
   min-height: 76px;
   resize: vertical;
+}
+
+.info-community-form input[readonly] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.info-name-lock-hint {
+  margin: -4px 0 0;
+  opacity: 0.7;
+}
+
+.info-name-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: inherit;
+  color: var(--itchio_link_color);
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .info-community-btn {
@@ -1041,6 +1066,13 @@ a.info-credit-tag:hover {
     font-size: 16px;
   }
 
+  /* Shrinks just the placeholder — the input itself stays 16px above so
+     iOS Safari doesn't auto-zoom the page when it's tapped into. */
+  .info-community-form input::placeholder,
+  .info-community-form textarea::placeholder {
+    font-size: 13px;
+  }
+
   .info-doodles {
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   }
@@ -1056,5 +1088,46 @@ a.info-credit-tag:hover {
     display: block;
     padding-top: 2px;
     padding-bottom: 10px;
+  }
+
+  .info-section-head h2,
+  .info-section-head h3 {
+    font-size: 18px;
+  }
+
+  .info-row-title {
+    font-size: 13px;
+  }
+
+  .info-row-sub,
+  .info-row-meta {
+    font-size: 11px;
+  }
+
+  .info-desc pre,
+  .info-note {
+    font-size: 12px;
+  }
+
+  .info-block .small,
+  .info-body .small {
+    font-size: 12px;
+  }
+
+  .info-credits {
+    font-size: 13px;
+  }
+
+  .info-meta {
+    font-size: 13px;
+  }
+
+  .info-download-note,
+  .info-file {
+    font-size: 13px;
+  }
+
+  .info-card-btn {
+    font-size: 12px;
   }
 }

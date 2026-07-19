@@ -2,9 +2,12 @@
 // Apply in Firebase console → Firestore Database → Rules, or with
 // `firebase deploy --only firestore:rules` if you set up firebase.json.
 //
-// Model: the site reads projects/blogs/community anonymously; the only
-// anonymous write is creating a community comment. Admin edits and deletes
-// go through /api/admin/* with a service account, which bypasses these rules.
+// Model: the site reads projects/blogs/community anonymously. Writing a
+// community comment requires a silent anonymous Firebase Auth session (no
+// login UI — see ensureAnonAuth in src/lib/firebase.ts) so a chosen display
+// name can be bound to a "names" claim and impersonating someone else's name
+// is rejected. Admin edits and deletes go through /api/admin/* with a
+// service account, which bypasses these rules.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -21,9 +24,14 @@ service cloud.firestore {
     match /community/{id} {
       allow read: if true;
       // The form caps name at 40 and message at 280; the slack here only
-      // covers older clients, not abuse.
-      allow create: if request.resource.data.keys().hasOnly(['name', 'message', 'timestamp', 'parentId'])
+      // covers older clients, not abuse. The name field is required — "traveler"
+      // is a reserved shared handle (anyone can post as it, unclaimed) for any
+      // client that still sends it; everyone else must own their name via a
+      // names/{name} claim below.
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['name', 'message', 'timestamp', 'parentId'])
         && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 60
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
@@ -32,7 +40,23 @@ service cloud.firestore {
         && request.resource.data.timestamp.size() <= 40
         && (!('parentId' in request.resource.data)
           || (request.resource.data.parentId is string
-            && request.resource.data.parentId.size() <= 128));
+            && request.resource.data.parentId.size() <= 128))
+        && (request.resource.data.name.lower() == 'traveler'
+          || get(/databases/$(database)/documents/names/$(request.resource.data.name.lower())).data.owner == request.auth.uid);
+      allow update, delete: if false;
+    }
+
+    match /names/{nameId} {
+      allow read: if true;
+      // Claiming a name is a one-time create keyed by its lowercased text.
+      // No update/delete means nobody can steal or release someone else's
+      // claim — whichever anonymous uid claims a name keeps it for good.
+      allow create: if request.auth != null
+        && nameId == nameId.lower()
+        && nameId != 'traveler'
+        && request.resource.data.keys().hasOnly(['owner', 'createdAt'])
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.createdAt is string;
       allow update, delete: if false;
     }
 

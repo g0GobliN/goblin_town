@@ -388,7 +388,7 @@ export function initPixelRoom() {
   modalClose.addEventListener("click", closeSection);
 
   const updateCrumbHud = () => {
-    if (crumbsEl) crumbsEl.textContent = `${found.size}/${CRUMBS.length}`;
+    if (crumbsEl) crumbsEl.textContent = `DOORS ${found.size}/${CRUMBS.length}`;
   };
 
   const setMenuOpen = (openMenu: boolean, withSfx = true) => {
@@ -1125,6 +1125,22 @@ export function initPixelRoom() {
       btn.addEventListener("lostpointercapture", release);
     }
   }
+
+  // If focus leaves the page (alt-tab, clicking another app, switching tabs)
+  // the browser never fires keyup for held keys — Shift/arrow keys stay
+  // "stuck" and the goblin keeps running on its own. Force-clear on blur.
+  const releaseAllControls = () => {
+    keys.clear();
+    clearMoveKeys();
+    hideStick();
+    gestureId = null;
+    stickDragging = false;
+    runHeld = false;
+  };
+  window.addEventListener("blur", releaseAllControls);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) releaseAllControls();
+  });
 
   // Tap cinematic overlay (intro / credits)
   cineOverlay?.addEventListener("pointerdown", (event) => {

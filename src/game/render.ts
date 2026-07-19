@@ -1,5 +1,6 @@
 import { enemyBody } from "./combat";
 import { ENEMY_HURT_DURATION, GROUND_Y, SCALE, VIEW_H, VIEW_W } from "./constants";
+import { solidAt } from "./physics";
 import { getActiveScene } from "./scenes";
 import type { DrawContext, EnemyState } from "./types";
 import { EAST_GATE } from "./world";
@@ -47,6 +48,73 @@ function drawGroundStrip(
     ctx.drawImage(tileset, sx, sy, tile, tile, dx, GROUND_Y, tile, tile);
     ctx.drawImage(tileset, sx, sy + tile, tile, tile, dx, GROUND_Y + tile, tile, tile);
   }
+
+  // Soft ambient-occlusion band where the road meets the walkable surface —
+  // gives the street some depth instead of reading as a flat color swap.
+  const grad = ctx.createLinearGradient(0, GROUND_Y, 0, GROUND_Y + 7);
+  grad.addColorStop(0, "rgba(0, 0, 0, 0.32)");
+  grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, GROUND_Y, VIEW_W, 7);
+}
+
+/** Soft contact/cast shadow — anchors sprites and platforms to the ground beneath them. */
+function drawContactShadow(
+  c: CanvasRenderingContext2D,
+  cx: number,
+  groundY: number,
+  width: number,
+  strength = 1,
+) {
+  const sw = Math.max(6, width);
+  const sh = Math.max(2, sw * 0.26);
+  c.save();
+  c.globalAlpha = 0.35 * strength;
+  c.fillStyle = "#000000";
+  c.beginPath();
+  c.ellipse(Math.floor(cx), Math.floor(groundY - 1), sw / 2, sh / 2, 0, 0, Math.PI * 2);
+  c.fill();
+  c.restore();
+}
+
+/** Shadows cast onto the road by every jump box/platform (crates, signs, floating ledges). */
+function drawPlatformShadows(ctx: DrawContext) {
+  const { ctx: c, cameraX } = ctx;
+  const scene = getActiveScene();
+
+  for (const platform of scene.platforms) {
+    if (platform.y >= GROUND_Y - 2) continue; // this *is* the ground
+
+    const dx = platform.x + platform.w / 2 - cameraX;
+    if (dx < -40 || dx > VIEW_W + 40) continue;
+
+    drawContactShadow(c, dx, GROUND_Y, platform.w * 0.85, 0.8);
+  }
+}
+
+/** Finds the y of the nearest solid surface at/below (px, py) — used to place a landing shadow. */
+function landingY(px: number, py: number, pw: number): number {
+  for (let y = py; y <= GROUND_Y; y += 2) {
+    const hit = solidAt(px + 2, y, Math.max(1, pw - 4), 2);
+    if (hit) return hit.y;
+  }
+  return GROUND_Y;
+}
+
+function drawPlayerShadow(ctx: DrawContext) {
+  const { ctx: c, cameraX, player } = ctx;
+  // Only needed mid-air, to show where you'll land. Once standing still the
+  // sprite already visibly touches the surface — an extra shadow right at
+  // the feet just muddies small/dark platforms (e.g. the hanging sign board).
+  if (player.onGround || player.climbing) return;
+
+  const feetY = player.y + player.h;
+  const gy = landingY(player.x, feetY, player.w);
+  const dist = Math.max(0, gy - feetY);
+  const shrink = Math.max(0.35, 1 - dist / 140);
+  const cx = player.x + player.w / 2 - cameraX;
+
+  drawContactShadow(c, cx, gy, player.w * 0.9 * shrink, shrink);
 }
 
 function drawParallax(ctx: DrawContext) {
@@ -521,6 +589,7 @@ export function drawWorld(draw: DrawContext) {
   drawParallax(draw);
   drawChurchBackdrop(draw);
   drawGroundStrip(ctx, draw.assets.tileset, draw.cameraX);
+  drawPlatformShadows(draw);
   drawProps(draw);
   drawColumns(draw);
   drawEastGate(draw);
@@ -529,6 +598,7 @@ export function drawWorld(draw: DrawContext) {
   drawPickups(draw);
   drawNpcs(draw);
   drawEnemies(draw);
+  drawPlayerShadow(draw);
   drawPlayer(draw);
   drawSceneChrome(draw);
 }

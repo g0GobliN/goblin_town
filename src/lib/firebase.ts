@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import { getAuth, signInAnonymously, onAuthStateChanged, type Auth } from "firebase/auth";
 import {
   getFirestore,
   addDoc,
@@ -9,6 +9,7 @@ import {
   getDocs,
   query,
   orderBy,
+  runTransaction,
   type Firestore,
 } from "firebase/firestore";
 
@@ -205,6 +206,66 @@ export type CommunityPost = {
   parentId?: string;
 };
 
+const RESERVED_GOBLIN_NAME = "traveler";
+
+export class NameTakenError extends Error {
+  constructor(name: string) {
+    super(`"${name}" is already claimed by another goblin`);
+    this.name = "NameTakenError";
+  }
+}
+
+// Every browser gets a silent, UI-less anonymous Firebase Auth session so a
+// claimed goblin name (see claimGoblinName) can be tied to a stable uid.
+// Cached as a promise so repeated calls don't race multiple sign-ins.
+let anonAuthReady: Promise<string> | null = null;
+export function ensureAnonAuth(): Promise<string> {
+  if (!anonAuthReady) {
+    anonAuthReady = new Promise((resolve, reject) => {
+      const unsubscribe = onAuthStateChanged(
+        auth,
+        (user) => {
+          if (user) {
+            unsubscribe();
+            resolve(user.uid);
+          }
+        },
+        (err) => {
+          unsubscribe();
+          reject(err);
+        },
+      );
+      if (!auth.currentUser) {
+        signInAnonymously(auth).catch((err) => {
+          unsubscribe();
+          reject(err);
+        });
+      }
+    });
+  }
+  return anonAuthReady;
+}
+
+// Reserves a display name to this browser's anonymous uid, so nobody else can
+// post or reply under it. The "names" collection doc id is the lowercased
+// name; Firestore rules only allow a name doc to be created once and never
+// updated, so whoever claims it first keeps it for good.
+export async function claimGoblinName(name: string): Promise<void> {
+  const key = name.trim().toLowerCase();
+  if (!key || key === RESERVED_GOBLIN_NAME) return;
+
+  const uid = await ensureAnonAuth();
+  const nameRef = doc(db, "names", key);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(nameRef);
+    if (snap.exists()) {
+      if (snap.data().owner !== uid) throw new NameTakenError(name.trim());
+      return;
+    }
+    tx.set(nameRef, { owner: uid, createdAt: new Date().toISOString() });
+  });
+}
+
 // Community comments live in the main Firebase project (not the doodle one).
 export async function getCommunityPosts(): Promise<CommunityPost[]> {
   try {
@@ -223,6 +284,7 @@ export async function saveCommunityPost(data: {
   timestamp: string;
   parentId?: string;
 }): Promise<void> {
+  await ensureAnonAuth();
   const post: Record<string, string> = {
     name: data.name,
     message: data.message,

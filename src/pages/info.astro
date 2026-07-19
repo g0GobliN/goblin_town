@@ -445,9 +445,11 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
               id="community-name"
               type="text"
               maxlength="40"
-              placeholder="name (optional)"
+              placeholder="name"
               autocomplete="nickname"
+              required
             />
+            <p class="small info-name-lock-hint" id="community-name-hint" hidden></p>
             <textarea
               id="community-message"
               maxlength="280"
@@ -486,7 +488,62 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
         getDoodles,
         saveCommunityPost,
         saveDoodle,
+        ensureAnonAuth,
+        claimGoblinName,
+        NameTakenError,
       } from "../lib/firebase";
+
+      const GOBLIN_NAME_KEY = "gt-goblin-name";
+      function getLockedName(): string {
+        try {
+          return localStorage.getItem(GOBLIN_NAME_KEY) || "";
+        } catch {
+          return "";
+        }
+      }
+      function setLockedName(name: string) {
+        try {
+          localStorage.setItem(GOBLIN_NAME_KEY, name);
+        } catch {
+          // localStorage unavailable (e.g. private mode) — name just won't persist
+        }
+      }
+      function clearLockedName() {
+        try {
+          localStorage.removeItem(GOBLIN_NAME_KEY);
+        } catch {
+          // ignore
+        }
+      }
+
+      function describeError(err: unknown): string {
+        if (err instanceof NameTakenError) return `> ${err.message} — try another name`;
+        return "> couldn't post — try again in a moment";
+      }
+
+      function refreshMainNameHint() {
+        const hint = document.getElementById("community-name-hint") as HTMLElement | null;
+        const input = document.getElementById("community-name") as HTMLInputElement | null;
+        if (!hint || !input) return;
+        const locked = getLockedName();
+        if (locked) {
+          input.value = locked;
+          input.readOnly = true;
+          hint.hidden = false;
+          hint.innerHTML = `Posting as <strong>${escapeHtml(locked)}</strong> — <button type="button" id="community-name-clear" class="info-name-clear">not you?</button>`;
+          document.getElementById("community-name-clear")?.addEventListener("click", () => {
+            clearLockedName();
+            input.value = "";
+            input.readOnly = false;
+            refreshMainNameHint();
+            input.focus();
+          });
+        } else {
+          input.readOnly = false;
+          hint.hidden = true;
+          hint.innerHTML = "";
+        }
+      }
 
       function escapeHtml(value: string) {
         return value
@@ -799,13 +856,18 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
         data: { name: string; message: string; parentId?: string },
         status: HTMLElement,
       ) {
+        const trimmedName = data.name.trim();
+        if (!trimmedName) return;
         status.textContent = "> posting...";
+        await claimGoblinName(trimmedName);
         await saveCommunityPost({
-          name: data.name || "traveler",
+          name: trimmedName,
           message: data.message,
           timestamp: new Date().toISOString(),
           parentId: data.parentId,
         });
+        setLockedName(trimmedName);
+        refreshMainNameHint();
         await loadCommunity();
       }
 
@@ -818,11 +880,12 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
             existing?.remove();
             if (wasOpenHere) return;
 
+            const lockedName = getLockedName();
             const form = document.createElement("form");
             form.className = "info-community-form info-reply-form";
             form.dataset.parent = parentId;
             form.innerHTML = `
-              <input type="text" maxlength="40" placeholder="name (optional)" autocomplete="nickname" />
+              <input type="text" maxlength="40" placeholder="name" autocomplete="nickname" required ${lockedName ? `value="${escapeAttr(lockedName)}" readonly` : ""} />
               <textarea maxlength="280" required placeholder="write a reply..."></textarea>
               <button class="info-card-btn info-community-btn" type="submit">POST REPLY</button>`;
             btn.insertAdjacentElement("afterend", form);
@@ -839,7 +902,7 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
                 await submitPost({ name: nameEl.value.trim(), message, parentId }, status);
               } catch (err) {
                 console.error(err);
-                status.textContent = "> couldn't post — try again in a moment";
+                status.textContent = describeError(err);
                 submitBtn.disabled = false;
               }
             });
@@ -864,12 +927,14 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
           messageEl.value = "";
         } catch (err) {
           console.error(err);
-          status.textContent = "> couldn't post — try again in a moment";
+          status.textContent = describeError(err);
         } finally {
           button.disabled = false;
         }
       });
 
+      void ensureAnonAuth();
+      refreshMainNameHint();
       initInfoDoodlePad();
       void Promise.all([loadWork(), loadBlog(), loadDoodles(), loadCommunity()]);
     </script>
