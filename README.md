@@ -19,14 +19,6 @@
 - [Firebase](https://firebase.google.com) (Firestore) for blogs, comments, and the visitor doodle wall
 - Pixel art from the Gothicvania packs (Ansimuz / itch.io)
 
-## Run it locally
-
-```bash
-npm install
-npm run dev      # https://localhost:4321
-npm run build    # production build into dist/
-```
-
 ## Me
 
 Grew up in Nepal. Live in Tokyo. IT engineer by day; side projects, open source, and weird experiments by night.
