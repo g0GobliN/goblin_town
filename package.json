@@ -1,6 +1,7 @@
 {
   "name": "pixel-room-portfolio",
   "private": true,
+  "license": "CC-BY-NC-4.0",
   "type": "module",
   "scripts": {
     "dev": "astro dev --host",

@@ -27,6 +27,10 @@ Grew up in Nepal. Live in Tokyo. IT engineer by day; side projects, open source,
 - GitHub: [g0GobliN](https://github.com/g0GobliN)
 - Instagram: [goblin01_](https://instagram.com/goblin01_)
 
+## License
+
+Licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — give credit, no commercial use (no selling, no monetizing). See [LICENSE](LICENSE).
+
 ## Art & sound
 
-Pixel assets from the Gothicvania packs (Ansimuz / itch.io) — see licenses under `public/img/gothicvania/`. Site code is MIT; those packs keep their own terms.
+Pixel assets from the Gothicvania packs (Ansimuz / itch.io) — see licenses under `public/img/gothicvania/`. Those packs keep their own terms.
