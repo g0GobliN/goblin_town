@@ -1,5 +1,7 @@
 /** Action-specific SFX (Kenney CC0: UI Audio + RPG Audio + Digital Audio). */
 
+import { devWarn } from "../lib/log";
+
 export type SfxName =
   | "jump"
   | "talk"
@@ -66,7 +68,7 @@ async function loadAll() {
         const data = await res.arrayBuffer();
         buffers.set(name, await ac.decodeAudioData(data.slice(0)));
       } catch (err) {
-        console.warn(`SFX missing: ${name}`, err);
+        devWarn(`SFX missing: ${name}`, err);
       }
     }),
   );

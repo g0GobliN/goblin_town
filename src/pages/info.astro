@@ -480,6 +480,18 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
       </div>
     </div>
 
+    <div id="info-alert-overlay" class="info-alert-overlay" hidden>
+      <div
+        class="info-alert-card"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="info-alert-msg"
+      >
+        <p id="info-alert-msg" class="info-alert-msg"></p>
+        <button type="button" class="info-card-btn" id="info-alert-ok">OK</button>
+      </div>
+    </div>
+
     <script>
       import {
         getCommunityPosts,
@@ -492,6 +504,7 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
         claimGoblinName,
         NameTakenError,
       } from "../lib/firebase";
+      import { devError } from "../lib/log";
 
       const GOBLIN_NAME_KEY = "gt-goblin-name";
       function getLockedName(): string {
@@ -517,8 +530,36 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
       }
 
       function describeError(err: unknown): string {
-        if (err instanceof NameTakenError) return `> ${err.message} — try another name`;
+        if (err instanceof NameTakenError) return "> that name is taken — try another name";
         return "> couldn't post — try again in a moment";
+      }
+
+      const alertOverlay = document.getElementById("info-alert-overlay") as HTMLElement;
+      const alertMsg = document.getElementById("info-alert-msg") as HTMLElement;
+      const alertOk = document.getElementById("info-alert-ok") as HTMLButtonElement;
+
+      function showAlert(message: string) {
+        alertMsg.textContent = message;
+        alertOverlay.hidden = false;
+        alertOk.focus();
+      }
+      function hideAlert() {
+        alertOverlay.hidden = true;
+      }
+      alertOk.addEventListener("click", hideAlert);
+      alertOverlay.addEventListener("click", (e) => {
+        if (e.target === alertOverlay) hideAlert();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !alertOverlay.hidden) hideAlert();
+      });
+
+      function handlePostError(err: unknown, status: HTMLElement) {
+        devError(err);
+        status.textContent = describeError(err);
+        if (err instanceof NameTakenError) {
+          showAlert(`That name is already taken — pick a different name.`);
+        }
       }
 
       function refreshMainNameHint() {
@@ -901,8 +942,7 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
               try {
                 await submitPost({ name: nameEl.value.trim(), message, parentId }, status);
               } catch (err) {
-                console.error(err);
-                status.textContent = describeError(err);
+                handlePostError(err, status);
                 submitBtn.disabled = false;
               }
             });
@@ -926,8 +966,7 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
           await submitPost({ name: nameEl.value.trim(), message }, status);
           messageEl.value = "";
         } catch (err) {
-          console.error(err);
-          status.textContent = describeError(err);
+          handlePostError(err, status);
         } finally {
           button.disabled = false;
         }

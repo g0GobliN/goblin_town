@@ -417,6 +417,45 @@
   background: repeating-linear-gradient(45deg, #efe0b0, #efe0b0 6px, #f4e4bc 6px, #f4e4bc 12px);
 }
 
+/* --- confirm dialog (replaces native confirm() so it matches the theme) --- */
+
+.admin-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(6, 3, 8, 0.72);
+  animation: admin-fade-in 0.15s ease both;
+}
+
+.admin-confirm-overlay[hidden] {
+  display: none;
+}
+
+.admin-confirm-card {
+  width: min(100%, 360px);
+  padding: 22px 20px;
+  background: linear-gradient(180deg, rgba(34, 16, 24, 0.98) 0%, rgba(14, 8, 18, 0.99) 100%);
+  border: 2px solid #5a3048;
+  outline: 3px solid #1a0a14;
+  box-shadow:
+    0 0 0 1px rgba(201, 164, 79, 0.15),
+    0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.admin-confirm-msg {
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--pixel-fg);
+  margin-bottom: 18px;
+}
+
+.admin-confirm-card .admin-actions {
+  margin-top: 0;
+}
+
 @media (max-width: 600px) {
   .admin-gate-card {
     padding: 28px 18px 24px;
@@ -460,8 +499,11 @@
 
   input,
   textarea,
-  select {
-    font-size: 16px; /* avoid iOS zoom on focus */
+  select,
+  .admin-form input,
+  .admin-form textarea,
+  .admin-form select {
+    font-size: 16px; /* avoid iOS zoom on focus — must match/beat .admin-form's specificity */
   }
 
   .admin-tab {

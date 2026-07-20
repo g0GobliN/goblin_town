@@ -7,6 +7,7 @@ import { createEnemies, enemiesKilled, makePlayer, resolveCombat } from "./comba
 import { CREDITS_MUSIC_SRC, GROUND_Y, MUSIC_SRC, SCALE, VIEW_H, VIEW_W } from "./constants";
 import { loadSectionContent } from "./content";
 import { initDoodlePad } from "./doodle";
+import { devError } from "../lib/log";
 import { cameraFollow, ladderAt, movePlayer, tryAttack, tryJump, updateEnemy } from "./physics";
 import { drawLoading, drawWorld } from "./render";
 import { SECTION_ICONS, SECTION_KEYS, titleFor } from "./sections";
@@ -1367,7 +1368,7 @@ export function initPixelRoom() {
       window.setTimeout(finishBoot, 900);
     })
     .catch((error) => {
-      console.error(error);
+      devError(error);
       hint.hidden = false;
       hint.textContent = "> FAILED TO LOAD ASSETS";
       if (bootGate) bootGate.classList.add("is-done");

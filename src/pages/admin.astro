@@ -192,6 +192,22 @@ import "../styles/admin.css";
       </section>
     </main>
 
+    <div id="confirm-overlay" class="admin-confirm-overlay" hidden>
+      <div
+        class="admin-confirm-card"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="confirm-msg"
+      >
+        <p id="confirm-msg" class="admin-confirm-msg"></p>
+        <div class="admin-actions">
+          <button type="button" class="pixel-btn admin-btn-danger" id="confirm-ok">DELETE</button>
+          <button type="button" class="pixel-btn admin-btn-ghost" id="confirm-cancel">CANCEL</button
+          >
+        </div>
+      </div>
+    </div>
+
     <script>
       import {
         auth,
@@ -204,6 +220,7 @@ import "../styles/admin.css";
         type Doodle,
         type Project,
       } from "../lib/firebase";
+      import { devError } from "../lib/log";
       import {
         EmailAuthProvider,
         onAuthStateChanged,
@@ -261,7 +278,7 @@ import "../styles/admin.css";
               : typeof data === "string" && data
                 ? data
                 : `Request failed (${res.status})`;
-          console.error("admin api error:", path, res.status, msg);
+          devError("admin api error:", path, res.status, msg);
           throw new Error(msg);
         }
         return data;
@@ -276,16 +293,22 @@ import "../styles/admin.css";
       }
 
       function setAuthed(user: User | null) {
-        currentUser = user;
-        document.body.classList.toggle("is-authed", Boolean(user));
-        if (!user) {
+        // Anonymous sessions (created by the community board's ensureAnonAuth on
+        // /info) share this same Firebase project, so a visitor who commented
+        // elsewhere and then opens /admin arrives here already "signed in" as
+        // an anonymous user. That must never unlock the dashboard — only a real
+        // email/password sign-in (the login form below) counts as authed.
+        const realUser = user && !user.isAnonymous ? user : null;
+        currentUser = realUser;
+        document.body.classList.toggle("is-authed", Boolean(realUser));
+        if (!realUser) {
           loginPanel.hidden = false;
           dashPanel.hidden = true;
           return;
         }
         loginPanel.hidden = true;
         dashPanel.hidden = false;
-        adminEmailEl.textContent = user.email || user.uid;
+        adminEmailEl.textContent = realUser.email || realUser.uid;
         void refreshAll();
       }
 
@@ -331,7 +354,7 @@ import "../styles/admin.css";
         list.querySelectorAll<HTMLButtonElement>("[data-del-project]").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const slug = btn.dataset.delProject!;
-            if (!confirm(`Delete project “${slug}”?`)) return;
+            if (!(await confirmDialog(`Delete project "${slug}"?`))) return;
             try {
               await api("/api/admin/projects", {
                 method: "DELETE",
@@ -403,7 +426,7 @@ import "../styles/admin.css";
         list.querySelectorAll<HTMLButtonElement>("[data-del-blog]").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const slug = btn.dataset.delBlog!;
-            if (!confirm(`Delete blog “${slug}”?`)) return;
+            if (!(await confirmDialog(`Delete blog "${slug}"?`))) return;
             try {
               await api("/api/admin/blogs", {
                 method: "DELETE",
@@ -463,7 +486,7 @@ import "../styles/admin.css";
         list.querySelectorAll<HTMLButtonElement>("[data-del-doodle]").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const id = btn.dataset.delDoodle!;
-            if (!confirm("Delete this doodle?")) return;
+            if (!(await confirmDialog("Delete this doodle?"))) return;
             try {
               await api(`/api/admin/doodles/${encodeURIComponent(id)}/`, { method: "DELETE" });
               showMsg(dashMsg, "Doodle deleted");
@@ -521,7 +544,7 @@ import "../styles/admin.css";
         list.querySelectorAll<HTMLButtonElement>("[data-del-comment]").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const id = btn.dataset.delComment!;
-            if (!confirm("Delete this comment (and its replies)?")) return;
+            if (!(await confirmDialog("Delete this comment (and its replies)?"))) return;
             try {
               await api(`/api/admin/comments/${encodeURIComponent(id)}/`, { method: "DELETE" });
               showMsg(dashMsg, "Comment deleted");
@@ -530,6 +553,41 @@ import "../styles/admin.css";
               showMsg(dashMsg, (e as Error).message, "err");
             }
           });
+        });
+      }
+
+      const confirmOverlay = document.getElementById("confirm-overlay")!;
+      const confirmMsg = document.getElementById("confirm-msg")!;
+      const confirmOk = document.getElementById("confirm-ok") as HTMLButtonElement;
+      const confirmCancel = document.getElementById("confirm-cancel") as HTMLButtonElement;
+
+      function confirmDialog(message: string): Promise<boolean> {
+        return new Promise((resolve) => {
+          confirmMsg.textContent = message;
+          confirmOverlay.hidden = false;
+
+          const done = (result: boolean) => {
+            confirmOverlay.hidden = true;
+            confirmOk.removeEventListener("click", onOk);
+            confirmCancel.removeEventListener("click", onCancel);
+            confirmOverlay.removeEventListener("click", onBackdrop);
+            document.removeEventListener("keydown", onKey);
+            resolve(result);
+          };
+          const onOk = () => done(true);
+          const onCancel = () => done(false);
+          const onBackdrop = (e: MouseEvent) => {
+            if (e.target === confirmOverlay) done(false);
+          };
+          const onKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape") done(false);
+          };
+
+          confirmOk.addEventListener("click", onOk);
+          confirmCancel.addEventListener("click", onCancel);
+          confirmOverlay.addEventListener("click", onBackdrop);
+          document.addEventListener("keydown", onKey);
+          confirmCancel.focus();
         });
       }
 
@@ -545,6 +603,26 @@ import "../styles/admin.css";
         return escapeHtml(value).replaceAll("'", "&#39;");
       }
 
+      function describeAuthError(err: unknown, context: "login" | "password" = "login"): string {
+        const code = (err as { code?: string })?.code || "";
+        switch (code) {
+          case "auth/invalid-credential":
+          case "auth/wrong-password":
+          case "auth/user-not-found":
+            return context === "password" ? "Wrong current password" : "Wrong email or password";
+          case "auth/invalid-email":
+            return "That email doesn't look right";
+          case "auth/user-disabled":
+            return "This account has been disabled";
+          case "auth/too-many-requests":
+            return "Too many attempts — try again in a bit";
+          case "auth/network-request-failed":
+            return "Network error — check your connection";
+          default:
+            return "Something went wrong — try again";
+        }
+      }
+
       document.getElementById("login-form")!.addEventListener("submit", async (e) => {
         e.preventDefault();
         clearMsg(loginMsg);
@@ -554,7 +632,8 @@ import "../styles/admin.css";
         try {
           await signInWithEmailAndPassword(auth, email, password);
         } catch (err) {
-          showMsg(loginMsg, (err as Error).message, "err");
+          devError("login failed:", err);
+          showMsg(loginMsg, describeAuthError(err), "err");
         }
       });
 
@@ -663,7 +742,8 @@ import "../styles/admin.css";
           form.reset();
           showMsg(passwordMsg, "Password updated");
         } catch (err) {
-          showMsg(passwordMsg, (err as Error).message, "err");
+          devError("password change failed:", err);
+          showMsg(passwordMsg, describeAuthError(err, "password"), "err");
         }
       });
 

@@ -688,6 +688,48 @@ a.info-credit-tag:hover {
   -webkit-backdrop-filter: blur(6px);
 }
 
+/* alert dialog — for errors like "name already taken" that must not be silent */
+.info-alert-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.info-alert-overlay[hidden] {
+  display: none;
+}
+
+.info-alert-card {
+  display: grid;
+  gap: 16px;
+  width: min(360px, 100%);
+  padding: 20px;
+  background: var(--itchio_ui_bg);
+  border: 1px solid var(--itchio_border_color);
+  border-radius: 3px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.info-alert-msg {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--itchio_text_color);
+}
+
+.info-alert-card .info-card-btn {
+  justify-self: center;
+  min-width: 96px;
+}
+
 .info-doodle-modal {
   display: grid;
   gap: 12px;

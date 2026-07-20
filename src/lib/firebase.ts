@@ -1,4 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
+import { devWarn } from "./log";
 import { getAuth, signInAnonymously, onAuthStateChanged, type Auth } from "firebase/auth";
 import {
   getFirestore,
@@ -65,7 +66,7 @@ try {
   _db = getFirestore(app);
   _auth = getAuth(app);
 } catch (error) {
-  console.warn("Firebase unavailable — check PUBLIC_FIREBASE_* vars in .env.local:", error);
+  devWarn("Firebase unavailable — check PUBLIC_FIREBASE_* vars in .env.local:", error);
 }
 export const db = _db as Firestore;
 export const auth = _auth as Auth;
@@ -79,7 +80,7 @@ export async function getDbProjects(): Promise<Project[]> {
       return { ...data, slug: data.slug || d.id };
     });
   } catch (error) {
-    console.warn("Failed to fetch projects:", error);
+    devWarn("Failed to fetch projects:", error);
     return [];
   }
 }
@@ -94,7 +95,7 @@ export async function getDbProject(slug: string): Promise<Project | null> {
     const all = await getDbProjects();
     return all.find((p) => p.slug === slug) ?? null;
   } catch (error) {
-    console.warn("Failed to fetch project:", error);
+    devWarn("Failed to fetch project:", error);
     return null;
   }
 }
@@ -108,7 +109,7 @@ export async function getDbBlogs(): Promise<Blog[]> {
       return { ...data, slug: data.slug || d.id };
     });
   } catch (error) {
-    console.warn("Failed to fetch blogs:", error);
+    devWarn("Failed to fetch blogs:", error);
     return [];
   }
 }
@@ -123,7 +124,7 @@ export async function getDbBlog(slug: string): Promise<Blog | null> {
     const all = await getDbBlogs();
     return all.find((b) => b.slug === slug) ?? null;
   } catch (error) {
-    console.warn("Failed to fetch blog:", error);
+    devWarn("Failed to fetch blog:", error);
     return null;
   }
 }
@@ -164,7 +165,7 @@ export async function getDoodles(): Promise<Doodle[]> {
         `https://firestore.googleapis.com/v1/projects/${DOODLE_PROJECT}/databases/(default)/documents/doodles?${params}`,
       );
       if (!res.ok) {
-        console.warn("Doodle fetch failed:", res.status, await res.text());
+        devWarn("Doodle fetch failed:", res.status, await res.text());
         break;
       }
       const data = await res.json();
@@ -193,7 +194,7 @@ export async function getDoodles(): Promise<Doodle[]> {
     doodles.sort((a, b) => String(b.timestamp || "").localeCompare(String(a.timestamp || "")));
     return doodles;
   } catch (err) {
-    console.warn("Failed to fetch doodles:", err);
+    devWarn("Failed to fetch doodles:", err);
     return [];
   }
 }
@@ -273,7 +274,7 @@ export async function getCommunityPosts(): Promise<CommunityPost[]> {
     const snap = await getDocs(q);
     return snap.docs.map((d) => ({ ...(d.data() as Omit<CommunityPost, "id">), id: d.id }));
   } catch (err) {
-    console.warn("Failed to fetch community posts:", err);
+    devWarn("Failed to fetch community posts:", err);
     return [];
   }
 }

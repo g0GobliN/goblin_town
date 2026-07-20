@@ -237,7 +237,6 @@ body {
   flex-direction: column;
   align-items: center;
   line-height: 0.9;
-  animation: title-float 3.2s ease-in-out infinite;
 }
 
 .brand-main {
@@ -265,16 +264,6 @@ body {
   text-shadow:
     2px 2px 0 #3a0610,
     3px 3px 0 #140208;
-}
-
-@keyframes title-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
 }
 
 .game-frame {

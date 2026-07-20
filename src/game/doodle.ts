@@ -1,4 +1,5 @@
 import { saveDoodle } from "../lib/firebase";
+import { devError } from "../lib/log";
 import { invalidateDoodleCache, renderDoodles } from "./content";
 import { playSfx } from "./sounds";
 
@@ -133,7 +134,7 @@ export function initDoodlePad() {
       invalidateDoodleCache();
       await renderDoodles();
     } catch (err) {
-      console.error(err);
+      devError(err);
       playSfx("deny");
       if (statusEl) statusEl.textContent = "> couldn't save — try again in a moment";
     } finally {
