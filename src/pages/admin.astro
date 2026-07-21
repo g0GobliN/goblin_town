@@ -115,6 +115,9 @@ import "../styles/admin.css";
                 Cover image
                 <input type="file" name="cover" accept="image/*" />
               </label>
+              <button type="button" class="pixel-btn admin-btn-ghost" data-clear-cover>
+                Clear image
+              </button>
               <input type="hidden" name="coverImage" />
               <div class="admin-actions">
                 <button type="submit" class="pixel-btn">SAVE</button>
@@ -142,6 +145,9 @@ import "../styles/admin.css";
                 Cover image
                 <input type="file" name="cover" accept="image/*" />
               </label>
+              <button type="button" class="pixel-btn admin-btn-ghost" data-clear-cover>
+                Clear image
+              </button>
               <input type="hidden" name="coverImage" />
               <div class="admin-actions">
                 <button type="submit" class="pixel-btn">SAVE</button>
@@ -706,6 +712,14 @@ import "../styles/admin.css";
 
       document.getElementById("work-reset")!.addEventListener("click", resetWorkForm);
       document.getElementById("blog-reset")!.addEventListener("click", resetBlogForm);
+
+      document.querySelectorAll<HTMLButtonElement>("[data-clear-cover]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const form = btn.closest("form")!;
+          (form.elements.namedItem("cover") as HTMLInputElement).value = "";
+          (form.elements.namedItem("coverImage") as HTMLInputElement).value = "";
+        });
+      });
 
       document.getElementById("work-form")!.addEventListener("submit", async (e) => {
         e.preventDefault();
