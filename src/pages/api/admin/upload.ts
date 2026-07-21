@@ -23,7 +23,8 @@ export const POST: APIRoute = async ({ request }) => {
     if (file.size > 5 * 1024 * 1024) return jsonError("file too large (max 5MB)", 400);
 
     const sa = getMainServiceAccount();
-    const bucket = getEnv("PUBLIC_FIREBASE_STORAGE_BUCKET") || `${sa.project_id}.appspot.com`;
+    const bucket = getEnv("PUBLIC_FIREBASE_STORAGE_BUCKET");
+    if (!bucket) return jsonError("PUBLIC_FIREBASE_STORAGE_BUCKET is not configured", 500);
     const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
     const objectName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext || "png"}`;
 
