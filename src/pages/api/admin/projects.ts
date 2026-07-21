@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { json, jsonError, requireAdmin } from "../../../lib/admin-auth";
 import { firestoreDelete, firestoreSet } from "../../../lib/firestore-rest";
+import { pingIndexNow } from "../../../lib/indexnow";
 import type { Project } from "../../../lib/firebase";
 
 export const prerender = false;
@@ -73,6 +74,7 @@ export const POST: APIRoute = async ({ request }) => {
       updatedAt: new Date().toISOString(),
     });
 
+    await pingIndexNow(`https://g0.monster/work/${project.slug}/`);
     return json({ ok: true, slug: project.slug });
   } catch (err) {
     return jsonError(err instanceof Error ? err.message : "Save failed", 500);
@@ -97,6 +99,7 @@ export const DELETE: APIRoute = async ({ request }) => {
     if (!slug) return jsonError("slug is required", 400);
 
     await firestoreDelete("projects", slug);
+    await pingIndexNow(`https://g0.monster/work/${slug}/`);
     return json({ ok: true });
   } catch (err) {
     return jsonError(err instanceof Error ? err.message : "Delete failed", 500);
