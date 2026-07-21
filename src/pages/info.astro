@@ -26,14 +26,12 @@ import "../styles/info.css";
     <meta property="og:image" content="https://g0.monster/og/goblin-town-og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta
-      property="og:image:alt"
-      content="Pixel-art night town with a grinning goblin — Goblin Town, a playable portfolio at g0.monster"
-    />
+    <meta property="og:image:alt" content="Goblin Town — a playable portfolio at g0.monster" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://g0.monster/og/goblin-town-og.png" />
     <meta name="theme-color" content="#000000" />
     <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -163,7 +161,7 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
                   const rows = [
                     [
                       "Director",
-                      tag("Vishal Gurung", "/logo/logo-512.png", "https://github.com/g0GobliN"),
+                      tag("Vishal Gurung", "/logo/mark.png", "https://github.com/g0GobliN"),
                     ],
                     [
                       "Pixel Art",
@@ -505,6 +503,7 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
         NameTakenError,
       } from "../lib/firebase";
       import { devError } from "../lib/log";
+      import { attachInlineReplyForms } from "../lib/reply-form";
 
       const GOBLIN_NAME_KEY = "gt-goblin-name";
       function getLockedName(): string {
@@ -913,41 +912,25 @@ Leave a doodle on the gallery wall, post in the town square, or just wander and 
       }
 
       function attachReplyHandlers(list: HTMLElement, status: HTMLElement) {
-        list.querySelectorAll<HTMLButtonElement>("[data-reply]").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const parentId = btn.dataset.reply!;
-            const existing = list.querySelector<HTMLFormElement>(".info-reply-form");
-            const wasOpenHere = existing?.dataset.parent === parentId;
-            existing?.remove();
-            if (wasOpenHere) return;
-
+        attachInlineReplyForms({
+          list,
+          triggerSelector: "[data-reply]",
+          targetIdOf: (trigger) => (trigger as HTMLElement).dataset.reply!,
+          formClass: "info-reply-form",
+          getAnchor: (trigger) => trigger,
+          buildFormHtml: () => {
             const lockedName = getLockedName();
-            const form = document.createElement("form");
-            form.className = "info-community-form info-reply-form";
-            form.dataset.parent = parentId;
-            form.innerHTML = `
+            return `
               <input type="text" maxlength="40" placeholder="name" autocomplete="nickname" required ${lockedName ? `value="${escapeAttr(lockedName)}" readonly` : ""} />
               <textarea maxlength="280" required placeholder="write a reply..."></textarea>
               <button class="info-card-btn info-community-btn" type="submit">POST REPLY</button>`;
-            btn.insertAdjacentElement("afterend", form);
-
-            form.addEventListener("submit", async (event) => {
-              event.preventDefault();
-              const nameEl = form.querySelector("input")!;
-              const messageEl = form.querySelector("textarea")!;
-              const submitBtn = form.querySelector("button")!;
-              const message = messageEl.value.trim();
-              if (!message) return;
-              submitBtn.disabled = true;
-              try {
-                await submitPost({ name: nameEl.value.trim(), message, parentId }, status);
-              } catch (err) {
-                handlePostError(err, status);
-                submitBtn.disabled = false;
-              }
-            });
-            form.querySelector("textarea")!.focus();
-          });
+          },
+          getMessage: (form) => form.querySelector("textarea")!.value.trim(),
+          submit: async (form, parentId, message) => {
+            const nameEl = form.querySelector("input")!;
+            await submitPost({ name: nameEl.value.trim(), message, parentId }, status);
+          },
+          onError: (err) => handlePostError(err, status),
         });
       }
 

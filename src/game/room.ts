@@ -1361,10 +1361,21 @@ export function initPixelRoom() {
     window.setTimeout(() => clear(), 1300);
   };
 
-  loadAssets()
-    .then((loaded) => {
+  const fontsReady =
+    typeof document !== "undefined" && document.fonts
+      ? Promise.all([
+          document.fonts.load('1em "New Rocker"'),
+          document.fonts.load('1em "Press Start 2P"'),
+        ])
+          .then(() => document.fonts.ready)
+          .catch(() => undefined)
+      : Promise.resolve();
+
+  Promise.all([loadAssets(), fontsReady])
+    .then(([loaded]) => {
       assets = loaded;
       requestAnimationFrame(loop);
+      // Hold shutters until brand type is painted — no fallback→New Rocker flash
       window.setTimeout(finishBoot, 900);
     })
     .catch((error) => {

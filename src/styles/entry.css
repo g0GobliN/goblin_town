@@ -54,11 +54,121 @@
   background-position:
     0 0,
     50% 0;
+  /* Town art = first viewport only (full width); below that stays black. */
   background-size:
     100% 100vh,
-    1600px 100vh;
+    100% 100vh;
   background-attachment: scroll;
   image-rendering: pixelated;
+}
+
+/* 404 / 500 — single screen: fill viewport, center content, keep town visible */
+.entry-body--solo {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #000000;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.28) 0%,
+      rgba(0, 0, 0, 0.4) 55%,
+      rgba(0, 0, 0, 0.55) 100%
+    ),
+    url("/img/gothicvania/town/background.png");
+  background-repeat: no-repeat;
+  background-size:
+    100% 100%,
+    cover;
+  background-position:
+    0 0,
+    50% 50%;
+  background-attachment: scroll;
+}
+
+.entry-body--solo .entry-page {
+  width: 100%;
+  max-width: 960px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: rgba(37, 51, 68, 0.28);
+}
+
+.entry-body--solo .entry-body-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.entry-body--solo .entry-links {
+  justify-content: center;
+}
+
+/* Mobile status pages — lock to one screen, full-bleed art, stacked CTAs */
+@media (max-width: 700px) {
+  .entry-body.entry-body--solo {
+    width: 100%;
+    height: 100dvh;
+    height: 100svh;
+    min-height: 100dvh;
+    min-height: 100svh;
+    max-height: 100dvh;
+    max-height: 100svh;
+    overflow: hidden;
+    justify-content: stretch;
+    background-size:
+      100% 100%,
+      cover;
+    background-position:
+      0 0,
+      center center;
+  }
+
+  .entry-body--solo .entry-page {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    min-height: 0;
+    justify-content: flex-start;
+    background-color: rgba(12, 8, 16, 0.35);
+  }
+
+  .entry-body--solo .entry-body-inner {
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
+    gap: 4px;
+    padding: 28px 20px;
+    box-sizing: border-box;
+  }
+
+  .entry-body--solo .entry-content {
+    max-width: 28em;
+  }
+
+  .entry-body--solo .entry-links {
+    width: 100%;
+    max-width: 280px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .entry-body--solo .entry-link-btn {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
 }
 
 .entry-nav {

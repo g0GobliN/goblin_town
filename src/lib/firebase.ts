@@ -208,6 +208,9 @@ export type CommunityPost = {
 };
 
 const RESERVED_GOBLIN_NAME = "traveler";
+// Reserved for the admin reply voice (src/pages/api/admin/comments.ts) — never
+// claimable or postable by a regular visitor. Enforced again in firestore.rules.
+const ADMIN_RESERVED_NAME = "goblin";
 
 export class NameTakenError extends Error {
   constructor(name: string) {
@@ -254,6 +257,7 @@ export function ensureAnonAuth(): Promise<string> {
 export async function claimGoblinName(name: string): Promise<void> {
   const key = name.trim().toLowerCase();
   if (!key || key === RESERVED_GOBLIN_NAME) return;
+  if (key === ADMIN_RESERVED_NAME) throw new NameTakenError(name.trim());
 
   const uid = await ensureAnonAuth();
   const nameRef = doc(db, "names", key);

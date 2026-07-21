@@ -27,7 +27,9 @@ service cloud.firestore {
       // covers older clients, not abuse. The name field is required — "traveler"
       // is a reserved shared handle (anyone can post as it, unclaimed) for any
       // client that still sends it; everyone else must own their name via a
-      // names/{name} claim below.
+      // names/{name} claim below. "goblin" is reserved for admin replies
+      // (written by the service account, which bypasses these rules) and can
+      // never be claimed — see the names/{nameId} rule.
       allow create: if request.auth != null
         && request.resource.data.keys().hasOnly(['name', 'message', 'timestamp', 'parentId'])
         && request.resource.data.name is string
@@ -54,6 +56,7 @@ service cloud.firestore {
       allow create: if request.auth != null
         && nameId == nameId.lower()
         && nameId != 'traveler'
+        && nameId != 'goblin'
         && request.resource.data.keys().hasOnly(['owner', 'createdAt'])
         && request.resource.data.owner == request.auth.uid
         && request.resource.data.createdAt is string;

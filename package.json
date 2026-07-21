@@ -9,7 +9,7 @@
     "build:astro": "astro build",
     "preview": "astro preview",
     "lint": "prettier --check . && astro check",
-    "test": "node --test tests/**/*.mjs",
+    "test": "node --test",
     "deploy": "npm run build && wrangler pages deploy ./dist --project-name=goblin-town",
     "format": "prettier --write ."
   },

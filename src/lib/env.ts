@@ -1,5 +1,3 @@
-import { env as cfEnv } from "cloudflare:workers";
-
 /** Collect all non-empty values for a key (Cloudflare runtime, process, Vite). */
 export function getEnvCandidates(name: string): string[] {
   const out: string[] = [];
@@ -7,12 +5,15 @@ export function getEnvCandidates(name: string): string[] {
     if (typeof v === "string" && v.trim().length > 0) out.push(v);
   };
 
+  // Astro Cloudflare platformProxy may stash bindings here during `astro dev`.
   try {
-    add((cfEnv as Record<string, unknown>)[name]);
+    const g = globalThis as typeof globalThis & { __env__?: Record<string, unknown> };
+    add(g.__env__?.[name]);
   } catch {
-    /* cloudflare:workers unavailable locally sometimes */
+    /* ignore */
   }
 
+  // Local: .env.local via Vite. Prod CF: string secrets/vars with nodejs_compat.
   try {
     add(process.env[name]);
   } catch {

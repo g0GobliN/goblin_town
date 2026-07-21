@@ -67,6 +67,16 @@ function toField(value: unknown): Record<string, unknown> {
   return { stringValue: String(value) };
 }
 
+/** Convert a plain data object into Firestore REST `fields`, dropping undefined values. */
+function buildFields(data: Record<string, unknown>): Record<string, unknown> {
+  const fields: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data)) {
+    if (v === undefined) continue;
+    fields[k] = toField(v);
+  }
+  return fields;
+}
+
 function fromFields(fields: Record<string, unknown> = {}): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, raw] of Object.entries(fields)) {
@@ -127,11 +137,7 @@ export async function firestoreSet(
   data: Record<string, unknown>,
   sa: ServiceAccount = getMainServiceAccount(),
 ) {
-  const fields: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(data)) {
-    if (v === undefined) continue;
-    fields[k] = toField(v);
-  }
+  const fields = buildFields(data);
   const keys = Object.keys(fields);
   const mask = keys.map((k) => `updateMask.fieldPaths=${encodeURIComponent(k)}`).join("&");
   const url = `${docPath(mainProjectId(sa), collection, id)}?${mask}`;
@@ -139,6 +145,23 @@ export async function firestoreSet(
     method: "PATCH",
     body: JSON.stringify({ fields }),
   });
+}
+
+/** Create a document with an auto-generated id. Returns the new id. */
+export async function firestoreCreate(
+  collection: string,
+  data: Record<string, unknown>,
+  sa: ServiceAccount = getMainServiceAccount(),
+): Promise<string> {
+  const fields = buildFields(data);
+  const res = await authedFetch(sa, colPath(mainProjectId(sa), collection), {
+    method: "POST",
+    body: JSON.stringify({ fields }),
+  });
+  const body = (await res.json()) as { name?: string };
+  const id = body.name?.split("/").pop();
+  if (!id) throw new Error("Firestore CREATE returned no document id");
+  return id;
 }
 
 export async function firestoreList(

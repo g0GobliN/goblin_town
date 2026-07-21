@@ -106,6 +106,8 @@ body {
     0 3px 0 #1a0a14,
     0 0 24px rgba(180, 40, 60, 0.35);
   letter-spacing: 0.04em;
+  /* Prefer metric stability while webfonts settle */
+  font-synthesis: none;
 }
 
 .boot-line {

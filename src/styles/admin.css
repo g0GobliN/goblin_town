@@ -389,6 +389,37 @@
   line-height: 1.6;
 }
 
+.admin-reply-form {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid #5a3048;
+  background: #120a18;
+  font-size: 9px;
+}
+
+.admin-reply-form .small {
+  font-size: 8px;
+}
+
+.admin-reply-form textarea {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1.5;
+  color: inherit;
+  background: #0a0610;
+  border: 1px solid #5a3048;
+  padding: 8px;
+}
+
+.admin-reply-form .pixel-btn {
+  font-size: 8px;
+}
+
 .admin-doodle-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

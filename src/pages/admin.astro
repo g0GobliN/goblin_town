@@ -10,6 +10,8 @@ import "../styles/admin.css";
     <meta name="robots" content="noindex,nofollow" />
     <title>Admin — Goblin Town</title>
     <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -33,7 +35,13 @@ import "../styles/admin.css";
         </h1>
         <p class="admin-gate-line" aria-hidden="true"></p>
         <p class="admin-gate-sub">Keeper's gate</p>
-        <form id="login-form" class="admin-form admin-login-form">
+        <form
+          id="login-form"
+          class="admin-form admin-login-form"
+          method="post"
+          action="/admin/"
+          autocomplete="on"
+        >
           <label>
             Email
             <input
@@ -152,14 +160,20 @@ import "../styles/admin.css";
         <div class="admin-tab-panel" data-panel="comments" hidden>
           <h2>Comments</h2>
           <p class="small">
-            Community board on /info. Deleting a comment also removes all its replies.
+            Community board on /info. Replies post as <strong>goblin</strong> (any device). Deleting a
+            comment also removes all its replies.
           </p>
           <div id="comment-list" class="admin-list"></div>
         </div>
 
         <div class="admin-tab-panel" data-panel="settings" hidden>
           <h2>Settings</h2>
-          <form id="password-form" class="admin-form admin-card admin-settings-card">
+          <form
+            id="password-form"
+            class="admin-form admin-card admin-settings-card"
+            method="post"
+            action="/admin/"
+          >
             <h3>Change password</h3>
             <label>
               Current password
@@ -221,6 +235,7 @@ import "../styles/admin.css";
         type Project,
       } from "../lib/firebase";
       import { devError } from "../lib/log";
+      import { attachInlineReplyForms } from "../lib/reply-form";
       import {
         EmailAuthProvider,
         onAuthStateChanged,
@@ -230,6 +245,11 @@ import "../styles/admin.css";
         updatePassword,
         type User,
       } from "firebase/auth";
+
+      // Never leave credentials in the address bar (GET fallback / leaked share).
+      if (location.search) {
+        history.replaceState(null, "", location.pathname);
+      }
 
       const loginPanel = document.getElementById("login-panel")!;
       const dashPanel = document.getElementById("dash-panel")!;
@@ -505,13 +525,14 @@ import "../styles/admin.css";
       ): string {
         const kids = byParent.get(c.id) || [];
         const own = `
-          <article class="admin-item admin-comment" style="margin-left: ${depth * 20}px">
+          <article class="admin-item admin-comment" style="margin-left: ${depth * 20}px" data-comment-id="${escapeAttr(c.id)}">
             <div>
               <strong>${escapeHtml(c.name || "traveler")}</strong>
               <p class="small">${escapeHtml((c.timestamp || "").slice(0, 10))}${depth ? " · reply" : ""}</p>
               <p class="small">${escapeHtml(c.message || "")}</p>
             </div>
             <div class="admin-item-actions">
+              <button type="button" class="pixel-btn admin-btn-ghost" data-reply-comment="${escapeAttr(c.id)}">REPLY</button>
               <button type="button" class="pixel-btn admin-btn-danger" data-del-comment="${escapeAttr(c.id)}">DEL</button>
             </div>
           </article>`;
@@ -553,6 +574,37 @@ import "../styles/admin.css";
               showMsg(dashMsg, (e as Error).message, "err");
             }
           });
+        });
+
+        attachInlineReplyForms({
+          list,
+          triggerSelector: "[data-reply-comment]",
+          targetIdOf: (trigger) => (trigger as HTMLElement).dataset.replyComment!,
+          formClass: "admin-reply-form",
+          getAnchor: (_trigger, targetId) =>
+            Array.from(list.querySelectorAll<HTMLElement>("[data-comment-id]")).find(
+              (el) => el.dataset.commentId === targetId,
+            ) || null,
+          onCreated: (form, anchor) => {
+            form.style.marginLeft = (anchor as HTMLElement).style.marginLeft || "0";
+          },
+          buildFormHtml: () => `
+              <p class="small">Reply as <strong>goblin</strong></p>
+              <textarea name="message" maxlength="280" required rows="3" placeholder="write a reply..."></textarea>
+              <div class="admin-item-actions">
+                <button type="submit" class="pixel-btn">POST REPLY</button>
+                <button type="button" class="pixel-btn admin-btn-ghost" data-cancel-reply>CANCEL</button>
+              </div>`,
+          getMessage: (form) => new FormData(form).get("message")?.toString().trim() || "",
+          submit: async (_form, parentId, message) => {
+            await api("/api/admin/comments/", {
+              method: "POST",
+              body: JSON.stringify({ parentId, message }),
+            });
+            showMsg(dashMsg, "Reply posted as goblin");
+            await refreshAll();
+          },
+          onError: (err) => showMsg(dashMsg, (err as Error).message, "err"),
         });
       }
 

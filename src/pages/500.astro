@@ -17,6 +17,7 @@ export const prerender = true;
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#0c0610" />
     <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -25,20 +26,8 @@ export const prerender = true;
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
     />
   </head>
-  <body class="entry-body">
-    <div class="entry-stage" aria-hidden="true">
-      <img class="entry-stage-bg" src="/img/gothicvania/town/background.png" alt="" />
-      <img class="entry-stage-mid" src="/img/gothicvania/town/middleground.png" alt="" />
-      <div class="entry-stage-veil"></div>
-    </div>
-
+  <body class="entry-body entry-body--solo">
     <article class="entry-page">
-      <nav class="entry-nav">
-        <a href="/">← Enter Game</a>
-        <div class="entry-nav-links">
-          <a href="/info/">Summary</a>
-        </div>
-      </nav>
       <div class="entry-body-inner">
         <p class="entry-kicker">❒ THE FORGE BROKE</p>
         <h1 class="entry-title">500 — something went wrong</h1>
@@ -52,56 +41,5 @@ export const prerender = true;
         </div>
       </div>
     </article>
-
-    <style>
-      .entry-body {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .entry-page {
-        margin: 28px auto;
-      }
-      .entry-body-inner {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-      .entry-links {
-        justify-content: center;
-      }
-      @media (max-width: 600px) {
-        .entry-page {
-          width: min(400px, calc(100% - 40px));
-        }
-        .entry-body-inner {
-          padding: 14px 12px 18px;
-        }
-        .entry-kicker {
-          font-size: 7px;
-          margin-bottom: 6px;
-        }
-        .entry-title {
-          font-size: 10px;
-          margin-bottom: 6px;
-        }
-        .entry-content {
-          font-size: 8px;
-          line-height: 1.7;
-        }
-        .entry-links {
-          margin-top: 12px;
-          gap: 8px;
-        }
-        .entry-link-btn {
-          font-size: 7px;
-          padding: 7px 10px;
-        }
-        .entry-nav {
-          font-size: 8px;
-        }
-      }
-    </style>
   </body>
 </html>

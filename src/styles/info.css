@@ -49,9 +49,10 @@
   background-position:
     0 0,
     50% 0;
+  /* Town art = first viewport only (full width); below that stays black. */
   background-size:
     100% 100vh,
-    1600px 100vh;
+    100% 100vh;
   background-attachment: scroll;
   image-rendering: pixelated;
 }
