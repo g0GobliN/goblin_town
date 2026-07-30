@@ -12,6 +12,12 @@ const TOWN_PROPS = [
   "street-lamp",
   "wagon",
   "well",
+  "door-board-home",
+  "door-board-work",
+  "door-board-read",
+  "door-board-art",
+  "door-board-draw",
+  "door-board-gate",
 ] as const;
 
 const CEM_PROPS = [

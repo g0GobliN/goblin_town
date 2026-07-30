@@ -101,11 +101,11 @@ crateStack(2140);
 // ── SKETCH ALLEY ─────────────────────────────────────────
 barrel(2280);
 barrel(2310);
-lamp(2400);
-crate(2460);
-sign(2580);
-crateStack(2680);
-lamp(2780);
+houseC(2360);
+lamp(2580);
+crate(2640);
+sign(2720);
+crateStack(2780);
 
 // ── EAST MARKET (cemetery mix-in) ────────────────────────
 houseC(2880);
@@ -298,24 +298,24 @@ export const CRUMBS: Crumb[] = [
     hint: "Warm lamplight — {KEY} to browse the shelves",
   },
   {
-    id: "gallery-wagon",
+    id: "gallery-house",
     key: "gallery",
-    label: "Gallery wagon",
-    x: 1680,
+    label: "Gallery house",
+    x: 2000,
     y: GROUND_Y - 40,
     w: 100,
     h: 40,
-    hint: "The art wagon! {KEY} to see visitor doodles",
+    hint: "Gallery house — {KEY} to see visitor doodles",
   },
   {
-    id: "sketch-hut",
+    id: "sketch-house",
     key: "doodle",
-    label: "Sketch crates",
-    x: 2180,
+    label: "Sketch house",
+    x: 2400,
     y: GROUND_Y - 40,
-    w: 90,
+    w: 110,
     h: 40,
-    hint: "Paint and crates — {KEY} to doodle something",
+    hint: "Sketch house — {KEY} to doodle something",
   },
   {
     id: "church-gate",

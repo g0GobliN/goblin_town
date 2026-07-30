@@ -140,7 +140,17 @@ import "../styles/admin.css";
               <label>Tagline <input name="tagline" /></label>
               <label>Published <input name="publishedAt" type="date" /></label>
               <label>Tags (comma) <input name="tags" /></label>
-              <label>Content <textarea name="content" rows="8"></textarea></label>
+              <label
+                >Content
+                <textarea
+                  name="content"
+                  rows="14"
+                  placeholder={"# Big section title\n\n## Subsection\n\nParagraph text…"}
+                ></textarea>
+                <span class="small admin-field-hint"
+                  >Use # ## ### for headings · blank line between paragraphs</span
+                >
+              </label>
               <label>
                 Cover image
                 <input type="file" name="cover" accept="image/*" />

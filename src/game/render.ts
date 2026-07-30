@@ -2,8 +2,18 @@ import { enemyBody } from "./combat";
 import { ENEMY_HURT_DURATION, GROUND_Y, SCALE, VIEW_H, VIEW_W } from "./constants";
 import { solidAt } from "./physics";
 import { getActiveScene } from "./scenes";
-import type { DrawContext, EnemyState } from "./types";
-import { EAST_GATE } from "./world";
+import type { DrawContext, EnemyState, SectionKey } from "./types";
+import { CRUMBS, EAST_GATE } from "./world";
+
+/** Short tags painted on the wooden door boards */
+const DOOR_BOARD_PROP: Record<SectionKey, string> = {
+  about: "door-board-home",
+  work: "door-board-work",
+  blog: "door-board-read",
+  gallery: "door-board-art",
+  doodle: "door-board-draw",
+  contact: "door-board-gate",
+};
 
 function drawSheetFrame(
   ctx: CanvasRenderingContext2D,
@@ -241,6 +251,27 @@ function drawProps(ctx: DrawContext) {
     } else {
       c.drawImage(img, Math.floor(dx), Math.floor(prop.y));
     }
+  }
+}
+
+/** Address boards by each door — still, beside the house, readable label. */
+function drawDoorBoards(ctx: DrawContext) {
+  if (getActiveScene().id !== "town") return;
+
+  const { ctx: c, assets, cameraX } = ctx;
+
+  for (const crumb of CRUMBS) {
+    const board = assets.props[DOOR_BOARD_PROP[crumb.key]];
+    if (!board) continue;
+
+    // Beside the house so the doorway stays clear
+    const worldX = crumb.x - 46;
+    const worldY = GROUND_Y - board.height + 2;
+    const dx = worldX - cameraX;
+    if (dx + board.width < -10 || dx > VIEW_W + 10) continue;
+
+    c.imageSmoothingEnabled = false;
+    c.drawImage(board, Math.floor(dx), Math.floor(worldY));
   }
 }
 
@@ -591,6 +622,7 @@ export function drawWorld(draw: DrawContext) {
   drawGroundStrip(ctx, draw.assets.tileset, draw.cameraX);
   drawPlatformShadows(draw);
   drawProps(draw);
+  drawDoorBoards(draw);
   drawColumns(draw);
   drawEastGate(draw);
   drawPlatforms(draw);

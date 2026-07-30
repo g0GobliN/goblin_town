@@ -230,19 +230,109 @@
   margin-right: auto;
 }
 
-/* cover = FAF top hero image */
+/* cover = animated ENTERING / GOBLIN TOWN title card */
 .info-cover {
   margin: 0;
   background: #0b050a;
+  overflow: hidden;
 }
 
-.info-cover img {
-  display: block;
+.info-cover-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
   width: 100%;
+  min-height: 180px;
+  aspect-ratio: 960 / 220;
   max-height: 220px;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
+  overflow: hidden;
+}
+
+.info-cover-sky {
+  position: absolute;
+  inset: -8% -20%;
+  background-image: url("/img/gothicvania/town/background.png");
+  background-size: cover;
+  background-position: 50% 18%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  opacity: 0.55;
+  filter: saturate(0.85) brightness(0.72);
+  animation: info-cover-sky 48s linear infinite;
+}
+
+.info-cover-sky--drift {
+  opacity: 0.28;
+  mix-blend-mode: screen;
+  background-position: 20% 40%;
+  animation-duration: 72s;
+  animation-direction: reverse;
+}
+
+.info-cover-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 70% at 50% 48%, rgba(12, 6, 14, 0.35), rgba(8, 4, 10, 0.92) 72%),
+    linear-gradient(90deg, rgba(8, 4, 10, 0.55), transparent 18%, transparent 82%, rgba(8, 4, 10, 0.55)),
+    linear-gradient(180deg, rgba(8, 4, 10, 0.4), transparent 30%, transparent 70%, rgba(8, 4, 10, 0.55));
+  pointer-events: none;
+}
+
+.info-cover-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52%;
+  height: 1px;
+  background: #4a2038;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.info-cover-mark {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  padding: 12px 16px;
+  animation: info-cover-breathe 4.8s ease-in-out infinite;
+}
+
+.info-cover-kicker {
+  margin: 0 0 10px;
+  font-family: "Press Start 2P", Poppins, monospace;
+  font-size: clamp(8px, 1.4vw, 10px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #c9a44f;
+  animation: info-cover-pulse 1.2s steps(2, jump-none) infinite;
+}
+
+.info-cover-title {
+  margin: 0;
+  font-family: "New Rocker", Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(1.7rem, 5.5vw, 2.75rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f2d9c0;
+  text-shadow:
+    0 3px 0 #1a0a14,
+    0 0 28px rgba(180, 40, 60, 0.35);
+  font-synthesis: none;
+  line-height: 1;
+}
+
+.info-cover-glowline {
+  width: min(180px, 42vw);
+  height: 2px;
+  margin-top: 14px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent, #c9a44f, transparent);
+  box-shadow: 0 0 12px rgba(201, 164, 79, 0.45);
+  animation: info-cover-glowline 2.8s ease-in-out infinite;
 }
 
 .info-cover-label {
@@ -250,6 +340,68 @@
   font-size: 14px;
   opacity: 0.85;
   color: #fefeff;
+}
+
+@keyframes info-cover-sky {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-8%);
+  }
+}
+
+@keyframes info-cover-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes info-cover-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes info-cover-glowline {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scaleX(0.86);
+    filter: brightness(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+    filter: brightness(1.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-cover-sky,
+  .info-cover-sky--drift,
+  .info-cover-kicker,
+  .info-cover-mark,
+  .info-cover-glowline {
+    animation: none;
+  }
+
+  .info-cover-kicker {
+    opacity: 1;
+  }
+
+  .info-cover-glowline {
+    opacity: 0.85;
+    transform: none;
+  }
 }
 
 /* lockup = same style as header.png (ENTERING + GOBLIN TOWN) */
@@ -660,7 +812,64 @@ a.info-credit-tag:hover {
 }
 
 .info-reply-form {
-  margin: 10px 0 0;
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 12px;
+  max-width: 480px;
+  background: rgba(57, 71, 88, 0.22);
+  border: 1px solid rgba(254, 254, 255, 0.18);
+  border-radius: 3px;
+}
+
+.info-reply-form input,
+.info-reply-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 10px 12px;
+  background: rgba(57, 71, 88, 0.32);
+  border: 1px solid rgba(254, 254, 255, 0.5);
+  border-radius: 3px;
+  color: var(--itchio_text_color);
+}
+
+.info-reply-form input::placeholder,
+.info-reply-form textarea::placeholder {
+  color: rgba(254, 254, 255, 0.5);
+}
+
+.info-reply-form input:focus,
+.info-reply-form textarea:focus {
+  outline: none;
+  border-color: var(--itchio_button_color);
+}
+
+.info-reply-form textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.info-reply-form input[readonly] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.info-reply-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-reply-form-actions .info-reply-btn {
+  margin-top: 0;
+}
+
+.info-reply-form .info-community-btn {
+  justify-self: start;
 }
 
 /* doodle */
@@ -741,6 +950,18 @@ a.info-credit-tag:hover {
   background: var(--itchio_ui_bg);
   border-radius: 3px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+}
+
+@media (min-width: 601px) {
+  .info-doodle-modal {
+    width: min(640px, 92vw);
+    gap: 14px;
+    padding: 22px;
+  }
+
+  .info-doodle-pad input[type="text"] {
+    max-width: none;
+  }
 }
 
 .info-doodle-kicker {
@@ -838,6 +1059,19 @@ a.info-credit-tag:hover {
   padding: 8px;
 }
 
+.info-doodle-openable {
+  cursor: zoom-in;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.info-doodle-openable:hover,
+.info-doodle-openable:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  outline: 2px solid var(--itchio_button_color);
+  outline-offset: 2px;
+}
+
 .info-doodle img,
 .info-doodle-empty {
   display: block;
@@ -857,6 +1091,116 @@ a.info-credit-tag:hover {
   color: #5d5142;
   text-align: center;
   font-size: 12px;
+}
+
+.info-doodle-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  cursor: zoom-out;
+}
+
+.info-doodle-lightbox[hidden] {
+  display: none;
+}
+
+.info-doodle-lightbox-close {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(254, 254, 255, 0.35);
+  border-radius: 3px;
+  background: rgba(40, 40, 40, 0.85);
+  color: var(--itchio_text_color);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.info-doodle-lightbox-close:hover {
+  border-color: var(--itchio_button_color);
+  color: var(--itchio_button_color);
+}
+
+.info-doodle-lightbox-frame {
+  margin: 0;
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  max-width: min(720px, 100%);
+  cursor: default;
+  animation: info-doodle-pop 0.22s ease-out;
+}
+
+.info-doodle-lightbox-frame img {
+  display: block;
+  width: min(640px, 92vw);
+  max-height: min(68vh, 520px);
+  object-fit: contain;
+  background: #f4e4bc;
+  border-radius: 4px;
+  padding: 14px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 28px 80px rgba(0, 0, 0, 0.55);
+}
+
+.info-doodle-lightbox-meta {
+  display: grid;
+  gap: 6px;
+  text-align: center;
+  justify-items: center;
+}
+
+.info-doodle-lightbox-kicker {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--itchio_link_color);
+  opacity: 0.75;
+}
+
+.info-doodle-lightbox-name {
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(174, 222, 234, 0.35);
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.info-doodle-lightbox-name::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 42px;
+  height: 2px;
+  transform: translateX(-50%);
+  background: var(--itchio_button_color);
+  border-radius: 1px;
+}
+
+@keyframes info-doodle-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* footer */
@@ -1053,10 +1397,10 @@ a.info-credit-tag:hover {
     margin-bottom: 10px;
   }
 
-  .info-cover img {
-    min-height: 120px;
+  .info-cover-stage {
+    min-height: 140px;
     max-height: none;
-    object-fit: cover;
+    aspect-ratio: 16 / 7;
   }
 
   .info-screens {
@@ -1105,15 +1449,28 @@ a.info-credit-tag:hover {
   }
 
   .info-community-form input,
-  .info-community-form textarea {
+  .info-community-form textarea,
+  .info-reply-form input,
+  .info-reply-form textarea {
     font-size: 16px;
   }
 
   /* Shrinks just the placeholder — the input itself stays 16px above so
      iOS Safari doesn't auto-zoom the page when it's tapped into. */
   .info-community-form input::placeholder,
-  .info-community-form textarea::placeholder {
+  .info-community-form textarea::placeholder,
+  .info-reply-form input::placeholder,
+  .info-reply-form textarea::placeholder {
     font-size: 13px;
+  }
+
+  .info-reply-form {
+    max-width: none;
+    padding: 10px;
+  }
+
+  .info-replies {
+    padding-left: 10px;
   }
 
   .info-doodles {

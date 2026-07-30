@@ -250,6 +250,12 @@
   letter-spacing: 0.04em;
 }
 
+.admin-field-hint {
+  opacity: 0.65;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
 .admin-form input,
 .admin-form textarea {
   width: 100%;

@@ -63,10 +63,35 @@ const slug = Astro.params.slug ?? "";
       }
 
       function formatContent(content: string) {
-        return escapeHtml(content)
-          .split(/\n{2,}/)
-          .map((block) => `<p>${block.replaceAll("\n", "<br />")}</p>`)
-          .join("");
+        const escaped = escapeHtml(content);
+        const lines = escaped.split(/\r?\n/);
+        const out: string[] = [];
+        let para: string[] = [];
+
+        const flushPara = () => {
+          if (!para.length) return;
+          out.push(`<p>${para.join("<br />")}</p>`);
+          para = [];
+        };
+
+        for (const raw of lines) {
+          const line = raw.trimEnd();
+          const heading = /^(#{1,3})\s+(.+)$/.exec(line.trim());
+          if (heading) {
+            flushPara();
+            // Page already has an h1 (post title): # → h2, ## → h3, ### → h4
+            const level = heading[1]!.length + 1;
+            out.push(`<h${level}>${heading[2]}</h${level}>`);
+            continue;
+          }
+          if (line.trim() === "") {
+            flushPara();
+            continue;
+          }
+          para.push(line);
+        }
+        flushPara();
+        return out.join("");
       }
 
       const root = document.getElementById("entry-root")!;
