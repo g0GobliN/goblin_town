@@ -1,0 +1,5 @@
+# Trailing-slash variants 404; send them to the real files.
+/sitemap.xml/           /sitemap.xml           301
+/sitemap-index.xml/     /sitemap-index.xml     301
+/sitemap-0.xml/         /sitemap-0.xml         301
+/robots.txt/            /robots.txt            301
