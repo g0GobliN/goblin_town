@@ -774,14 +774,18 @@ There is no rush. Take a look around. The town is always here.</pre>
         };
 
         grid.addEventListener("click", (event) => {
-          const figure = (event.target as HTMLElement).closest<HTMLElement>(".info-doodle-openable");
+          const figure = (event.target as HTMLElement).closest<HTMLElement>(
+            ".info-doodle-openable",
+          );
           if (!figure) return;
           openFromFigure(figure);
         });
 
         grid.addEventListener("keydown", (event) => {
           if (event.key !== "Enter" && event.key !== " ") return;
-          const figure = (event.target as HTMLElement).closest<HTMLElement>(".info-doodle-openable");
+          const figure = (event.target as HTMLElement).closest<HTMLElement>(
+            ".info-doodle-openable",
+          );
           if (!figure || event.target !== figure) return;
           event.preventDefault();
           openFromFigure(figure);

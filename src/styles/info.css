@@ -274,8 +274,20 @@
   inset: 0;
   background:
     radial-gradient(ellipse 55% 70% at 50% 48%, rgba(12, 6, 14, 0.35), rgba(8, 4, 10, 0.92) 72%),
-    linear-gradient(90deg, rgba(8, 4, 10, 0.55), transparent 18%, transparent 82%, rgba(8, 4, 10, 0.55)),
-    linear-gradient(180deg, rgba(8, 4, 10, 0.4), transparent 30%, transparent 70%, rgba(8, 4, 10, 0.55));
+    linear-gradient(
+      90deg,
+      rgba(8, 4, 10, 0.55),
+      transparent 18%,
+      transparent 82%,
+      rgba(8, 4, 10, 0.55)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 4, 10, 0.4),
+      transparent 30%,
+      transparent 70%,
+      rgba(8, 4, 10, 0.55)
+    );
   pointer-events: none;
 }
 
@@ -1061,7 +1073,9 @@ a.info-credit-tag:hover {
 
 .info-doodle-openable {
   cursor: zoom-in;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .info-doodle-openable:hover,
