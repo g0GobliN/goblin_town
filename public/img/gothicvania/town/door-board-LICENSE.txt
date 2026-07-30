@@ -1,0 +1,4 @@
+door-board*.png — original pixel art for Goblin Town.
+
+Public domain / CC0. Palette matched to Gothicvania town props (Ansimuz)
+for visual consistency; these sprites are not Ansimuz assets.
