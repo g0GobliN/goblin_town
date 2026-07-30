@@ -87,4 +87,20 @@ if (existsSync(sitemap0)) {
   console.warn("flatten-for-pages: sitemap-0.xml missing — skipped sitemap.xml");
 }
 
+// Bypass the SSR worker for static/SEO files. Without this, /sitemap.xml goes
+// through _worker.js (cf-cache-status: DYNAMIC), which often makes GSC report
+// "Couldn't fetch" even when a browser gets 200. Only SSR routes invoke the worker.
+writeFileSync(
+  join(distDir, "_routes.json"),
+  `${JSON.stringify(
+    {
+      version: 1,
+      include: ["/api/*", "/blog/*", "/work/*"],
+    },
+    null,
+    2,
+  )}\n`,
+);
+console.log("flatten-for-pages: wrote _routes.json (worker only for api/blog/work)");
+
 console.log("flatten-for-pages: dist/ is ready for Cloudflare Pages (with worker)");
