@@ -309,7 +309,6 @@
   justify-items: center;
   text-align: center;
   padding: 12px 16px;
-  animation: info-cover-breathe 4.8s ease-in-out infinite;
 }
 
 .info-cover-kicker {
@@ -319,7 +318,6 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #c9a44f;
-  animation: info-cover-pulse 1.2s steps(2, jump-none) infinite;
 }
 
 .info-cover-title {
@@ -363,26 +361,6 @@
   }
 }
 
-@keyframes info-cover-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.35;
-  }
-}
-
-@keyframes info-cover-breathe {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
 @keyframes info-cover-glowline {
   0%,
   100% {
@@ -400,14 +378,8 @@
 @media (prefers-reduced-motion: reduce) {
   .info-cover-sky,
   .info-cover-sky--drift,
-  .info-cover-kicker,
-  .info-cover-mark,
   .info-cover-glowline {
     animation: none;
-  }
-
-  .info-cover-kicker {
-    opacity: 1;
   }
 
   .info-cover-glowline {
@@ -1412,9 +1384,27 @@ a.info-credit-tag:hover {
   }
 
   .info-cover-stage {
-    min-height: 140px;
-    max-height: none;
-    aspect-ratio: 16 / 7;
+    min-height: 96px;
+    max-height: 120px;
+    aspect-ratio: 3 / 1;
+  }
+
+  .info-cover-mark {
+    padding: 6px 12px;
+  }
+
+  .info-cover-kicker {
+    margin-bottom: 6px;
+    font-size: 7px;
+  }
+
+  .info-cover-title {
+    font-size: clamp(1.35rem, 7vw, 1.85rem);
+  }
+
+  .info-cover-glowline {
+    margin-top: 8px;
+    width: min(120px, 36vw);
   }
 
   .info-screens {
