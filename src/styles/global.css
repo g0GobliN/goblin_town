@@ -496,27 +496,6 @@ body {
   margin-right: 6px;
 }
 
-.seo-blurb {
-  max-width: 28rem;
-  margin: 0 auto 10px;
-  padding: 0 12px;
-  font-size: 9px;
-  line-height: 1.6;
-  color: #c9b09a;
-  text-align: center;
-  text-shadow: 0 1px 0 #1a0a14;
-}
-
-.seo-blurb a {
-  color: #f2d9c0;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.seo-blurb a:hover {
-  color: #fff0dc;
-}
-
 .controls-hint {
   display: flex;
   flex-direction: column;
@@ -1831,16 +1810,12 @@ html:-webkit-full-screen .game-page .stage {
 
 html.is-fullscreen .game-page .brand,
 html.is-fullscreen .game-page .controls-hint,
-html.is-fullscreen .game-page .seo-blurb,
 html.is-immersive .game-page .brand,
 html.is-immersive .game-page .controls-hint,
-html.is-immersive .game-page .seo-blurb,
 html:fullscreen .game-page .brand,
 html:fullscreen .game-page .controls-hint,
-html:fullscreen .game-page .seo-blurb,
 html:-webkit-full-screen .game-page .brand,
-html:-webkit-full-screen .game-page .controls-hint,
-html:-webkit-full-screen .game-page .seo-blurb {
+html:-webkit-full-screen .game-page .controls-hint {
   display: none;
 }
 
