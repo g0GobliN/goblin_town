@@ -11,7 +11,8 @@
     "lint": "prettier --check . && astro check",
     "test": "node --test",
     "deploy": "npm run build && wrangler pages deploy ./dist --project-name=goblin-town",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.3",
