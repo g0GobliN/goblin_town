@@ -45,7 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (!blog) return jsonError("slug and title are required", 400);
 
     await firestoreSet("blogs", blog.slug, { ...blog });
-    await pingIndexNow(`https://g0.monster/blog/${blog.slug}/`);
+    await pingIndexNow(`https://v1.monster/blog/${blog.slug}/`);
     return json({ ok: true, slug: blog.slug });
   } catch (err) {
     return jsonError(err instanceof Error ? err.message : "Save failed", 500);
@@ -70,7 +70,7 @@ export const DELETE: APIRoute = async ({ request }) => {
     if (!slug) return jsonError("slug is required", 400);
 
     await firestoreDelete("blogs", slug);
-    await pingIndexNow(`https://g0.monster/blog/${slug}/`);
+    await pingIndexNow(`https://v1.monster/blog/${slug}/`);
     return json({ ok: true });
   } catch (err) {
     return jsonError(err instanceof Error ? err.message : "Delete failed", 500);

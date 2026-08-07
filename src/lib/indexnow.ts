@@ -1,4 +1,4 @@
-const INDEXNOW_HOST = "g0.monster";
+const INDEXNOW_HOST = "v1.monster";
 const INDEXNOW_KEY = "269a59572c1c473bb1841ecbd0e74682";
 
 /**

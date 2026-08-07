@@ -14,7 +14,8 @@ import "../styles/info.css";
     />
     <meta name="author" content="Vishal Gurung" />
     <meta name="robots" content="index,follow,max-image-preview:large" />
-    <link rel="canonical" href="https://g0.monster/info/" />
+    <link rel="canonical" href="https://v1.monster/info/" />
+    <link rel="alternate" type="text/plain" href="https://v1.monster/llms.txt" title="LLM summary" />
     <meta property="og:site_name" content="Goblin Town" />
     <meta property="og:title" content="Goblin Town — Summary" />
     <meta
@@ -22,13 +23,13 @@ import "../styles/info.css";
       content="Text summary of Vishal Gurung's playable portfolio — work, notes, doodles, and contact."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://g0.monster/info/" />
-    <meta property="og:image" content="https://g0.monster/og/goblin-town-og.png" />
+    <meta property="og:url" content="https://v1.monster/info/" />
+    <meta property="og:image" content="https://v1.monster/og/goblin-town-og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Goblin Town — a playable portfolio at g0.monster" />
+    <meta property="og:image:alt" content="Goblin Town — a playable portfolio at v1.monster" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://g0.monster/og/goblin-town-og.png" />
+    <meta name="twitter:image" content="https://v1.monster/og/goblin-town-og.png" />
     <meta name="theme-color" content="#000000" />
     <link rel="icon" href="/logo/favicon-48.png" type="image/png" sizes="48x48" />
     <link rel="icon" href="/logo/favicon-96.png" type="image/png" sizes="96x96" />
@@ -44,14 +45,20 @@ import "../styles/info.css";
       {
         "@context": "https://schema.org",
         "@type": "ProfilePage",
-        "url": "https://g0.monster/info/",
-        "name": "Goblin Town — Summary",
+        "@id": "https://v1.monster/info/#page",
+        "url": "https://v1.monster/info/",
+        "name": "Goblin Town — Summary · Vishal Gurung",
+        "description": "Text summary of Vishal Gurung — IT engineer in Tokyo. Work, notes, doodles, and contact.",
+        "isPartOf": { "@id": "https://v1.monster/#website" },
         "mainEntity": {
           "@type": "Person",
+          "@id": "https://v1.monster/#person",
           "name": "Vishal Gurung",
-          "url": "https://g0.monster/",
+          "url": "https://v1.monster/",
           "email": "grgvishal.gurung17@gmail.com",
           "jobTitle": "IT Engineer",
+          "description": "IT engineer based in Tokyo, Japan. Works on web development, WebRTC, system development, and cameras. Creator of reality-map and Goblin Town.",
+          "image": "https://v1.monster/logo/mark.png",
           "workLocation": {
             "@type": "Place",
             "address": {
@@ -65,9 +72,13 @@ import "../styles/info.css";
             "WebRTC",
             "System development",
             "Cameras",
-            "Game development"
+            "Game development",
+            "Pixel art"
           ],
-          "sameAs": ["https://github.com/g0GobliN", "https://instagram.com/goblin01_"]
+          "sameAs": [
+            "https://github.com/g0GobliN",
+            "https://instagram.com/goblin01_"
+          ]
         }
       }
     </script>

@@ -4,7 +4,7 @@
 
 **A portfolio you play.** A little pixel-art night town you can walk through — houses open onto work, notes, doodles, and a way to say hello.
 
-**▶ Play it live at [g0.monster](https://g0.monster)** · Prefer reading? There's a plain summary at [g0.monster/info](https://g0.monster/info/).
+**▶ Play it live at [v1.monster](https://v1.monster)** · Prefer reading? There's a plain summary at [v1.monster/info](https://v1.monster/info/).
 
 ## What's here
 

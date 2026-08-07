@@ -18,7 +18,7 @@ async function fetchSlugUrls(projectId, collection, pathPrefix) {
     return (body.documents || [])
       .map((doc) => doc.fields?.slug?.stringValue)
       .filter((slug) => typeof slug === "string" && slug.length > 0)
-      .map((slug) => `https://g0.monster${pathPrefix}${slug}/`);
+      .map((slug) => `https://v1.monster${pathPrefix}${slug}/`);
   } catch (err) {
     console.warn(`[sitemap] could not fetch ${collection} slugs, skipping:`, err.message);
     return [];
@@ -38,7 +38,7 @@ const dynamicPages = firebaseProjectId
   : [];
 
 export default defineConfig({
-  site: "https://g0.monster",
+  site: "https://v1.monster",
   output: "static",
   trailingSlash: "always",
   adapter: cloudflare(),
