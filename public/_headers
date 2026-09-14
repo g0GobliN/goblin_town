@@ -10,9 +10,13 @@
   Cache-Control: public, max-age=0, must-revalidate
 /index.html
   Cache-Control: public, max-age=0, must-revalidate
-/info/
+/game/
   Cache-Control: public, max-age=0, must-revalidate
-/info/index.html
+/game/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/contact/
+  Cache-Control: public, max-age=0, must-revalidate
+/contact/index.html
   Cache-Control: public, max-age=0, must-revalidate
 /admin/
   Cache-Control: public, max-age=0, must-revalidate

@@ -4,12 +4,13 @@
 
 **A portfolio you play.** A little pixel-art night town you can walk through — houses open onto work, notes, doodles, and a way to say hello.
 
-**▶ Play it live at [v1.monster](https://v1.monster)** · Prefer reading? There's a plain summary at [v1.monster/info](https://v1.monster/info/).
+**▶ Play it live at [v1.monster/game](https://v1.monster/game/)** · Prefer reading? The portfolio itself is at [v1.monster](https://v1.monster/).
 
 ## What's here
 
-- **/** — the town (move, talk, fight, open doors, leave a doodle)
-- **/info** — text summary of everything
+- **/** — text portfolio: work, notes, doodles, contact
+- **/game** — the town (move, talk, fight, open doors, leave a doodle)
+- **/contact** — email, GitHub, Instagram
 - **/work/[slug]** · **/blog/[slug]** — project & post pages
 
 ## Built with
@@ -23,7 +24,7 @@
 
 Grew up in Nepal. Live in Tokyo. IT engineer by day; side projects, open source, and weird experiments by night.
 
-- Email: grgvishal.gurung17@gmail.com
+- Email: hello@v1.monster
 - GitHub: [g0GobliN](https://github.com/g0GobliN)
 - Instagram: [goblin01_](https://instagram.com/goblin01_)
 

@@ -37,10 +37,10 @@ const slug = Astro.params.slug ?? "";
   <body class="entry-body">
     <article class="entry-page" data-slug={slug}>
       <nav class="entry-nav">
-        <a href="/info/">← Summary</a>
+        <a href="/">← Summary</a>
         <div class="entry-nav-links">
-          <a href="/info/#blog-list">Library</a>
-          <a href="/">Enter Game</a>
+          <a href="/#blog-list">Library</a>
+          <a href="/game/">Enter Game</a>
         </div>
       </nav>
       <div id="entry-root">
@@ -128,8 +128,8 @@ const slug = Astro.params.slug ?? "";
             ${tags ? `<div class="entry-stack">${tags}</div>` : ""}
             <div class="entry-content">${formatContent(blog.content || "")}</div>
             <div class="entry-links">
-              <a class="entry-link-btn" href="/info/#blog-list">More notes</a>
-              <a class="entry-link-btn primary" href="/">Enter Game</a>
+              <a class="entry-link-btn" href="/#blog-list">More notes</a>
+              <a class="entry-link-btn primary" href="/game/">Enter Game</a>
             </div>
           </div>
         `;

@@ -441,7 +441,7 @@ export function initPixelRoom() {
 
   const infoMenuBtn = document.createElement("a");
   infoMenuBtn.className = "pixel-btn";
-  infoMenuBtn.href = "/info/";
+  infoMenuBtn.href = "/";
   infoMenuBtn.innerHTML = `<span class="btn-icon">☰</span>SIMPLE PAGE`;
   nav.appendChild(infoMenuBtn);
 

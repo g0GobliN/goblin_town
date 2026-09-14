@@ -1,0 +1,423 @@
+---
+import "../styles/global.css";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Goblin Town — Play · Vishal Gurung</title>
+    <meta
+      name="description"
+      content="Play Goblin Town at v1.monster/game — a playable pixel-art portfolio by Vishal Gurung, IT engineer in Tokyo. Walk the town, open houses for work, notes, doodles, and contact."
+    />
+    <meta name="author" content="Vishal Gurung" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://v1.monster/game/" />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="https://v1.monster/llms.txt"
+      title="LLM summary"
+    />
+    <meta property="og:site_name" content="Goblin Town" />
+    <meta property="og:title" content="Goblin Town — Play · Vishal Gurung" />
+    <meta
+      property="og:description"
+      content="A playable portfolio. Explore the town, open houses for work and notes, leave a doodle, find the church gate."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://v1.monster/game/" />
+    <meta property="og:image" content="https://v1.monster/og/goblin-town-og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Goblin Town — a playable portfolio at v1.monster" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://v1.monster/og/goblin-town-og.png" />
+    <meta name="twitter:title" content="Goblin Town — Play · Vishal Gurung" />
+    <meta
+      name="twitter:description"
+      content="A playable portfolio. Explore the town, open houses for work and notes, leave a doodle, find the church gate."
+    />
+    <meta name="theme-color" content="#0c0610" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" href="/logo/favicon-48.png" type="image/png" sizes="48x48" />
+    <link rel="icon" href="/logo/favicon-96.png" type="image/png" sizes="96x96" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- display=block: hide text until brand fonts load (avoids intro FOUT) -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Press+Start+2P&display=block"
+    />
+  </head>
+  <body class="game-page">
+    <div class="sky" aria-hidden="true">
+      <div class="sky-far"></div>
+      <div class="sky-near"></div>
+      <div class="sky-veil"></div>
+    </div>
+
+    <div id="rotate-gate" class="rotate-gate" hidden>
+      <div class="rotate-card">
+        <p class="rotate-kicker">GOBLIN TOWN</p>
+        <div class="rotate-phone" aria-hidden="true">
+          <span class="rotate-phone-body"></span>
+          <span class="rotate-arrow">↻</span>
+        </div>
+        <h2 class="rotate-title">Turn your phone</h2>
+        <p class="rotate-copy">Play sideways for the full town view.</p>
+        <a class="rotate-info" href="/">Read about me instead</a>
+      </div>
+    </div>
+
+    <button id="fs-btn" class="fs-btn" type="button" hidden>FULL</button>
+
+    <div id="boot-gate" class="boot-gate" aria-hidden="true">
+      <div class="boot-shutter boot-shutter-top"></div>
+      <div class="boot-shutter boot-shutter-bottom"></div>
+      <div class="boot-mark">
+        <p class="boot-kicker">ENTERING</p>
+        <p class="boot-title">GOBLIN TOWN</p>
+        <div class="boot-line" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <main class="stage">
+      <header class="brand">
+        <h1 class="brand-title">
+          <span class="brand-main">GOBLIN</span>
+          <span class="brand-sub">TOWN</span>
+        </h1>
+      </header>
+
+      <div class="game-frame">
+        <canvas id="room-canvas" width="960" height="540"></canvas>
+
+        <button
+          id="menu-toggle"
+          class="menu-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="room-nav"
+        >
+          MENU
+        </button>
+        <!-- Always in HTML (not JS / not display:none) so Google can discover / -->
+        <a id="info-page-link" class="info-page-link" href="/">INFO</a>
+
+        <div id="zone-label" class="hud-zone">TOWN SQUARE</div>
+        <div id="hp-hud" class="hud-hp">HP ♥♥♥♥♥</div>
+        <div id="kill-hud" class="hud-kills">KILLS 0/12</div>
+        <div id="gem-hud" class="hud-gems">GEMS 0/12</div>
+        <div id="crumb-count" class="hud-crumbs">DOORS 0/6</div>
+
+        <div id="dialogue-box" class="dialogue" hidden>
+          <div id="dialogue-name" class="dialogue-name">TOWNSFOLK</div>
+          <p id="dialogue-text"></p>
+          <p id="dialogue-prompt" class="dialogue-prompt" hidden>ENTER — continue</p>
+        </div>
+
+        <div id="room-hint" class="hint" hidden></div>
+
+        <nav id="room-nav" class="menu-panel" aria-label="Sections" hidden></nav>
+
+        <div id="touch-controls" class="touch-controls" aria-hidden="true">
+          <div id="touch-move-zone" class="touch-move-zone" aria-label="Move stick"></div>
+          <div id="touch-stick" class="touch-stick" hidden>
+            <div class="touch-stick-base"></div>
+            <div class="touch-stick-knob"></div>
+          </div>
+          <div class="touch-actions">
+            <button class="tc-btn tc-act" data-tc="act" type="button" aria-label="Talk / interact">
+              ACT
+            </button>
+            <button class="tc-btn tc-run" data-tc="run" type="button" aria-label="Run (hold)">
+              RUN
+            </button>
+            <button class="tc-btn tc-hit" data-tc="attack" type="button" aria-label="Attack">
+              HIT
+            </button>
+            <button class="tc-btn tc-jump" data-tc="jump" type="button" aria-label="Jump">
+              JUMP
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p id="controls-hint" class="controls-hint">
+        <img
+          class="press-key"
+          src="/img/gothicvania/ui/press-enter-text.png"
+          alt=""
+          width="120"
+          height="16"
+        />
+        <span class="controls-keys"
+          >Walk with A/D · run with SHIFT · jump with W · attack with J or X · talk &amp; heal with
+          SPACE · menu with M</span
+        >
+        <span class="controls-touch"
+          >Stick to walk · hold RUN to sprint · JUMP to jump · HIT to attack · ACT to talk</span
+        >
+      </p>
+      <noscript>
+        <p class="controls-hint">
+          <a href="/">Goblin Town summary — Vishal Gurung, work, notes, contact</a>
+        </p>
+      </noscript>
+    </main>
+
+    <!-- Crawlable copy: game UI is canvas + display:none modals, so auditors see thin content without this. -->
+    <section class="seo-copy" aria-label="About Goblin Town">
+      <h2>Goblin Town — a playable portfolio by Vishal Gurung</h2>
+      <p>
+        Goblin Town is the personal site of <strong>Vishal Gurung</strong>, an IT engineer
+        (システムエンジニア) based in Tokyo, Japan. Online he goes by goblin. This page is a small
+        pixel-art town you can explore in the browser: walk the streets, open doors, talk to
+        townsfolk, and find the work, notes, doodles, and contact links behind each place.
+      </p>
+      <p>
+        Vishal grew up in Nepal and now lives in Tokyo. Day to day he works on web development,
+        WebRTC, system development, and cameras. Outside of work he builds side projects — apps,
+        tools, open source packages, and experiments that start from a simple “what if.” This town
+        is one of those experiments: a portfolio you play instead of scrolling a static page.
+      </p>
+      <p>
+        What you can do here: visit the Diary House to read who lives in Goblin Town; open the
+        Workshop for selected builds such as reality-map and other shipped projects; browse the
+        Library for notes and write-ups; leave a doodle on the Gallery Wall; and stop by the Church
+        Gate to say hello. Collect gems, defeat Hell-gato, and unlock more of the map if you like —
+        or skip straight to the text summary if you prefer reading.
+      </p>
+      <p>
+        Next steps: <a href="/">read the full summary on the home page</a> for who Vishal is, selected
+        work, notes, and contact details without playing the game; enter the town above and explore the
+        doors; email
+        <a href="mailto:hello@v1.monster">hello@v1.monster</a> to collaborate or ask about a project;
+        find code on
+        <a href="https://github.com/g0GobliN" rel="noopener">GitHub @g0GobliN</a>; or try
+        <a href="https://www.npmjs.com/package/reality-map" rel="noopener">reality-map on npm</a>.
+        Privacy and terms live at <a href="/privacy/">/privacy/</a> and <a href="/terms/">/terms/</a
+        > — no cookies, no trackers, no analytics.
+      </p>
+      <p>
+        Goblin Town runs at v1.monster/game. Prefer keyboard or touch: A/D to walk, SHIFT to run, W
+        to jump, J or X to attack, SPACE to talk or heal, M for the menu. On a phone, use the
+        on-screen stick and ACT / RUN / HIT / JUMP. Happy you’re here — take a look around.
+      </p>
+    </section>
+
+    <div id="cine-overlay" class="cine" hidden>
+      <div id="cine-panel" class="cine-panel">
+        <p id="cine-kicker" class="cine-kicker"></p>
+        <h2 id="cine-title" class="cine-title"></h2>
+        <div id="cine-body" class="cine-body"></div>
+        <p id="cine-prompt" class="cine-prompt">ENTER — continue</p>
+        <p id="cine-progress" class="cine-progress"></p>
+      </div>
+      <div id="credits-roll" class="credits-roll" hidden>
+        <div id="credits-track" class="credits-track"></div>
+      </div>
+      <p id="credits-hint" class="credits-hint" hidden>SPACE — fast forward · ESC — skip</p>
+      <button id="credits-skip" class="pixel-btn credits-skip" type="button" hidden>
+        SKIP ▸
+      </button>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay">
+      <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div id="modal-title" class="modal-title"></div>
+          <button id="modal-close" class="pixel-btn modal-close-btn">X</button>
+        </div>
+        <div class="modal-body">
+          <div data-section="about" hidden>
+            <div class="stack about-copy">
+              <p class="small accent">⌂ HOUSE DIARY · who lives here</p>
+              <p>
+                Hey — I'm <strong>Vishal</strong>. Online I'm usually just
+                <strong>goblin</strong>.
+              </p>
+              <p>
+                This little town is my portfolio. Walk around, open a few doors, see what I've been
+                working on.
+              </p>
+              <p>
+                I grew up in Nepal, live in Tokyo now, and work as an IT engineer
+                (システムエンジニア). Outside of work I build side projects — apps, tools, small
+                open source stuff, and weird experiments like this page.
+              </p>
+              <p>
+                I've always liked taking things apart: games, phones, code. Japanese came through
+                school; Japan came after that. Still figuring things out day by day.
+              </p>
+              <p class="small">Happy you're here. Take a look around.</p>
+            </div>
+          </div>
+
+          <div data-section="work" hidden>
+            <div class="stack section-panel">
+              <p class="small accent">⚒ WORKSHOP · selected builds</p>
+              <p class="small">
+                Projects pinned to the board — apps, tools, packages. Flip a card to see what
+                shipped.
+              </p>
+              <p id="work-status" class="small">&gt; unlocking the workshop...</p>
+              <div id="work-list" class="stack"></div>
+              <nav id="work-pager" class="pager" hidden></nav>
+            </div>
+          </div>
+
+          <div data-section="blog" hidden>
+            <div class="stack section-panel">
+              <p class="small accent">❒ LIBRARY · notes &amp; posts</p>
+              <p class="small">Quiet shelves for write-ups. When a page is ready, it lands here.</p>
+              <p id="blog-status" class="small">&gt; lighting the reading lamps...</p>
+              <div id="blog-list" class="stack"></div>
+              <nav id="blog-pager" class="pager" hidden></nav>
+              <div id="blog-detail" hidden></div>
+            </div>
+          </div>
+
+          <div data-section="gallery" hidden>
+            <div class="stack section-panel">
+              <p class="small accent">▦ GALLERY WALL · visitor doodles</p>
+              <p class="small">
+                Sketches left by travelers. Yours can hang here too — draw in Sketch Alley, then
+                check back.
+              </p>
+              <p id="doodle-status" class="small">&gt; dusting the wall...</p>
+              <div id="doodle-grid" class="doodle-grid"></div>
+              <nav id="doodle-pager" class="pager" hidden></nav>
+            </div>
+          </div>
+
+          <div data-section="doodle" hidden>
+            <div class="stack">
+              <p class="small accent">SKETCH ALLEY · leave a mark</p>
+              <p class="small">&gt; CLICK &amp; DRAG to draw · then SAVE — it hangs on the wall</p>
+              <canvas id="doodle-canvas" width="640" height="400"></canvas>
+              <div class="doodle-controls">
+                <div id="doodle-palette" class="doodle-palette">
+                  <button
+                    id="doodle-eraser"
+                    class="doodle-swatch doodle-eraser-swatch"
+                    type="button"
+                    aria-label="Eraser"
+                    title="Eraser"></button>
+                </div>
+                <div class="doodle-size-label" role="group" aria-label="Brush size">
+                  <span class="small">SIZE</span>
+                  <div id="doodle-sizes" class="doodle-size-presets">
+                    <button
+                      type="button"
+                      class="doodle-size-btn is-active"
+                      data-size="4"
+                      aria-label="Thin"
+                    >
+                      <span class="doodle-size-dot"></span>
+                    </button>
+                    <button type="button" class="doodle-size-btn" data-size="8" aria-label="Medium">
+                      <span class="doodle-size-dot"></span>
+                    </button>
+                    <button type="button" class="doodle-size-btn" data-size="16" aria-label="Thick">
+                      <span class="doodle-size-dot"></span>
+                    </button>
+                    <button type="button" class="doodle-size-btn" data-size="28" aria-label="Bold">
+                      <span class="doodle-size-dot"></span>
+                    </button>
+                  </div>
+                </div>
+                <button id="doodle-clear" class="pixel-btn doodle-clear-btn" type="button">
+                  CLEAR
+                </button>
+              </div>
+              <div class="doodle-submit-row">
+                <label class="small doodle-name-label">
+                  NAME
+                  <input
+                    id="doodle-name"
+                    class="doodle-name"
+                    type="text"
+                    maxlength="40"
+                    placeholder="goblin-sketch"
+                  />
+                </label>
+                <button id="doodle-save" class="pixel-btn" type="button">SAVE DOODLE</button>
+              </div>
+              <p id="doodle-save-status" class="small"></p>
+            </div>
+          </div>
+
+          <div data-section="contact" hidden>
+            <div class="stack">
+              <p class="small accent">⚑ CHURCH GATE · say hello</p>
+              <p>
+                If you want to work together, ask about a project, or just say hi — here's where to
+                find me.
+              </p>
+              <ul class="list">
+                <li>
+                  &gt; Email:
+                  <a href="mailto:hello@v1.monster">hello@v1.monster</a>
+                </li>
+                <li>
+                  &gt; GitHub:
+                  <a href="https://github.com/g0GobliN" target="_blank" rel="noopener">g0GobliN</a>
+                </li>
+                <li>
+                  &gt; Instagram:
+                  <a href="https://instagram.com/goblin01_" target="_blank" rel="noopener"
+                    >goblin01_</a
+                  >
+                </li>
+                <li>
+                  &gt; RealityMap on npm:
+                  <a href="https://www.npmjs.com/package/reality-map" target="_blank" rel="noopener"
+                    >reality-map</a
+                  >
+                </li>
+                <li>
+                  &gt; All in one place:
+                  <a href="/contact/">/contact/</a>
+                </li>
+              </ul>
+              <button id="credits-btn" class="pixel-btn" type="button">WATCH CREDITS</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      import { initPixelRoom } from "../game/room";
+
+      // Portrait phones: show rotate gate. Landscape / desktop: play.
+      const rotateGate = document.getElementById("rotate-gate");
+      const touchish = () =>
+        window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(hover: none)").matches;
+      const portrait = () => window.matchMedia("(orientation: portrait)").matches;
+
+      const syncOrient = () => {
+        const block = touchish() && portrait();
+        document.documentElement.classList.toggle("game-portrait-block", block);
+        if (rotateGate) rotateGate.hidden = !block;
+      };
+      syncOrient();
+      window.addEventListener("orientationchange", syncOrient);
+      window.matchMedia("(orientation: portrait)").addEventListener("change", syncOrient);
+
+      initPixelRoom();
+    </script>
+  </body>
+</html>

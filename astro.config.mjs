@@ -49,7 +49,8 @@ export default defineConfig({
         !page.includes("/admin") &&
         !page.includes("/api/") &&
         !page.includes("/404") &&
-        !page.includes("/500"),
+        !page.includes("/500") &&
+        !page.includes("/info"), // /info/ now redirects to /
     }),
   ],
   server: { port: 4321, host: true },

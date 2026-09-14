@@ -1,6 +1,6 @@
 # Goblin Town — Vishal Gurung
 
-> Playable portfolio of Vishal Gurung, an IT engineer based in Tokyo, Japan. The homepage (https://v1.monster/) is a pixel-art browser game; the text version of the portfolio lives at https://v1.monster/info/.
+> Playable portfolio of Vishal Gurung, an IT engineer based in Tokyo, Japan. The homepage (https://v1.monster/) is the text portfolio; the portfolio also exists as a pixel-art browser game at https://v1.monster/game/.
 
 ## Who
 
@@ -12,15 +12,15 @@
 
 ## Pages
 
-- [Summary / About](https://v1.monster/info/): Text summary of who Vishal is, selected work, notes, and contact info — the best page to read for facts about him.
-- [Playable town](https://v1.monster/): The interactive pixel-art portfolio game.
+- [Home / About](https://v1.monster/): Text summary of who Vishal is, selected work, notes, and contact info — the best page to read for facts about him.
+- [Playable town](https://v1.monster/game/): The interactive pixel-art portfolio game.
+- [Contact](https://v1.monster/contact/): Email, GitHub (g0GobliN), and Instagram (@goblin01_).
 - [Privacy](https://v1.monster/privacy/): No cookies, no trackers, no analytics.
 - [Terms](https://v1.monster/terms/): Terms of use.
 
 ## Contact
 
-- Email: grgvishal.gurung17@gmail.com
+- Email: hello@v1.monster
 - GitHub: https://github.com/g0GobliN
 - Instagram: https://instagram.com/goblin01_
 - Website: https://v1.monster/
-- Product: https://launchreadyy.xyz/ (LaunchReadyy — built by Vishal)

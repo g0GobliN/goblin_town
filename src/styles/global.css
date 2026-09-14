@@ -442,7 +442,7 @@ body {
 
 /* Kept out of the HUD visually (not a MENU-row button anymore), but never
    display:none/visibility:hidden — this link is how Google discovers
-   /info/, and hidden-via-display links get discounted by crawlers. */
+   / (the text home page), and hidden-via-display links get discounted by crawlers. */
 .info-page-link {
   position: absolute;
   width: 1px;
