@@ -24,3 +24,6 @@ pnpm-debug.log*
 !.vscode/extensions.json
 .idea
 .DS_Store
+
+# local tool metadata (freebuff client)
+.freebuff/
