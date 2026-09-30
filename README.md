@@ -30,7 +30,7 @@ Grew up in Nepal. Live in Tokyo. IT engineer by day; side projects, open source,
 
 ## License
 
-Licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — give credit, no commercial use (no selling, no monetizing). See [LICENSE](LICENSE).
+Licensed under the [MIT License](LICENSE) — free to use, modify, and build on, including commercially. Just keep the copyright notice (or credit **Vishal Gurung / [g0GobliN](https://github.com/g0GobliN)** somewhere visible in your project).
 
 ## Art & sound
 
