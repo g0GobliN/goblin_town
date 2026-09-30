@@ -308,6 +308,111 @@
   margin-top: 0;
 }
 
+/* Markdown body — rendered by src/lib/markdown.ts */
+
+.entry-content code {
+  font-family: Consolas, "Courier New", ui-monospace, monospace;
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  background: rgba(57, 71, 88, 0.6);
+  border: 1px solid var(--itchio_border_color);
+  border-radius: 3px;
+}
+
+.entry-content pre {
+  margin: 1.2em 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: #0b1017;
+  border: 1px solid var(--itchio_border_color);
+  border-radius: 3px;
+  line-height: 1.6;
+}
+
+.entry-content pre code {
+  display: block;
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #d7e3ee;
+  white-space: pre;
+}
+
+.entry-content ul,
+.entry-content ol {
+  margin: 0.9em 0;
+  padding-left: 1.5em;
+}
+
+.entry-content li {
+  margin: 0.3em 0;
+}
+
+.entry-content li::marker {
+  color: var(--itchio_link_color);
+}
+
+.entry-content blockquote {
+  margin: 1.2em 0;
+  padding: 2px 16px;
+  border-left: 3px solid var(--itchio_link_color);
+  background: rgba(57, 71, 88, 0.35);
+  border-radius: 0 3px 3px 0;
+  color: rgba(254, 254, 255, 0.85);
+}
+
+.entry-content blockquote p {
+  margin: 0.6em 0;
+}
+
+.entry-content hr {
+  margin: 2em 0;
+  border: none;
+  border-top: 1px solid var(--itchio_border_color);
+}
+
+.entry-content a {
+  color: var(--itchio_link_color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.entry-content a:hover {
+  filter: brightness(1.15);
+}
+
+.entry-content strong {
+  color: #ffffff;
+}
+
+.entry-content del {
+  opacity: 0.6;
+}
+
+/* Mermaid diagrams (src/lib/mermaid.ts) — centered, max-width like the text column */
+
+.entry-mermaid {
+  margin: 1.4em 0;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  background: #0b1017;
+  border: 1px solid var(--itchio_border_color);
+  border-radius: 3px;
+  overflow-x: auto;
+}
+
+.entry-mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.entry-mermaid .nodeLabel,
+.entry-mermaid .edgeLabel {
+  color: #fefeff;
+}
+
 .entry-highlights {
   margin: 18px 0 0;
   padding: 12px 14px;

@@ -50,49 +50,11 @@ const slug = Astro.params.slug ?? "";
 
     <script>
       import { getDbBlog } from "../../lib/firebase";
-
-      function escapeHtml(value: string) {
-        return value
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;");
-      }
+      import { escapeHtml, markdownToHtml } from "../../lib/markdown";
+      import { renderMermaidBlocks } from "../../lib/mermaid";
 
       function escapeAttr(value: string) {
-        return escapeHtml(value).replaceAll("'", "&#39;");
-      }
-
-      function formatContent(content: string) {
-        const escaped = escapeHtml(content);
-        const lines = escaped.split(/\r?\n/);
-        const out: string[] = [];
-        let para: string[] = [];
-
-        const flushPara = () => {
-          if (!para.length) return;
-          out.push(`<p>${para.join("<br />")}</p>`);
-          para = [];
-        };
-
-        for (const raw of lines) {
-          const line = raw.trimEnd();
-          const heading = /^(#{1,3})\s+(.+)$/.exec(line.trim());
-          if (heading) {
-            flushPara();
-            // Page already has an h1 (post title): # → h2, ## → h3, ### → h4
-            const level = heading[1]!.length + 1;
-            out.push(`<h${level}>${heading[2]}</h${level}>`);
-            continue;
-          }
-          if (line.trim() === "") {
-            flushPara();
-            continue;
-          }
-          para.push(line);
-        }
-        flushPara();
-        return out.join("");
+        return escapeHtml(value);
       }
 
       const root = document.getElementById("entry-root")!;
@@ -126,13 +88,18 @@ const slug = Astro.params.slug ?? "";
             <p class="entry-meta">${escapeHtml(blog.publishedAt || "")}</p>
             ${blog.tagline ? `<p class="entry-tagline">${escapeHtml(blog.tagline)}</p>` : ""}
             ${tags ? `<div class="entry-stack">${tags}</div>` : ""}
-            <div class="entry-content">${formatContent(blog.content || "")}</div>
+            <div class="entry-content">${markdownToHtml(blog.content || "")}</div>
             <div class="entry-links">
               <a class="entry-link-btn" href="/#blog-list">More notes</a>
               <a class="entry-link-btn primary" href="/game/">Enter Game</a>
             </div>
           </div>
         `;
+
+        // ```mermaid fences were rendered as code blocks by markdownToHtml;
+        // upgrade them to diagrams. Lazy-loads mermaid only when a diagram
+        // exists, and falls back to the plain code block on parse errors.
+        await renderMermaidBlocks(root);
       }
 
       void load();
