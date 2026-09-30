@@ -6,8 +6,8 @@ import {
   HURT_DURATION,
   INVULN_DURATION,
   PLAYER_MAX_HP,
-} from "./constants";
-import type { EnemyKind, EnemyState, PlayerState, Rect } from "./types";
+} from "./constants.ts";
+import type { EnemyKind, EnemyState, PlayerState, Rect } from "./types.ts";
 
 function overlaps(a: Rect, b: Rect): boolean {
   return a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h;

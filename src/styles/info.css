@@ -218,6 +218,13 @@
   color: #fefeff;
 }
 
+/* The <pre> blocks in .info-desc hold prose, not code: sentences must wrap
+   and flow as normal paragraphs instead of honoring the hard line breaks
+   (and blank lines) in the markup. */
+.info-desc pre {
+  white-space: normal;
+}
+
 .info-desc figure {
   margin: 1em 0;
 }

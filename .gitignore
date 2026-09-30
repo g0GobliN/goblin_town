@@ -3,6 +3,9 @@ dist/
 .astro/
 .wrangler/
 
+# e2e test artifacts
+test-results/
+
 # dependencies
 node_modules/
 

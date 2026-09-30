@@ -1,5 +1,5 @@
-import { GROUND_Y, WORLD_W } from "./constants";
-import type { Crumb, Npc, Prop, Rect } from "./types";
+import { GROUND_Y, WORLD_W } from "./constants.ts";
+import type { Crumb, Npc, Prop, Rect } from "./types.ts";
 
 /**
  * Town layout — add props / crates / wells here to grow the run.

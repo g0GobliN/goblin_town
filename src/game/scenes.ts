@@ -1,6 +1,6 @@
-import { GROUND_Y, WORLD_W } from "./constants";
-import type { Crumb, Npc, Prop, Rect, SectionKey } from "./types";
-import { CRUMBS, LADDERS, NPCS, PLATFORMS, PROPS } from "./world";
+import { GROUND_Y, WORLD_W } from "./constants.ts";
+import type { Crumb, Npc, Prop, Rect, SectionKey } from "./types.ts";
+import { CRUMBS, LADDERS, NPCS, PLATFORMS, PROPS } from "./world.ts";
 
 export type SceneId = "town" | SectionKey;
 

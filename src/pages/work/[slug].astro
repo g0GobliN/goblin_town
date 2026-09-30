@@ -1,22 +1,33 @@
 ---
 import "../../styles/global.css";
 import "../../styles/entry.css";
+import { fetchProjectSsr } from "../../lib/firestore-rest";
 
 export const prerender = false;
 
 const slug = Astro.params.slug ?? "";
+const project = slug ? await fetchProjectSsr(slug) : null;
+
+const title = project ? `${project.name || project.slug} — Goblin Town` : "Work — Goblin Town";
+const description =
+  project?.tagline ||
+  project?.summary?.slice(0, 155) ||
+  "Project details from Goblin Town workshop.";
+const canonical = `https://v1.monster/work/${slug}/`;
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Work — Goblin Town</title>
-    <meta name="description" content="Project details from Goblin Town workshop." />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
     <meta property="og:site_name" content="Goblin Town" />
-    <meta property="og:title" content="Work — Goblin Town" />
-    <meta property="og:description" content="Project details from Goblin Town workshop." />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
     <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonical} />
     <meta property="og:image" content="https://v1.monster/og/goblin-town-og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -44,78 +55,65 @@ const slug = Astro.params.slug ?? "";
         </div>
       </nav>
       <div id="entry-root">
-        <p class="entry-status">&gt; unlocking the workshop shelf...</p>
+        {
+          project ? (
+            <div class="entry-body-inner">
+              {project.coverImage && <img class="entry-cover" src={project.coverImage} alt="" />}
+              <p class="entry-kicker">Workshop</p>
+              <h1 class="entry-title">{project.name || project.slug}</h1>
+              <p class="entry-meta">{[project.year, project.role].filter(Boolean).join(" · ")}</p>
+              {project.tagline && <p class="entry-tagline">{project.tagline}</p>}
+              {project.stack?.length > 0 && (
+                <div class="entry-stack">
+                  {project.stack.map((s) => (
+                    <span class="entry-chip">{s}</span>
+                  ))}
+                </div>
+              )}
+              <div class="entry-content">
+                {project.summary && <p set:html={project.summary.replaceAll("\n", "<br />")} />}
+              </div>
+              {project.highlights?.length > 0 && (
+                <ul class="entry-highlights">
+                  {project.highlights.map((h) => (
+                    <li>{h}</li>
+                  ))}
+                </ul>
+              )}
+              {(project.links?.length || true) && (
+                <div class="entry-links">
+                  {project.links?.map((l) => (
+                    <a class="entry-link-btn" href={l.href} target="_blank" rel="noopener">
+                      {l.label || "Link"}
+                    </a>
+                  ))}
+                  <a class="entry-link-btn primary" href="/game/">
+                    Enter Game
+                  </a>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div class="entry-body-inner">
+              <p class="entry-kicker">Workshop</p>
+              <h1 class="entry-title">{slug ? `“${slug}”` : "Workshop"}</h1>
+              <p class="entry-status" data-kind="err">
+                {slug
+                  ? `No project found for “${slug}”. It may have been moved or renamed — check the workshop shelf.`
+                  : "Missing project slug."}
+              </p>
+              <div class="entry-links">
+                <a class="entry-link-btn" href="/#work-list">
+                  ← Back to Workshop
+                </a>
+                <a class="entry-link-btn primary" href="/game/">
+                  Enter Game
+                </a>
+              </div>
+            </div>
+          )
+        }
       </div>
     </article>
-
-    <script>
-      import { getDbProject } from "../../lib/firebase";
-
-      function escapeHtml(value: string) {
-        return value
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;");
-      }
-
-      function escapeAttr(value: string) {
-        return escapeHtml(value).replaceAll("'", "&#39;");
-      }
-
-      const root = document.getElementById("entry-root")!;
-      const slug = document.querySelector<HTMLElement>(".entry-page")?.dataset.slug?.trim() || "";
-
-      async function load() {
-        if (!slug) {
-          root.innerHTML = `<p class="entry-status" data-kind="err">Missing project slug.</p>`;
-          return;
-        }
-        const project = await getDbProject(slug);
-        if (!project) {
-          root.innerHTML = `<p class="entry-status" data-kind="err">No project found for “${escapeHtml(slug)}”.</p>`;
-          return;
-        }
-
-        document.title = `${project.name || project.slug} — Goblin Town`;
-
-        const cover = project.coverImage
-          ? `<img class="entry-cover" src="${escapeAttr(project.coverImage)}" alt="" />`
-          : "";
-        const stack = (project.stack || [])
-          .map((s) => `<span class="entry-chip">${escapeHtml(s)}</span>`)
-          .join("");
-        const highlights = (project.highlights || [])
-          .map((h) => `<li>${escapeHtml(h)}</li>`)
-          .join("");
-        const links = (project.links || [])
-          .map(
-            (l) =>
-              `<a class="entry-link-btn" href="${escapeAttr(l.href)}" target="_blank" rel="noopener">${escapeHtml(l.label || "Link")}</a>`,
-          )
-          .join("");
-
-        root.innerHTML = `
-          ${cover}
-          <div class="entry-body-inner">
-            <p class="entry-kicker">Workshop</p>
-            <h1 class="entry-title">${escapeHtml(project.name || project.slug)}</h1>
-            <p class="entry-meta">${escapeHtml([project.year, project.role].filter(Boolean).join(" · "))}</p>
-            ${project.tagline ? `<p class="entry-tagline">${escapeHtml(project.tagline)}</p>` : ""}
-            ${stack ? `<div class="entry-stack">${stack}</div>` : ""}
-            <div class="entry-content">
-              ${project.summary ? `<p>${escapeHtml(project.summary).replaceAll("\n", "<br />")}</p>` : ""}
-            </div>
-            ${highlights ? `<ul class="entry-highlights">${highlights}</ul>` : ""}
-            <div class="entry-links">
-              ${links}
-              <a class="entry-link-btn primary" href="/game/">Enter Game</a>
-            </div>
-          </div>
-        `;
-      }
-
-      void load();
-    </script>
   </body>
 </html>

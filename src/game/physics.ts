@@ -1,4 +1,4 @@
-import { enemyFrameCount } from "./combat";
+import { enemyFrameCount } from "./combat.ts";
 import {
   ATTACK_DURATION,
   CLIMB_SPEED,
@@ -9,9 +9,9 @@ import {
   MOVE_SPEED,
   RUN_SPEED,
   VIEW_W,
-} from "./constants";
-import { getSceneLadders, getScenePlatforms, getSceneWorldW } from "./scenes";
-import type { EnemyState, PlayerState, Rect } from "./types";
+} from "./constants.ts";
+import { getSceneLadders, getScenePlatforms, getSceneWorldW } from "./scenes.ts";
+import type { EnemyState, PlayerState, Rect } from "./types.ts";
 
 export function solidAt(x: number, y: number, w: number, h: number): Rect | null {
   for (const platform of getScenePlatforms()) {

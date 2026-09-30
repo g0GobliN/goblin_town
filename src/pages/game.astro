@@ -401,6 +401,19 @@ import "../styles/global.css";
     <script>
       import { initPixelRoom } from "../game/room";
 
+      // PWA: manifest + offline service worker (production only)
+      const swManifest = document.createElement("link");
+      swManifest.rel = "manifest";
+      swManifest.href = "/manifest.webmanifest";
+      document.head.appendChild(swManifest);
+      if ("serviceWorker" in navigator && location.protocol === "https:") {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").catch(() => {
+            /* offline support is best-effort */
+          });
+        });
+      }
+
       // Portrait phones: show rotate gate. Landscape / desktop: play.
       const rotateGate = document.getElementById("rotate-gate");
       const touchish = () =>

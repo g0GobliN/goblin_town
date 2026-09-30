@@ -63,6 +63,22 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Ghost visitors — anonymous ephemeral presence for the "see other
+    // travelers" feature. Each browser owns its own doc (id = its random
+    // ghost id, stable in localStorage). Heartbeats only; no names, no
+    // reads of other fields, and docs are tiny + self-expiring client-side.
+    match /ghosts/{ghostId} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && ghostId.size() >= 4 && ghostId.size() <= 16
+        && request.resource.data.keys().hasOnly(['x', 'at'])
+        && request.resource.data.x is number
+        && request.resource.data.x >= -1
+        && request.resource.data.x <= 100000
+        && request.resource.data.at is number;
+      allow delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

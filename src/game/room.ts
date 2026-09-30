@@ -10,6 +10,9 @@ import { initDoodlePad } from "./doodle";
 import { devError } from "../lib/log";
 import { cameraFollow, ladderAt, movePlayer, tryAttack, tryJump, updateEnemy } from "./physics";
 import { drawLoading, drawWorld } from "./render";
+import { loadGameSave, saveGameSave, type GameSave } from "./save";
+import { startPresence, setGhostX } from "../lib/presence";
+import type { GhostVisitor } from "./types";
 import { SECTION_ICONS, SECTION_KEYS, titleFor } from "./sections";
 import { playSfx, unlockAudio } from "./sounds";
 import type { Assets, Crumb, Npc, PlayerState, SectionKey } from "./types";
@@ -115,8 +118,18 @@ export function initPixelRoom() {
   const keys = new Set<string>();
   const found = new Set<string>();
   const pickups = createPickups();
-  let souls = 0;
-  let bossDown = false;
+
+  // Restore progress from a previous visit (localStorage)
+  const restored = loadGameSave();
+  for (const p of pickups) {
+    if (p.kind === "soul" && restored.gems.includes(p.id)) p.taken = true;
+    if (p.kind === "heart" && restored.hearts.includes(p.id)) p.taken = true;
+  }
+  const restoredSouls = restored.gems.length;
+  for (const id of restored.doors) found.add(id);
+
+  let souls = restoredSouls;
+  let bossDown = restored.kills.includes("g12"); // Hell-gato
 
   let open: SectionKey | null = null;
   let assets: Assets | null = null;
@@ -137,6 +150,7 @@ export function initPixelRoom() {
   let bossFightReady = false;
 
   const player = makePlayer();
+  if (restored.x > 180) player.x = restored.x; // resume where you left off
   const enemies = createEnemies();
   const hellGato = () => enemies.find((e) => e.kind === "hound");
 
@@ -166,6 +180,7 @@ export function initPixelRoom() {
   const startCreditsRoll = () => {
     if (!cineOverlay || !creditsRoll || !creditsTrack) return;
     sawCredits = true;
+    persist();
     open = null;
     overlay.classList.remove("open");
     setMenuOpen(false, false);
@@ -264,6 +279,29 @@ export function initPixelRoom() {
 
   // Gate: last boss + enough gems — other mobs optional
   const gateUnlocked = () => bossDown && souls >= GEMS_TO_OPEN_GATE;
+
+  // ── progress persistence ────────────────────────────────
+  const killedIds = new Set(restored.kills);
+  const takenGemIds = new Set(restored.gems);
+  const takenHeartIds = new Set(restored.hearts);
+
+  const persist = () => {
+    const save: GameSave = {
+      gems: [...takenGemIds],
+      hearts: [...takenHeartIds],
+      kills: [...killedIds],
+      doors: [...found].filter((id) => id.startsWith("door-")),
+      x: Math.round(player.x),
+      finished: sawCredits,
+    };
+    saveGameSave(save);
+  };
+
+  // Position + any pending state is saved when the tab is hidden or closed
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") persist();
+  });
+  window.addEventListener("beforeunload", persist);
 
   updateHpHud();
   updateKillHud();
@@ -521,6 +559,7 @@ export function initPixelRoom() {
     if (crumb) {
       const isNew = !found.has(crumb.id);
       found.add(crumb.id);
+      if (isNew) persist();
       updateCrumbHud();
       hideDialogue();
       if (isNew) playSfx("secret");
@@ -1226,6 +1265,10 @@ export function initPixelRoom() {
     if (combat === "kill") {
       playSfx("kill");
       updateKillHud();
+      for (const e of enemies) {
+        if (!e.alive || e.dying) killedIds.add(e.id);
+      }
+      persist();
       const bossNow = hellGato();
       if (!bossDown && bossWasUp && bossNow && (bossNow.dying || !bossNow.alive)) {
         bossDown = true;
@@ -1259,12 +1302,16 @@ export function initPixelRoom() {
       if (p.kind === "heart") {
         if (player.hp >= player.maxHp) continue;
         p.taken = true;
+        takenHeartIds.add(p.id);
+        persist();
         player.hp = Math.min(player.maxHp, player.hp + 1);
         updateHpHud();
         playSfx("secret");
       } else {
         p.taken = true;
         souls += 1;
+        takenGemIds.add(p.id);
+        persist();
         updateGemHud();
         // Gem also tops up a heart if you're hurt
         if (player.hp < player.maxHp) {
@@ -1313,12 +1360,19 @@ export function initPixelRoom() {
     updateHint();
   };
 
+  // ── ghost visitors (other travelers on the street) ──────
+  let ghosts: GhostVisitor[] = [];
+  startPresence((list) => {
+    ghosts = list;
+  });
+
   const draw = () => {
     if (!assets) {
       drawLoading(ctx, canvas);
       return;
     }
 
+    setGhostX(player.x);
     drawWorld({
       ctx,
       assets,
@@ -1328,6 +1382,7 @@ export function initPixelRoom() {
       found,
       inTown: true,
       gateOpen: gateUnlocked(),
+      ghosts,
       pickups,
     });
   };

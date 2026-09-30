@@ -6,6 +6,7 @@ import {
   type Doodle,
   type Project,
 } from "../lib/firebase";
+import { blogCardHtml, projectCardHtml } from "../lib/content-render";
 import type { SectionKey } from "./types";
 
 const WORK_PAGE = 2;
@@ -91,22 +92,7 @@ async function renderWork() {
   const slice = projects.slice(workPage * WORK_PAGE, workPage * WORK_PAGE + WORK_PAGE);
 
   setStatus(status, `> ${projects.length} project${projects.length === 1 ? "" : "s"}`);
-  list.innerHTML = slice
-    .map(
-      (p) => `
-      <a class="card card-link" href="/work/${encodeURIComponent(p.slug)}/">
-        <div class="accent">&gt; ${escapeHtml(p.name || p.slug)}</div>
-        <p>${escapeHtml(p.tagline || p.summary || "")}</p>
-        <p class="small">${escapeHtml([p.year, p.role].filter(Boolean).join(" · "))}</p>
-        ${
-          p.stack?.length
-            ? `<p class="small">${escapeHtml(p.stack.slice(0, 6).join(" / "))}</p>`
-            : ""
-        }
-        <p class="small card-open">Open page →</p>
-      </a>`,
-    )
-    .join("");
+  list.innerHTML = slice.map(projectCardHtml).join("");
 
   bindPager("work-pager", workPage, totalPages, (next) => {
     workPage = next;
@@ -141,19 +127,7 @@ async function renderBlog() {
   const slice = blogs.slice(blogPage * BLOG_PAGE, blogPage * BLOG_PAGE + BLOG_PAGE);
 
   setStatus(status, `> ${blogs.length} post${blogs.length === 1 ? "" : "s"}`);
-  list.innerHTML = slice
-    .map(
-      (b) => `
-      <a class="card card-link" href="/blog/${encodeURIComponent(b.slug)}/">
-        <div class="accent">&gt; ${escapeHtml(b.title)}</div>
-        <p>${escapeHtml(b.tagline || "")}</p>
-        <p class="small">${escapeHtml(b.publishedAt || "")}${
-          b.tags?.length ? ` · ${escapeHtml(b.tags.slice(0, 3).join(", "))}` : ""
-        }</p>
-        <p class="small card-open">Open page →</p>
-      </a>`,
-    )
-    .join("");
+  list.innerHTML = slice.map(blogCardHtml).join("");
 
   bindPager("blog-pager", blogPage, totalPages, (next) => {
     blogPage = next;

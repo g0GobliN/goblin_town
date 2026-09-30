@@ -1,22 +1,38 @@
 ---
 import "../../styles/global.css";
 import "../../styles/entry.css";
+import { fetchBlogSsr } from "../../lib/firestore-rest";
+import { markdownToHtml } from "../../lib/markdown";
 
 export const prerender = false;
 
 const slug = Astro.params.slug ?? "";
+const blog = slug ? await fetchBlogSsr(slug) : null;
+
+const title = blog ? `${blog.title} — Goblin Town` : "Blog — Goblin Town";
+const description =
+  blog?.tagline ||
+  blog?.content?.replace(/[#*`>\[\]]/g, "").slice(0, 155) ||
+  "A note from the Goblin Town library.";
+const canonical = `https://v1.monster/blog/${slug}/`;
+const contentHtml = blog ? markdownToHtml(blog.content || "") : "";
+const hasMermaid = contentHtml.includes('class="language-mermaid"');
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Blog — Goblin Town</title>
-    <meta name="description" content="A note from the Goblin Town library." />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
     <meta property="og:site_name" content="Goblin Town" />
-    <meta property="og:title" content="Blog — Goblin Town" />
-    <meta property="og:description" content="A note from the Goblin Town library." />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
     <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonical} />
+    {blog?.publishedAt && <meta property="article:published_time" content={blog.publishedAt} />}
+    {blog?.tags?.map((t) => <meta property="article:tag" content={t} />)}
     <meta property="og:image" content="https://v1.monster/og/goblin-town-og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -44,65 +60,61 @@ const slug = Astro.params.slug ?? "";
         </div>
       </nav>
       <div id="entry-root">
-        <p class="entry-status">&gt; pulling a volume from the shelf...</p>
+        {
+          blog ? (
+            <div class="entry-body-inner">
+              {blog.coverImage && <img class="entry-cover" src={blog.coverImage} alt="" />}
+              <p class="entry-kicker">Library</p>
+              <h1 class="entry-title">{blog.title}</h1>
+              <p class="entry-meta">{blog.publishedAt || ""}</p>
+              {blog.tagline && <p class="entry-tagline">{blog.tagline}</p>}
+              {blog.tags?.length > 0 && (
+                <div class="entry-stack">
+                  {blog.tags.map((t) => (
+                    <span class="entry-chip">{t}</span>
+                  ))}
+                </div>
+              )}
+              <div class="entry-content" set:html={contentHtml} />
+              <div class="entry-links">
+                <a class="entry-link-btn" href="/#blog-list">
+                  More notes
+                </a>
+                <a class="entry-link-btn primary" href="/game/">
+                  Enter Game
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div class="entry-body-inner">
+              <p class="entry-kicker">Library</p>
+              <h1 class="entry-title">{slug ? `“${slug}”` : "Library"}</h1>
+              <p class="entry-status" data-kind="err">
+                {slug
+                  ? `No post found for “${slug}”. It may have been moved or renamed — check the library shelf.`
+                  : "Missing post slug."}
+              </p>
+              <div class="entry-links">
+                <a class="entry-link-btn" href="/#blog-list">
+                  ← Back to Library
+                </a>
+                <a class="entry-link-btn primary" href="/game/">
+                  Enter Game
+                </a>
+              </div>
+            </div>
+          )
+        }
       </div>
     </article>
 
-    <script>
-      import { getDbBlog } from "../../lib/firebase";
-      import { escapeHtml, markdownToHtml } from "../../lib/markdown";
-      import { renderMermaidBlocks } from "../../lib/mermaid";
-
-      function escapeAttr(value: string) {
-        return escapeHtml(value);
-      }
-
-      const root = document.getElementById("entry-root")!;
-      const slug = document.querySelector<HTMLElement>(".entry-page")?.dataset.slug?.trim() || "";
-
-      async function load() {
-        if (!slug) {
-          root.innerHTML = `<p class="entry-status" data-kind="err">Missing post slug.</p>`;
-          return;
-        }
-        const blog = await getDbBlog(slug);
-        if (!blog) {
-          root.innerHTML = `<p class="entry-status" data-kind="err">No post found for “${escapeHtml(slug)}”.</p>`;
-          return;
-        }
-
-        document.title = `${blog.title} — Goblin Town`;
-
-        const cover = blog.coverImage
-          ? `<img class="entry-cover" src="${escapeAttr(blog.coverImage)}" alt="" />`
-          : "";
-        const tags = (blog.tags || [])
-          .map((t) => `<span class="entry-chip">${escapeHtml(t)}</span>`)
-          .join("");
-
-        root.innerHTML = `
-          ${cover}
-          <div class="entry-body-inner">
-            <p class="entry-kicker">Library</p>
-            <h1 class="entry-title">${escapeHtml(blog.title)}</h1>
-            <p class="entry-meta">${escapeHtml(blog.publishedAt || "")}</p>
-            ${blog.tagline ? `<p class="entry-tagline">${escapeHtml(blog.tagline)}</p>` : ""}
-            ${tags ? `<div class="entry-stack">${tags}</div>` : ""}
-            <div class="entry-content">${markdownToHtml(blog.content || "")}</div>
-            <div class="entry-links">
-              <a class="entry-link-btn" href="/#blog-list">More notes</a>
-              <a class="entry-link-btn primary" href="/game/">Enter Game</a>
-            </div>
-          </div>
-        `;
-
-        // ```mermaid fences were rendered as code blocks by markdownToHtml;
-        // upgrade them to diagrams. Lazy-loads mermaid only when a diagram
-        // exists, and falls back to the plain code block on parse errors.
-        await renderMermaidBlocks(root);
-      }
-
-      void load();
-    </script>
+    {
+      blog && hasMermaid && (
+        <script>
+          import {renderMermaidBlocks} from "../../lib/mermaid"; const root =
+          document.getElementById("entry-root")!; await renderMermaidBlocks(root);
+        </script>
+      )
+    }
   </body>
 </html>

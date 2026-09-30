@@ -1,6 +1,25 @@
 ---
 import "../styles/global.css";
 import "../styles/info.css";
+import { fetchBlogsSsr, fetchProjectsSsr } from "../lib/firestore-rest";
+import { blogRowHtml, projectRowHtml } from "../lib/content-render";
+
+// Server-render the workshop/library lists so crawlers see real links.
+// The client script below re-renders the same nodes after Firebase loads,
+// keeping the page live without changing what crawlers indexed.
+const ssrProjects = await fetchProjectsSsr();
+const ssrBlogs = await fetchBlogsSsr();
+const ssrWorkHtml = ssrProjects.length
+  ? ssrProjects.slice(0, 8).map(projectRowHtml).join("")
+  : projectRowHtml({
+      slug: "reality-map",
+      name: "RealityMap",
+      tagline: "Already on npm — more builds land here soon.",
+      year: "",
+    });
+const ssrBlogHtml = ssrBlogs.length
+  ? ssrBlogs.slice(0, 8).map(blogRowHtml).join("")
+  : `<span class="info-row"><span class="info-row-main"><span class="info-row-title">No pages yet</span><span class="info-row-sub">Notes show up here when they're ready.</span></span></span>`;
 ---
 
 <html lang="en">
@@ -143,17 +162,7 @@ I like simple interfaces, code I can understand later, and projects that keep te
               <pre>
 Coding, open source, pixel art, games, random experiments, and turning ideas into real things just to see if they work.
 
-Also walking around Tokyo and finding quiet places.</pre>
-
-              <h3>Why Goblin?</h3>
-              <pre>
-It started with Spider-Man — I saw the Green Goblin and thought the name was cool.
-
-Then around 2013–14, I started playing Clash of Clans and saw goblins there too. Somehow the name just stuck with me.
-
-After that, I started using Goblin as my internet name instead of my real name.
-
-And I’ve been using it ever since.</pre>
+Most of my free time goes into side projects that have no reason to exist — building them is the fun part. Every now and then, one of those experiments grows into something real, and this site is one of them.</pre>
 
               <figure class="info-inline-media">
                 <img
@@ -402,17 +411,21 @@ It’s not really a résumé. It’s just my place on the internet.</pre>
         <section class="info-block">
           <div class="info-section-head">
             <h2 id="dev-log">Development log</h2>
-            <p class="small" id="blog-status">&gt; lighting lamps...</p>
+            <p class="small" id="blog-status">
+              &gt; {ssrBlogs.length} post{ssrBlogs.length === 1 ? "" : "s"}
+            </p>
           </div>
-          <div id="blog-list" class="info-rows"></div>
+          <div id="blog-list" class="info-rows" set:html={ssrBlogHtml} />
         </section>
 
         <section class="info-block">
           <div class="info-section-head">
             <h2 id="workshop">Workshop</h2>
-            <p class="small" id="work-status">&gt; unlocking...</p>
+            <p class="small" id="work-status">
+              &gt; {ssrProjects.length} project{ssrProjects.length === 1 ? "" : "s"}
+            </p>
           </div>
-          <div id="work-list" class="info-rows"></div>
+          <div id="work-list" class="info-rows" set:html={ssrWorkHtml} />
         </section>
 
         <section class="info-block">
@@ -570,6 +583,7 @@ It’s not really a résumé. It’s just my place on the internet.</pre>
       } from "../lib/firebase";
       import { devError } from "../lib/log";
       import { attachInlineReplyForms } from "../lib/reply-form";
+      import { blogRowHtml, projectRowHtml } from "../lib/content-render";
 
       const GOBLIN_NAME_KEY = "gt-goblin-name";
       function getLockedName(): string {
@@ -663,70 +677,22 @@ It’s not really a résumé. It’s just my place on the internet.</pre>
         return escapeHtml(value).replaceAll("'", "&#39;");
       }
 
-      function rowHtml(href: string, title: string, sub: string, meta: string) {
-        return `<a class="info-row" href="${escapeAttr(href)}">
-          <span class="info-row-main">
-            <span class="info-row-title">${escapeHtml(title)}</span>
-            ${sub ? `<span class="info-row-sub">${escapeHtml(sub)}</span>` : ""}
-          </span>
-          ${meta ? `<span class="info-row-meta">${escapeHtml(meta)}</span>` : ""}
-        </a>`;
-      }
-
       async function loadWork() {
         const list = document.getElementById("work-list")!;
         const status = document.getElementById("work-status")!;
         const projects = await getDbProjects();
-        if (!projects.length) {
-          status.textContent = "> forge is cold for now";
-          list.innerHTML = rowHtml(
-            "https://www.npmjs.com/package/reality-map",
-            "RealityMap",
-            "Already on npm — more builds land here soon.",
-            "",
-          );
-          return;
-        }
+        if (!projects.length) return; // keep SSR fallback (RealityMap row) visible
         status.textContent = `> ${projects.length} project${projects.length === 1 ? "" : "s"}`;
-        list.innerHTML = projects
-          .slice(0, 8)
-          .map((p) =>
-            rowHtml(
-              `/work/${encodeURIComponent(p.slug)}/`,
-              p.name || p.slug,
-              [p.tagline || p.summary || "", p.role].filter(Boolean).join(" · "),
-              p.year || "",
-            ),
-          )
-          .join("");
+        list.innerHTML = projects.slice(0, 8).map(projectRowHtml).join("");
       }
 
       async function loadBlog() {
         const list = document.getElementById("blog-list")!;
         const status = document.getElementById("blog-status")!;
         const blogs = await getDbBlogs();
-        if (!blogs.length) {
-          status.textContent = "> shelves waiting for ink";
-          list.innerHTML = rowHtml(
-            "/",
-            "No pages yet",
-            "Notes show up here when they're ready.",
-            "",
-          );
-          return;
-        }
+        if (!blogs.length) return; // keep SSR fallback row visible
         status.textContent = `> ${blogs.length} post${blogs.length === 1 ? "" : "s"}`;
-        list.innerHTML = blogs
-          .slice(0, 8)
-          .map((b) =>
-            rowHtml(
-              `/blog/${encodeURIComponent(b.slug)}/`,
-              b.title,
-              b.tagline || "",
-              (b.publishedAt || "").slice(0, 10),
-            ),
-          )
-          .join("");
+        list.innerHTML = blogs.slice(0, 8).map(blogRowHtml).join("");
       }
 
       async function loadDoodles() {

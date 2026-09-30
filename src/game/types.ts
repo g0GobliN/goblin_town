@@ -107,6 +107,12 @@ export interface Assets {
   pickup: HTMLImageElement[];
 }
 
+export interface GhostVisitor {
+  id: string;
+  x: number;
+  seenAt: number;
+}
+
 export interface DrawContext {
   ctx: CanvasRenderingContext2D;
   assets: Assets;
@@ -116,5 +122,6 @@ export interface DrawContext {
   found: Set<string>;
   inTown: boolean;
   gateOpen: boolean;
+  ghosts: GhostVisitor[];
   pickups: { id: string; x: number; y: number; taken: boolean; kind: "soul" | "heart" }[];
 }

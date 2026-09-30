@@ -511,6 +511,37 @@ function drawEnemies(ctx: DrawContext) {
   }
 }
 
+/**
+ * Ghost visitors — translucent silhouettes of other travelers on the street.
+ * Drawn as softly pulsing hooded shapes (no sprite needed); x comes from
+ * their heartbeat, so they glide rather than animate.
+ */
+function drawGhosts(ctx: DrawContext) {
+  const { ctx: c, cameraX, ghosts, assets } = ctx;
+  if (!ghosts.length) return;
+
+  const idle = assets.player.idle;
+  const frame = idle[0]!;
+  const now = performance.now();
+
+  for (const ghost of ghosts) {
+    const dx = ghost.x - cameraX + 20;
+    if (dx < -40 || dx > VIEW_W + 40) continue;
+
+    // Fade near the TTL edge so departure reads as fading out
+    const age = now - ghost.seenAt;
+    const alpha = Math.max(0.12, Math.min(0.45, 0.45 - age / 40_000));
+    const bob = Math.sin(now / 600 + ghost.x) * 2;
+
+    c.save();
+    c.globalAlpha = alpha;
+    // silhouette-tint the player sprite a spectral blue
+    c.filter = "brightness(0.25) saturate(0) drop-shadow(0 0 4px #7de0ff)";
+    c.drawImage(frame, dx - 20, GROUND_Y - 34 + bob, 40, 34);
+    c.restore();
+  }
+}
+
 function drawPlayer(ctx: DrawContext) {
   const { ctx: c, assets, cameraX, player } = ctx;
   if (player.invulnT > 0 && Math.floor(player.invulnT * 20) % 2 === 0) return;
@@ -630,6 +661,7 @@ export function drawWorld(draw: DrawContext) {
   drawPickups(draw);
   drawNpcs(draw);
   drawEnemies(draw);
+  drawGhosts(draw);
   drawPlayerShadow(draw);
   drawPlayer(draw);
   drawSceneChrome(draw);
