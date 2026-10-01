@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import "../styles/entry.css";
 import "../styles/admin.css";
 ---
 
@@ -17,7 +18,7 @@ import "../styles/admin.css";
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Press+Start+2P&family=Poppins:wght@400;600;700;800&display=swap"
     />
   </head>
   <body class="admin-body">
@@ -70,42 +71,291 @@ import "../styles/admin.css";
     </section>
 
     <main id="dash-panel" class="admin-shell" hidden>
-      <header class="admin-header">
-        <div>
+      <aside class="admin-side">
+        <div class="admin-side-brand">
           <p class="admin-kicker">GOBLIN TOWN</p>
-          <h1 class="admin-title">Keep</h1>
+          <p class="admin-brand-mini">Keeper's keep</p>
         </div>
-        <div class="admin-header-actions" id="header-actions">
+        <nav id="admin-nav" class="admin-nav" aria-label="Admin sections">
+          <button type="button" class="admin-nav-btn is-active" data-view="overview">
+            <span class="admin-nav-label">Overview</span>
+            <span class="admin-nav-label-short">Home</span>
+          </button>
+          <button type="button" class="admin-nav-btn" data-view="blog">
+            <span class="admin-nav-label">Blog</span>
+            <span class="admin-nav-label-short">Blog</span>
+            <span class="admin-nav-count" data-nav-count="blog" hidden></span>
+          </button>
+          <button type="button" class="admin-nav-btn" data-view="work">
+            <span class="admin-nav-label">Work</span>
+            <span class="admin-nav-label-short">Work</span>
+            <span class="admin-nav-count" data-nav-count="work" hidden></span>
+          </button>
+          <button type="button" class="admin-nav-btn" data-view="doodles">
+            <span class="admin-nav-label">Doodles</span>
+            <span class="admin-nav-label-short">Art</span>
+            <span class="admin-nav-count" data-nav-count="doodles" hidden></span>
+          </button>
+          <button type="button" class="admin-nav-btn" data-view="comments">
+            <span class="admin-nav-label">Comments</span>
+            <span class="admin-nav-label-short">Board</span>
+            <span class="admin-nav-count" data-nav-count="comments" hidden></span>
+          </button>
+          <button type="button" class="admin-nav-btn" data-view="settings">
+            <span class="admin-nav-label">Settings</span>
+            <span class="admin-nav-label-short">More</span>
+          </button>
+        </nav>
+        <div class="admin-side-foot">
           <span class="admin-email" id="admin-email"></span>
           <button type="button" class="pixel-btn" id="logout-btn">LOG OUT</button>
         </div>
-      </header>
+      </aside>
 
-      <section class="admin-dash">
-        <nav class="admin-tabs" role="tablist">
-          <button type="button" class="admin-tab is-active" data-tab="work">Work</button>
-          <button type="button" class="admin-tab" data-tab="blog">Blog</button>
-          <button type="button" class="admin-tab" data-tab="doodles">Doodles</button>
-          <button type="button" class="admin-tab" data-tab="comments">Comments</button>
-          <button type="button" class="admin-tab" data-tab="settings">Settings</button>
-        </nav>
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <div>
+            <h1 id="view-title" class="admin-title">Keep</h1>
+            <p id="view-sub" class="admin-view-sub">Everything at a glance</p>
+          </div>
+          <div class="admin-header-actions">
+            <a class="pixel-btn admin-btn-link" href="/" target="_blank" rel="noopener"
+              >VIEW SITE ↗</a
+            >
+            <a
+              class="pixel-btn admin-btn-link"
+              id="blog-open-link"
+              href="/"
+              target="_blank"
+              rel="noopener"
+              hidden>OPEN POST ↗</a
+            >
+          </div>
+        </header>
 
         <p class="admin-msg" id="dash-msg" hidden></p>
 
-        <div class="admin-tab-panel" data-panel="work">
-          <div class="admin-split">
-            <div>
-              <h2>Projects</h2>
-              <div id="work-list" class="admin-list"></div>
+        <!-- ============ OVERVIEW ============ -->
+        <section class="admin-view" data-view="overview">
+          <div class="admin-stats">
+            <div class="admin-stat">
+              <span class="admin-stat-num" id="stat-posts">0</span>
+              <span class="admin-stat-label">Blog posts</span>
             </div>
+            <div class="admin-stat">
+              <span class="admin-stat-num" id="stat-projects">0</span>
+              <span class="admin-stat-label">Projects</span>
+            </div>
+            <div class="admin-stat">
+              <span class="admin-stat-num" id="stat-doodles">0</span>
+              <span class="admin-stat-label">Doodles</span>
+            </div>
+            <div class="admin-stat">
+              <span class="admin-stat-num" id="stat-comments">0</span>
+              <span class="admin-stat-label">Comments</span>
+            </div>
+          </div>
+          <div class="admin-overview-grid">
+            <div class="admin-card admin-overview-card">
+              <h3>Recent posts</h3>
+              <div id="overview-recent" class="admin-list"></div>
+            </div>
+            <div class="admin-card admin-overview-card">
+              <h3>Quick actions</h3>
+              <div class="admin-actions admin-actions-col">
+                <button type="button" class="pixel-btn" data-goto="blog">WRITE A POST</button>
+                <button type="button" class="pixel-btn" data-goto="work">ADD A PROJECT</button>
+                <button type="button" class="pixel-btn" data-goto="comments">TIDY THE BOARD</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ BLOG ============ -->
+        <section class="admin-view" data-view="blog" hidden>
+          <div class="admin-editor-grid">
+            <form id="blog-form" class="admin-form admin-card admin-editor">
+              <h3 id="blog-form-title">New post</h3>
+              <div class="admin-status-row">
+                <span class="admin-status-label">Status</span>
+                <div class="admin-segment" role="group" aria-label="Post status">
+                  <button type="button" class="admin-seg-btn is-active" data-status="draft"
+                    >DRAFT</button
+                  >
+                  <button type="button" class="admin-seg-btn" data-status="published"
+                    >PUBLISHED</button
+                  >
+                </div>
+              </div>
+              <input type="hidden" name="draft" value="true" />
+              <label>
+                Title
+                <input name="title" required />
+              </label>
+              <label>
+                Slug
+                <input name="slug" required />
+                <span class="small admin-field-hint" id="blog-slug-hint">v1.monster/blog/…</span>
+              </label>
+              <label>
+                Tagline
+                <input name="tagline" placeholder="One line shown under the title" />
+              </label>
+              <div class="admin-form-row">
+                <label>Published <input name="publishedAt" type="date" /></label>
+                <label>Tags (comma) <input name="tags" /></label>
+              </div>
+              <label>
+                Cover image
+                <input type="file" name="cover" accept="image/*" />
+              </label>
+              <button type="button" class="pixel-btn admin-btn-ghost" data-clear-cover>
+                Clear cover image
+              </button>
+              <input type="hidden" name="coverImage" />
+
+              <div class="admin-editor-head">
+                <div
+                  class="admin-toolbar"
+                  id="blog-toolbar"
+                  role="toolbar"
+                  aria-label="Markdown formatting"
+                >
+                  <button type="button" class="admin-tool" data-md="h2" title="Section heading"
+                    >H2</button
+                  >
+                  <button type="button" class="admin-tool" data-md="h3" title="Sub-heading"
+                    >H3</button
+                  >
+                  <button type="button" class="admin-tool" data-md="b" title="Bold"
+                    ><strong>B</strong></button
+                  >
+                  <button type="button" class="admin-tool" data-md="i" title="Italic"
+                    ><em>I</em></button
+                  >
+                  <button type="button" class="admin-tool" data-md="s" title="Strikethrough"
+                    ><del>S</del></button
+                  >
+                  <button type="button" class="admin-tool" data-md="code" title="Inline code"
+                    >‹›</button
+                  >
+                  <button type="button" class="admin-tool" data-md="link" title="Insert link"
+                    >LINK</button
+                  >
+                  <button
+                    type="button"
+                    class="admin-tool"
+                    data-md="img"
+                    title="Insert image from URL">IMG</button
+                  >
+                  <button
+                    type="button"
+                    class="admin-tool"
+                    data-md="img-up"
+                    title="Upload an image into the post">IMG↑</button
+                  >
+                  <button type="button" class="admin-tool" data-md="quote" title="Blockquote"
+                    >QUOTE</button
+                  >
+                  <button type="button" class="admin-tool" data-md="ul" title="Bullet list"
+                    >LIST</button
+                  >
+                  <button type="button" class="admin-tool" data-md="ol" title="Numbered list"
+                    >NUM</button
+                  >
+                  <button type="button" class="admin-tool" data-md="hr" title="Divider">HR</button>
+                  <button type="button" class="admin-tool" data-md="fence" title="Code block"
+                    >BOX</button
+                  >
+                  <button type="button" class="admin-tool" data-md="mermaid" title="Mermaid diagram"
+                    >CHART</button
+                  >
+                </div>
+                <div class="admin-editor-tabs" aria-label="Editor mode">
+                  <button type="button" class="admin-editor-tab is-active" data-mode="write"
+                    >WRITE</button
+                  >
+                  <button type="button" class="admin-editor-tab" data-mode="preview">PREVIEW</button
+                  >
+                </div>
+              </div>
+              <textarea
+                id="blog-content"
+                name="content"
+                rows="16"
+                spellcheck="true"
+                placeholder={"# Big section title\n\nWrite your post in **markdown** — then hit PREVIEW to see it exactly as readers will.\n\n```\ncode blocks work too\n```"}
+              ></textarea>
+              <input type="file" id="blog-img-file" accept="image/*" hidden />
+              <div id="blog-preview" class="admin-preview" hidden>
+                <article class="entry-body-inner admin-preview-entry">
+                  <p class="entry-kicker">Library</p>
+                  <h1 class="entry-title" id="pv-title"></h1>
+                  <p class="entry-meta" id="pv-date"></p>
+                  <p class="entry-tagline" id="pv-tagline" hidden></p>
+                  <div class="entry-stack" id="pv-tags" hidden></div>
+                  <div class="entry-content" id="pv-content"></div>
+                </article>
+              </div>
+              <div class="admin-editor-foot">
+                <span id="blog-wordcount">0 words · ~0 min read</span>
+                <button
+                  type="button"
+                  class="pixel-btn admin-btn-ghost"
+                  id="blog-draft-discard"
+                  hidden>DISCARD DRAFT</button
+                >
+              </div>
+              <div class="admin-actions">
+                <button type="submit" class="pixel-btn admin-btn-primary" id="blog-submit"
+                  >PUBLISH</button
+                >
+                <button type="button" class="pixel-btn admin-btn-ghost" id="blog-reset">NEW</button>
+                <button type="button" class="pixel-btn admin-btn-danger" id="blog-del" hidden
+                  >DELETE</button
+                >
+              </div>
+            </form>
+
+            <div class="admin-side-col">
+              <div class="admin-list-head">
+                <h2>Posts</h2>
+                <span class="small" id="blog-count-label"></span>
+              </div>
+              <input
+                type="search"
+                id="blog-search"
+                class="admin-search"
+                placeholder="Search posts…"
+                aria-label="Search posts"
+              />
+              <div id="blog-list" class="admin-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ WORK ============ -->
+        <section class="admin-view" data-view="work" hidden>
+          <div class="admin-editor-grid">
             <form id="work-form" class="admin-form admin-card">
               <h3 id="work-form-title">New project</h3>
-              <input type="hidden" name="editing" value="" />
-              <label>Slug <input name="slug" required /></label>
-              <label>Name <input name="name" required /></label>
-              <label>Tagline <input name="tagline" /></label>
-              <label>Year <input name="year" /></label>
-              <label>Role <input name="role" /></label>
+              <label>
+                Name
+                <input name="name" required />
+              </label>
+              <label>
+                Slug
+                <input name="slug" required />
+                <span class="small admin-field-hint" id="work-slug-hint">v1.monster/work/…</span>
+              </label>
+              <label>
+                Tagline
+                <input name="tagline" />
+              </label>
+              <div class="admin-form-row">
+                <label>Year <input name="year" /></label>
+                <label>Role <input name="role" /></label>
+              </div>
               <label>Stack (comma) <input name="stack" /></label>
               <label>Summary <textarea name="summary" rows="3"></textarea></label>
               <label
@@ -117,74 +367,57 @@ import "../styles/admin.css";
                 <input type="file" name="cover" accept="image/*" />
               </label>
               <button type="button" class="pixel-btn admin-btn-ghost" data-clear-cover>
-                Clear image
+                Clear cover image
               </button>
               <input type="hidden" name="coverImage" />
               <div class="admin-actions">
-                <button type="submit" class="pixel-btn">SAVE</button>
+                <button type="submit" class="pixel-btn admin-btn-primary">SAVE</button>
                 <button type="button" class="pixel-btn admin-btn-ghost" id="work-reset">NEW</button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <div class="admin-tab-panel" data-panel="blog" hidden>
-          <div class="admin-split">
-            <div>
-              <h2>Posts</h2>
-              <div id="blog-list" class="admin-list"></div>
-            </div>
-            <form id="blog-form" class="admin-form admin-card">
-              <h3 id="blog-form-title">New post</h3>
-              <label>Slug <input name="slug" required /></label>
-              <label>Title <input name="title" required /></label>
-              <label>Tagline <input name="tagline" /></label>
-              <label>Published <input name="publishedAt" type="date" /></label>
-              <label>Tags (comma) <input name="tags" /></label>
-              <label
-                >Content
-                <textarea
-                  name="content"
-                  rows="14"
-                  placeholder={"# Big section title\n\n## Subsection\n\nParagraph text…"}
-                ></textarea>
-                <span class="small admin-field-hint"
-                  >Use # ## ### for headings · blank line between paragraphs</span
+                <button type="button" class="pixel-btn admin-btn-danger" id="work-del" hidden
+                  >DELETE</button
                 >
-              </label>
-              <label>
-                Cover image
-                <input type="file" name="cover" accept="image/*" />
-              </label>
-              <button type="button" class="pixel-btn admin-btn-ghost" data-clear-cover>
-                Clear image
-              </button>
-              <input type="hidden" name="coverImage" />
-              <div class="admin-actions">
-                <button type="submit" class="pixel-btn">SAVE</button>
-                <button type="button" class="pixel-btn admin-btn-ghost" id="blog-reset">NEW</button>
               </div>
             </form>
+            <div class="admin-side-col">
+              <div class="admin-list-head">
+                <h2>Projects</h2>
+                <span class="small" id="work-count-label"></span>
+              </div>
+              <input
+                type="search"
+                id="work-search"
+                class="admin-search"
+                placeholder="Search projects…"
+                aria-label="Search projects"
+              />
+              <div id="work-list" class="admin-list"></div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div class="admin-tab-panel" data-panel="doodles" hidden>
-          <h2>Doodles</h2>
-          <p class="small">Delete only — travelers still create via Sketch Alley.</p>
+        <!-- ============ DOODLES ============ -->
+        <section class="admin-view" data-view="doodles" hidden>
+          <div class="admin-list-head">
+            <h2>Doodles</h2>
+            <span class="small">Delete only — travelers create via Sketch Alley</span>
+          </div>
           <div id="doodle-list" class="admin-doodle-grid"></div>
-        </div>
+        </section>
 
-        <div class="admin-tab-panel" data-panel="comments" hidden>
-          <h2>Comments</h2>
-          <p class="small">
-            Community board on /info. Replies post as <strong>goblin</strong> (any device). Deleting a
-            comment also removes all its replies.
+        <!-- ============ COMMENTS ============ -->
+        <section class="admin-view" data-view="comments" hidden>
+          <div class="admin-list-head">
+            <h2>Comments</h2>
+            <span class="small">Replies post as <strong>goblin</strong> (any device)</span>
+          </div>
+          <p class="small admin-note">
+            Community board on /info. Deleting a comment also removes all its replies.
           </p>
           <div id="comment-list" class="admin-list"></div>
-        </div>
+        </section>
 
-        <div class="admin-tab-panel" data-panel="settings" hidden>
-          <h2>Settings</h2>
+        <!-- ============ SETTINGS ============ -->
+        <section class="admin-view" data-view="settings" hidden>
           <form
             id="password-form"
             class="admin-form admin-card admin-settings-card"
@@ -216,11 +449,11 @@ import "../styles/admin.css";
                 autocomplete="new-password"
               />
             </label>
-            <button type="submit" class="pixel-btn">UPDATE PASSWORD</button>
+            <button type="submit" class="pixel-btn admin-btn-primary">UPDATE PASSWORD</button>
             <p class="admin-msg" id="password-msg" hidden></p>
           </form>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
 
     <div id="confirm-overlay" class="admin-confirm-overlay" hidden>
@@ -251,6 +484,8 @@ import "../styles/admin.css";
         type Doodle,
         type Project,
       } from "../lib/firebase";
+      import { markdownToHtml } from "../lib/markdown";
+      import { renderMermaidBlocks } from "../lib/mermaid";
       import { devError } from "../lib/log";
       import { attachInlineReplyForms } from "../lib/reply-form";
       import {
@@ -329,6 +564,117 @@ import "../styles/admin.css";
         return data.url as string;
       }
 
+      function escapeHtml(value: string) {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      function escapeAttr(value: string) {
+        return escapeHtml(value).replaceAll("'", "&#39;");
+      }
+
+      function slugify(value: string): string {
+        return value
+          .toLowerCase()
+          .replace(/['’]/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 60);
+      }
+
+      function rowMatches(query: string, fields: Array<string | undefined | null>): boolean {
+        if (!query) return true;
+        const hay = fields
+          .filter((f) => typeof f === "string" && f.length > 0)
+          .join(" ")
+          .toLowerCase();
+        return query
+          .split(/\s+/)
+          .filter(Boolean)
+          .every((term) => hay.includes(term));
+      }
+
+      // ============ view switching ============
+
+      const VIEW_META: Record<string, { title: string; sub: string }> = {
+        overview: { title: "Keep", sub: "Everything at a glance" },
+        blog: { title: "Library", sub: "Write, edit and publish posts" },
+        work: { title: "Workshop", sub: "Projects on the shelf" },
+        doodles: { title: "Sketch Alley", sub: "Drawings left by travelers" },
+        comments: { title: "Board", sub: "Community comments & replies" },
+        settings: { title: "Vault", sub: "Account & security" },
+      };
+
+      let currentView = "overview";
+      let blogDirty = false;
+      let workDirty = false;
+
+      function doSwitch(view: string) {
+        currentView = view;
+        document.querySelectorAll<HTMLButtonElement>(".admin-nav-btn").forEach((btn) => {
+          btn.classList.toggle("is-active", btn.dataset.view === view);
+        });
+        document.querySelectorAll<HTMLElement>(".admin-view").forEach((section) => {
+          section.hidden = section.dataset.view !== view;
+        });
+        const meta = VIEW_META[view] || VIEW_META.overview!;
+        document.getElementById("view-title")!.textContent = meta.title;
+        document.getElementById("view-sub")!.textContent = meta.sub;
+        if (view === "blog") updateOpenLink();
+      }
+
+      function switchView(view: string) {
+        if (view === currentView) return;
+        if ((currentView === "blog" && blogDirty) || (currentView === "work" && workDirty)) {
+          void confirmDialog("You have unsaved edits in this form — leave anyway?", "LEAVE").then(
+            (ok) => {
+              if (ok) doSwitch(view);
+            },
+          );
+          return;
+        }
+        doSwitch(view);
+      }
+
+      function updateNavCounts() {
+        const counts: Record<string, number> = {
+          blog: blogs.length,
+          work: projects.length,
+          doodles: doodles.length,
+          comments: comments.length,
+        };
+        document.querySelectorAll<HTMLElement>("[data-nav-count]").forEach((el) => {
+          const n = counts[el.dataset.navCount || ""] || 0;
+          el.textContent = String(n);
+          el.hidden = n === 0;
+        });
+      }
+
+      // ============ auth ============
+
+      function describeAuthError(err: unknown, context: "login" | "password" = "login"): string {
+        const code = (err as { code?: string })?.code || "";
+        switch (code) {
+          case "auth/invalid-credential":
+          case "auth/wrong-password":
+          case "auth/user-not-found":
+            return context === "password" ? "Wrong current password" : "Wrong email or password";
+          case "auth/invalid-email":
+            return "That email doesn't look right";
+          case "auth/user-disabled":
+            return "This account has been disabled";
+          case "auth/too-many-requests":
+            return "Too many attempts — try again in a bit";
+          case "auth/network-request-failed":
+            return "Network error — check your connection";
+          default:
+            return "Something went wrong — try again";
+        }
+      }
+
       function setAuthed(user: User | null) {
         // Anonymous sessions (created by the community board's ensureAnonAuth on
         // /info) share this same Firebase project, so a visitor who commented
@@ -349,34 +695,593 @@ import "../styles/admin.css";
         void refreshAll();
       }
 
+      let draftRestored = false;
+
       async function refreshAll() {
         projects = await getDbProjects();
-        blogs = await getDbBlogs();
+        blogs = await getDbBlogs({ includeDrafts: true });
         doodles = await getDoodles();
         comments = await getCommunityPosts();
-        renderWorkList();
+        renderOverview();
         renderBlogList();
+        renderWorkList();
         renderDoodles();
         renderComments();
+        updateNavCounts();
+        if (!draftRestored) {
+          draftRestored = true;
+          restoreBlogDraft();
+        }
       }
+
+      // ============ overview ============
+
+      function renderOverview() {
+        document.getElementById("stat-posts")!.textContent = String(blogs.length);
+        document.getElementById("stat-projects")!.textContent = String(projects.length);
+        document.getElementById("stat-doodles")!.textContent = String(doodles.length);
+        document.getElementById("stat-comments")!.textContent = String(comments.length);
+
+        const recent = document.getElementById("overview-recent")!;
+        const top = blogs.slice(0, 5);
+        if (!top.length) {
+          recent.innerHTML = `<p class="small">No posts yet — write your first one.</p>`;
+          return;
+        }
+        recent.innerHTML = top
+          .map(
+            (b) => `
+          <article class="admin-row admin-row-compact">
+            <div class="admin-row-top">
+              <span class="admin-row-title">${escapeHtml(b.title || b.slug)}${
+                b.draft ? ' <span class="admin-tag admin-tag-draft">DRAFT</span>' : ""
+              }</span>
+              <span class="admin-row-meta">${escapeHtml((b.publishedAt || "").slice(0, 10))}</span>
+            </div>
+            <div class="admin-row-foot">
+              <span class="small">${escapeHtml(b.slug)}</span>
+              <div class="admin-item-actions">
+                <button type="button" class="pixel-btn" data-edit-blog="${escapeAttr(b.slug)}">EDIT</button>
+                ${
+                  b.draft
+                    ? ""
+                    : `<a class="pixel-btn admin-btn-ghost" href="/blog/${encodeURIComponent(b.slug)}/" target="_blank" rel="noopener">VIEW</a>`
+                }
+              </div>
+            </div>
+          </article>`,
+          )
+          .join("");
+        bindBlogEditButtons(recent);
+      }
+
+      // ============ blog: list ============
+
+      let blogQuery = "";
+
+      function blogRowHtml(b: Blog): string {
+        const text = (b.content || "").trim();
+        const words = text ? text.split(/\s+/).length : 0;
+        const tags = (b.tags || [])
+          .slice(0, 4)
+          .map((t) => `<span class="admin-tag">${escapeHtml(t)}</span>`)
+          .join("");
+        return `
+          <article class="admin-row">
+            <div class="admin-row-top">
+              <span class="admin-row-title">${escapeHtml(b.title || b.slug)}${
+                b.draft ? ' <span class="admin-tag admin-tag-draft">DRAFT</span>' : ""
+              }</span>
+              <span class="admin-row-meta">${escapeHtml((b.publishedAt || "").slice(0, 10))}</span>
+            </div>
+            ${b.tagline ? `<p class="small admin-row-sub">${escapeHtml(b.tagline)}</p>` : ""}
+            ${tags ? `<div class="admin-row-tags">${tags}</div>` : ""}
+            <div class="admin-row-foot">
+              <span class="small">${escapeHtml(b.slug)} · ${words} words</span>
+              <div class="admin-item-actions">
+                ${
+                  b.draft
+                    ? ""
+                    : `<a class="pixel-btn admin-btn-ghost" href="/blog/${encodeURIComponent(b.slug)}/" target="_blank" rel="noopener">VIEW</a>`
+                }
+                <button type="button" class="pixel-btn" data-edit-blog="${escapeAttr(b.slug)}">EDIT</button>
+                <button type="button" class="pixel-btn admin-btn-danger" data-del-blog="${escapeAttr(b.slug)}">DEL</button>
+              </div>
+            </div>
+          </article>`;
+      }
+
+      function renderBlogList() {
+        const list = document.getElementById("blog-list")!;
+        const label = document.getElementById("blog-count-label")!;
+        if (!blogs.length) {
+          label.textContent = "";
+          list.innerHTML = `<p class="small">No posts yet.</p>`;
+          return;
+        }
+        const shown = blogs.filter((b) =>
+          rowMatches(blogQuery, [b.title, b.slug, b.tagline, (b.tags || []).join(" "), b.content]),
+        );
+        const draftCount = blogs.filter((b) => b.draft).length;
+        label.textContent = blogQuery
+          ? `${shown.length} of ${blogs.length}`
+          : draftCount
+            ? `${blogs.length} total · ${draftCount} draft${draftCount === 1 ? "" : "s"}`
+            : `${blogs.length} total`;
+        if (!shown.length) {
+          list.innerHTML = `<p class="small">Nothing matches “${escapeHtml(blogQuery)}”.</p>`;
+          return;
+        }
+        list.innerHTML = shown.map(blogRowHtml).join("");
+        bindBlogEditButtons(list);
+        list.querySelectorAll<HTMLButtonElement>("[data-del-blog]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const slug = btn.dataset.delBlog!;
+            if (!(await confirmDialog(`Delete blog "${slug}"?`))) return;
+            try {
+              await api("/api/admin/blogs", {
+                method: "DELETE",
+                body: JSON.stringify({ slug }),
+              });
+              showMsg(dashMsg, `Deleted blog ${slug}`);
+              if (blogEditingSlug === slug) resetBlogForm();
+              await refreshAll();
+            } catch (e) {
+              showMsg(dashMsg, (e as Error).message, "err");
+            }
+          });
+        });
+      }
+
+      function bindBlogEditButtons(scope: HTMLElement) {
+        scope.querySelectorAll<HTMLButtonElement>("[data-edit-blog]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const b = blogs.find((x) => x.slug === btn.dataset.editBlog);
+            if (!b) return;
+            fillBlogForm(b);
+            switchView("blog");
+          });
+        });
+      }
+
+      // ============ blog: editor ============
+
+      const blogForm = document.getElementById("blog-form") as HTMLFormElement;
+      const blogContentEl = document.getElementById("blog-content") as HTMLTextAreaElement;
+      const blogTitleEl = blogForm.elements.namedItem("title") as HTMLInputElement;
+      const blogSlugEl = blogForm.elements.namedItem("slug") as HTMLInputElement;
+      const blogImgFileEl = document.getElementById("blog-img-file") as HTMLInputElement;
+      let blogEditingSlug = "";
+      let slugTouched = false;
+      let editorMode: "write" | "preview" = "write";
+      let blogStatus: "draft" | "published" = "draft";
+
+      function setBlogStatus(status: "draft" | "published") {
+        blogStatus = status;
+        (blogForm.elements.namedItem("draft") as HTMLInputElement).value =
+          status === "draft" ? "true" : "false";
+        document.querySelectorAll<HTMLButtonElement>(".admin-seg-btn").forEach((btn) => {
+          btn.classList.toggle("is-active", btn.dataset.status === status);
+        });
+        (blogForm.querySelector('button[type="submit"]') as HTMLButtonElement).textContent =
+          status === "draft" ? "SAVE DRAFT" : "PUBLISH";
+        updateOpenLink();
+      }
+
+      function setBlogFormMode(editing: boolean) {
+        document.getElementById("blog-form-title")!.textContent = editing
+          ? "Edit post"
+          : "New post";
+        document.getElementById("blog-del")!.hidden = !editing;
+      }
+
+      function updateOpenLink() {
+        const link = document.getElementById("blog-open-link")!;
+        // Drafts aren't on the site — no public URL to open.
+        if (blogEditingSlug && blogStatus === "published") {
+          link.hidden = false;
+          link.setAttribute("href", `/blog/${encodeURIComponent(blogEditingSlug)}/`);
+        } else {
+          link.hidden = true;
+        }
+      }
+
+      function fillBlogForm(b: Blog) {
+        blogEditingSlug = b.slug;
+        slugTouched = true;
+        blogTitleEl.value = b.title || "";
+        blogSlugEl.value = b.slug;
+        (blogForm.elements.namedItem("tagline") as HTMLInputElement).value = b.tagline || "";
+        (blogForm.elements.namedItem("publishedAt") as HTMLInputElement).value = (
+          b.publishedAt || ""
+        ).slice(0, 10);
+        (blogForm.elements.namedItem("tags") as HTMLInputElement).value = (b.tags || []).join(", ");
+        blogContentEl.value = b.content || "";
+        (blogForm.elements.namedItem("coverImage") as HTMLInputElement).value = b.coverImage || "";
+        setBlogFormMode(true);
+        setBlogStatus(b.draft ? "draft" : "published");
+        blogDirty = false;
+        updateSlugHint();
+        updateBlogStats();
+        if (editorMode === "preview") void renderBlogPreview();
+      }
+
+      function resetBlogForm() {
+        blogForm.reset();
+        (blogForm.elements.namedItem("coverImage") as HTMLInputElement).value = "";
+        blogEditingSlug = "";
+        slugTouched = false;
+        setBlogFormMode(false);
+        setBlogStatus("draft"); // new posts start as drafts — go live deliberately
+        blogDirty = false;
+        clearBlogDraft();
+        updateSlugHint();
+        updateBlogStats();
+        if (editorMode === "preview") void renderBlogPreview();
+      }
+
+      function updateSlugHint() {
+        const raw = blogSlugEl.value.trim();
+        document.getElementById("blog-slug-hint")!.textContent = raw
+          ? `v1.monster/blog/${raw}/`
+          : "v1.monster/blog/…";
+      }
+
+      function updateBlogStats() {
+        const text = blogContentEl.value.trim();
+        const words = text ? text.split(/\s+/).length : 0;
+        const mins = words === 0 ? 0 : Math.max(1, Math.round(words / 200));
+        document.getElementById("blog-wordcount")!.textContent =
+          `${words} words · ~${mins} min read`;
+      }
+
+      // --- markdown toolbar helpers ---
+
+      function afterEdit(ta: HTMLTextAreaElement) {
+        ta.focus();
+        ta.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+
+      function wrapSel(
+        ta: HTMLTextAreaElement,
+        before: string,
+        after: string,
+        placeholder: string,
+      ) {
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? start;
+        const selected = ta.value.slice(start, end) || placeholder;
+        ta.value = ta.value.slice(0, start) + before + selected + after + ta.value.slice(end);
+        ta.setSelectionRange(start + before.length, start + before.length + selected.length);
+        afterEdit(ta);
+      }
+
+      function togglePrefix(ta: HTMLTextAreaElement, prefix: string) {
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? start;
+        const value = ta.value;
+        const lineStart = value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+        let lineEnd = value.indexOf("\n", end);
+        if (lineEnd === -1) lineEnd = value.length;
+        const lines = value.slice(lineStart, lineEnd).split("\n");
+        const allHave = lines.every((l) => l.startsWith(prefix));
+        const edited = lines.map((l) =>
+          allHave ? l.slice(prefix.length) : l.startsWith(prefix) ? l : prefix + l,
+        );
+        const joined = edited.join("\n");
+        ta.value = value.slice(0, lineStart) + joined + value.slice(lineEnd);
+        ta.setSelectionRange(lineStart, lineStart + joined.length);
+        afterEdit(ta);
+      }
+
+      function numberLines(ta: HTMLTextAreaElement) {
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? start;
+        const value = ta.value;
+        const lineStart = value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+        let lineEnd = value.indexOf("\n", end);
+        if (lineEnd === -1) lineEnd = value.length;
+        const lines = value.slice(lineStart, lineEnd).split("\n");
+        const joined = lines.map((l, i) => `${i + 1}. ${l.replace(/^\d+[.)]\s+/, "")}`).join("\n");
+        ta.value = value.slice(0, lineStart) + joined + value.slice(lineEnd);
+        ta.setSelectionRange(lineStart, lineStart + joined.length);
+        afterEdit(ta);
+      }
+
+      function insertBlock(ta: HTMLTextAreaElement, text: string, cursorFromEnd = 0) {
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? start;
+        const before = ta.value.slice(0, start);
+        const after = ta.value.slice(end);
+        // Keep a blank line between the block and surrounding text.
+        const pad =
+          before === "" || before.endsWith("\n\n") ? "" : before.endsWith("\n") ? "\n" : "\n\n";
+        const insert = `${pad}${text}\n\n`;
+        ta.value = before + insert + after;
+        const caret = before.length + pad.length + text.length + 2 - cursorFromEnd;
+        ta.setSelectionRange(caret, caret);
+        afterEdit(ta);
+      }
+
+      function insertSnippet(ta: HTMLTextAreaElement, text: string) {
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? start;
+        ta.value = ta.value.slice(0, start) + text + ta.value.slice(end);
+        ta.setSelectionRange(start + text.length, start + text.length);
+        afterEdit(ta);
+      }
+
+      function insertLink(ta: HTMLTextAreaElement) {
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? start;
+        const selected = ta.value.slice(start, end) || "link text";
+        const snippet = `[${selected}](https://)`;
+        ta.value = ta.value.slice(0, start) + snippet + ta.value.slice(end);
+        const urlStart = start + selected.length + 3;
+        ta.setSelectionRange(urlStart, urlStart + 8);
+        afterEdit(ta);
+      }
+
+      function insertImageMarkdown(ta: HTMLTextAreaElement, url: string, alt: string) {
+        const md = `![${alt}](${url})`;
+        insertSnippet(ta, md);
+      }
+
+      async function uploadContentImage(file: File) {
+        const ta = blogContentEl;
+        const marker = `UPLOADING-${Date.now()}`;
+        insertSnippet(ta, marker);
+        try {
+          const url = await uploadCover(file, "blog-media");
+          const alt = file.name.replace(/\.[^.]+$/, "");
+          ta.value = ta.value.replace(marker, `![${alt}](${url})`);
+          afterEdit(ta);
+          showMsg(dashMsg, "Image uploaded into the post");
+        } catch (err) {
+          ta.value = ta.value.replace(marker, "");
+          afterEdit(ta);
+          showMsg(dashMsg, (err as Error).message, "err");
+        }
+      }
+
+      function applyMarkdownAction(action: string) {
+        const ta = blogContentEl;
+        switch (action) {
+          case "h2":
+            togglePrefix(ta, "## ");
+            break;
+          case "h3":
+            togglePrefix(ta, "### ");
+            break;
+          case "b":
+            wrapSel(ta, "**", "**", "bold text");
+            break;
+          case "i":
+            wrapSel(ta, "*", "*", "italic text");
+            break;
+          case "s":
+            wrapSel(ta, "~~", "~~", "struck out");
+            break;
+          case "code":
+            wrapSel(ta, "`", "`", "code");
+            break;
+          case "link":
+            insertLink(ta);
+            break;
+          case "quote":
+            togglePrefix(ta, "> ");
+            break;
+          case "ul":
+            togglePrefix(ta, "- ");
+            break;
+          case "ol":
+            numberLines(ta);
+            break;
+          case "hr":
+            insertBlock(ta, "---");
+            break;
+          case "fence":
+            insertBlock(ta, "```ts\n\n```", 3);
+            break;
+          case "mermaid":
+            insertBlock(ta, "```mermaid\ngraph TD\n  A --> B\n```");
+            break;
+          case "img": {
+            const url = window.prompt("Image URL:");
+            if (url && url.trim()) {
+              const selected = ta.value.slice(ta.selectionStart ?? 0, ta.selectionEnd ?? 0);
+              insertImageMarkdown(ta, url.trim(), selected || "image");
+            }
+            break;
+          }
+          case "img-up":
+            blogImgFileEl.click();
+            break;
+        }
+      }
+
+      // --- live preview (reuses the real blog page styles + markdown renderer) ---
+
+      let previewTimer: ReturnType<typeof setTimeout> | null = null;
+
+      function schedulePreview() {
+        if (previewTimer) clearTimeout(previewTimer);
+        previewTimer = setTimeout(() => void renderBlogPreview(), 120);
+      }
+
+      async function renderBlogPreview() {
+        const title =
+          (blogForm.elements.namedItem("title") as HTMLInputElement).value.trim() ||
+          "Untitled post";
+        const tagline = (blogForm.elements.namedItem("tagline") as HTMLInputElement).value.trim();
+        const date = (blogForm.elements.namedItem("publishedAt") as HTMLInputElement).value || "";
+        const tags = (blogForm.elements.namedItem("tags") as HTMLInputElement).value
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+
+        document.getElementById("pv-title")!.textContent = title;
+        document.getElementById("pv-date")!.textContent = date;
+        const taglineEl = document.getElementById("pv-tagline")!;
+        taglineEl.textContent = tagline;
+        taglineEl.hidden = !tagline;
+        const tagsEl = document.getElementById("pv-tags")!;
+        tagsEl.innerHTML = tags
+          .map((t) => `<span class="entry-chip">${escapeHtml(t)}</span>`)
+          .join("");
+        tagsEl.hidden = tags.length === 0;
+        document.getElementById("pv-content")!.innerHTML = markdownToHtml(
+          blogContentEl.value || "_Nothing written yet._",
+        );
+        try {
+          // Renders ```mermaid fences as diagrams (same code path as the blog page).
+          await renderMermaidBlocks(document.getElementById("blog-preview")!);
+        } catch (err) {
+          devError("preview mermaid render failed:", err);
+        }
+      }
+
+      function setEditorMode(mode: "write" | "preview") {
+        editorMode = mode;
+        document.querySelectorAll<HTMLButtonElement>(".admin-editor-tab").forEach((tab) => {
+          tab.classList.toggle("is-active", tab.dataset.mode === mode);
+        });
+        blogContentEl.hidden = mode !== "write";
+        document.getElementById("blog-toolbar")!.hidden = mode !== "write";
+        document.getElementById("blog-preview")!.hidden = mode !== "preview";
+        if (mode === "preview") void renderBlogPreview();
+      }
+
+      // --- draft autosave (per tab session) ---
+
+      const DRAFT_KEY = "goblin-admin-blog-draft";
+      let draftTimer: ReturnType<typeof setTimeout> | null = null;
+
+      function scheduleDraftSave() {
+        if (blogEditingSlug) return; // drafts only for fresh posts
+        if (draftTimer) clearTimeout(draftTimer);
+        draftTimer = setTimeout(saveBlogDraft, 400);
+      }
+
+      function saveBlogDraft() {
+        if (blogEditingSlug) return;
+        const title = blogTitleEl.value.trim();
+        const content = blogContentEl.value;
+        if (!title && !content.trim()) return;
+        const draft = {
+          title: blogTitleEl.value,
+          slug: blogSlugEl.value,
+          tagline: (blogForm.elements.namedItem("tagline") as HTMLInputElement).value,
+          publishedAt: (blogForm.elements.namedItem("publishedAt") as HTMLInputElement).value,
+          tags: (blogForm.elements.namedItem("tags") as HTMLInputElement).value,
+          content,
+        };
+        try {
+          sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch {
+          // storage full/blocked — draft simply won't persist
+        }
+        document.getElementById("blog-draft-discard")!.hidden = false;
+      }
+
+      function restoreBlogDraft() {
+        let raw = "";
+        try {
+          raw = sessionStorage.getItem(DRAFT_KEY) || "";
+        } catch {
+          return;
+        }
+        if (!raw) return;
+        if (blogTitleEl.value.trim()) return; // only restore into an empty form
+        try {
+          const d = JSON.parse(raw) as Partial<
+            Record<"title" | "slug" | "tagline" | "publishedAt" | "tags" | "content", string>
+          >;
+          if (!d.title && !d.content) return;
+          blogTitleEl.value = d.title || "";
+          blogSlugEl.value = d.slug || "";
+          (blogForm.elements.namedItem("tagline") as HTMLInputElement).value = d.tagline || "";
+          (blogForm.elements.namedItem("publishedAt") as HTMLInputElement).value =
+            d.publishedAt || "";
+          (blogForm.elements.namedItem("tags") as HTMLInputElement).value = d.tags || "";
+          blogContentEl.value = d.content || "";
+          slugTouched = Boolean(d.slug);
+          updateSlugHint();
+          updateBlogStats();
+          document.getElementById("blog-draft-discard")!.hidden = false;
+          showMsg(dashMsg, "Draft restored from this session — finish and publish whenever ready.");
+        } catch {
+          try {
+            sessionStorage.removeItem(DRAFT_KEY);
+          } catch {
+            // ignore
+          }
+        }
+      }
+
+      function clearBlogDraft() {
+        try {
+          sessionStorage.removeItem(DRAFT_KEY);
+        } catch {
+          // ignore
+        }
+        document.getElementById("blog-draft-discard")!.hidden = true;
+      }
+
+      // ============ work ============
+
+      let workQuery = "";
 
       function renderWorkList() {
         const list = document.getElementById("work-list")!;
+        const label = document.getElementById("work-count-label")!;
         if (!projects.length) {
+          label.textContent = "";
           list.innerHTML = `<p class="small">No projects yet.</p>`;
           return;
         }
-        list.innerHTML = projects
+        const shown = projects.filter((p) =>
+          rowMatches(workQuery, [
+            p.name,
+            p.slug,
+            p.tagline,
+            p.summary,
+            p.role,
+            p.year,
+            (p.stack || []).join(" "),
+          ]),
+        );
+        label.textContent = workQuery
+          ? `${shown.length} of ${projects.length}`
+          : `${projects.length} total`;
+        if (!shown.length) {
+          list.innerHTML = `<p class="small">Nothing matches “${escapeHtml(workQuery)}”.</p>`;
+          return;
+        }
+        list.innerHTML = shown
           .map(
             (p) => `
-          <article class="admin-item">
-            <div>
-              <strong>${escapeHtml(p.name)}</strong>
-              <p class="small">${escapeHtml(p.slug)} · ${escapeHtml(p.year || "")}</p>
+          <article class="admin-row">
+            <div class="admin-row-top">
+              <span class="admin-row-title">${escapeHtml(p.name || p.slug)}</span>
+              <span class="admin-row-meta">${escapeHtml([p.year, p.role].filter(Boolean).join(" · "))}</span>
             </div>
-            <div class="admin-item-actions">
-              <button type="button" class="pixel-btn" data-edit-project="${escapeAttr(p.slug)}">EDIT</button>
-              <button type="button" class="pixel-btn admin-btn-danger" data-del-project="${escapeAttr(p.slug)}">DEL</button>
+            ${p.tagline ? `<p class="small admin-row-sub">${escapeHtml(p.tagline)}</p>` : ""}
+            ${
+              (p.stack || []).length
+                ? `<div class="admin-row-tags">${(p.stack || [])
+                    .slice(0, 6)
+                    .map((s) => `<span class="admin-tag">${escapeHtml(s)}</span>`)
+                    .join("")}</div>`
+                : ""
+            }
+            <div class="admin-row-foot">
+              <span class="small">${escapeHtml(p.slug)}</span>
+              <div class="admin-item-actions">
+                <a class="pixel-btn admin-btn-ghost" href="/work/${encodeURIComponent(p.slug)}/" target="_blank" rel="noopener">VIEW</a>
+                <button type="button" class="pixel-btn" data-edit-project="${escapeAttr(p.slug)}">EDIT</button>
+                <button type="button" class="pixel-btn admin-btn-danger" data-del-project="${escapeAttr(p.slug)}">DEL</button>
+              </div>
             </div>
           </article>`,
           )
@@ -385,7 +1290,10 @@ import "../styles/admin.css";
         list.querySelectorAll<HTMLButtonElement>("[data-edit-project]").forEach((btn) => {
           btn.addEventListener("click", () => {
             const p = projects.find((x) => x.slug === btn.dataset.editProject);
-            if (p) fillWorkForm(p);
+            if (p) {
+              fillWorkForm(p);
+              switchView("work");
+            }
           });
         });
         list.querySelectorAll<HTMLButtonElement>("[data-del-project]").forEach((btn) => {
@@ -398,106 +1306,65 @@ import "../styles/admin.css";
                 body: JSON.stringify({ slug }),
               });
               showMsg(dashMsg, `Deleted project ${slug}`);
+              if (workEditingSlug === slug) resetWorkForm();
               await refreshAll();
             } catch (e) {
               showMsg(dashMsg, (e as Error).message, "err");
             }
           });
         });
+      }
+
+      const workForm = document.getElementById("work-form") as HTMLFormElement;
+      let workEditingSlug = "";
+
+      function setWorkFormMode(editing: boolean) {
+        document.getElementById("work-form-title")!.textContent = editing
+          ? "Edit project"
+          : "New project";
+        document.getElementById("work-del")!.hidden = !editing;
+      }
+
+      function updateWorkSlugHint() {
+        const raw = ((workForm.elements.namedItem("slug") as HTMLInputElement).value || "").trim();
+        document.getElementById("work-slug-hint")!.textContent = raw
+          ? `v1.monster/work/${raw}/`
+          : "v1.monster/work/…";
       }
 
       function fillWorkForm(p: Project) {
-        const form = document.getElementById("work-form") as HTMLFormElement;
-        document.getElementById("work-form-title")!.textContent = "Edit project";
-        (form.elements.namedItem("slug") as HTMLInputElement).value = p.slug;
-        (form.elements.namedItem("name") as HTMLInputElement).value = p.name || "";
-        (form.elements.namedItem("tagline") as HTMLInputElement).value = p.tagline || "";
-        (form.elements.namedItem("year") as HTMLInputElement).value = p.year || "";
-        (form.elements.namedItem("role") as HTMLInputElement).value = p.role || "";
-        (form.elements.namedItem("stack") as HTMLInputElement).value = (p.stack || []).join(", ");
-        (form.elements.namedItem("summary") as HTMLTextAreaElement).value = p.summary || "";
-        (form.elements.namedItem("highlights") as HTMLTextAreaElement).value = (
+        workEditingSlug = p.slug;
+        (workForm.elements.namedItem("slug") as HTMLInputElement).value = p.slug;
+        (workForm.elements.namedItem("name") as HTMLInputElement).value = p.name || "";
+        (workForm.elements.namedItem("tagline") as HTMLInputElement).value = p.tagline || "";
+        (workForm.elements.namedItem("year") as HTMLInputElement).value = p.year || "";
+        (workForm.elements.namedItem("role") as HTMLInputElement).value = p.role || "";
+        (workForm.elements.namedItem("stack") as HTMLInputElement).value = (p.stack || []).join(
+          ", ",
+        );
+        (workForm.elements.namedItem("summary") as HTMLTextAreaElement).value = p.summary || "";
+        (workForm.elements.namedItem("highlights") as HTMLTextAreaElement).value = (
           p.highlights || []
         ).join("\n");
-        (form.elements.namedItem("links") as HTMLTextAreaElement).value = (p.links || [])
+        (workForm.elements.namedItem("links") as HTMLTextAreaElement).value = (p.links || [])
           .map((l) => `${l.label}|${l.href}`)
           .join("\n");
-        (form.elements.namedItem("coverImage") as HTMLInputElement).value = p.coverImage || "";
+        (workForm.elements.namedItem("coverImage") as HTMLInputElement).value = p.coverImage || "";
+        setWorkFormMode(true);
+        workDirty = false;
+        updateWorkSlugHint();
       }
 
       function resetWorkForm() {
-        const form = document.getElementById("work-form") as HTMLFormElement;
-        form.reset();
-        (form.elements.namedItem("coverImage") as HTMLInputElement).value = "";
-        document.getElementById("work-form-title")!.textContent = "New project";
+        workForm.reset();
+        (workForm.elements.namedItem("coverImage") as HTMLInputElement).value = "";
+        workEditingSlug = "";
+        setWorkFormMode(false);
+        workDirty = false;
+        updateWorkSlugHint();
       }
 
-      function renderBlogList() {
-        const list = document.getElementById("blog-list")!;
-        if (!blogs.length) {
-          list.innerHTML = `<p class="small">No posts yet.</p>`;
-          return;
-        }
-        list.innerHTML = blogs
-          .map(
-            (b) => `
-          <article class="admin-item">
-            <div>
-              <strong>${escapeHtml(b.title)}</strong>
-              <p class="small">${escapeHtml(b.slug)} · ${escapeHtml(b.publishedAt || "")}</p>
-            </div>
-            <div class="admin-item-actions">
-              <button type="button" class="pixel-btn" data-edit-blog="${escapeAttr(b.slug)}">EDIT</button>
-              <button type="button" class="pixel-btn admin-btn-danger" data-del-blog="${escapeAttr(b.slug)}">DEL</button>
-            </div>
-          </article>`,
-          )
-          .join("");
-
-        list.querySelectorAll<HTMLButtonElement>("[data-edit-blog]").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const b = blogs.find((x) => x.slug === btn.dataset.editBlog);
-            if (b) fillBlogForm(b);
-          });
-        });
-        list.querySelectorAll<HTMLButtonElement>("[data-del-blog]").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            const slug = btn.dataset.delBlog!;
-            if (!(await confirmDialog(`Delete blog "${slug}"?`))) return;
-            try {
-              await api("/api/admin/blogs", {
-                method: "DELETE",
-                body: JSON.stringify({ slug }),
-              });
-              showMsg(dashMsg, `Deleted blog ${slug}`);
-              await refreshAll();
-            } catch (e) {
-              showMsg(dashMsg, (e as Error).message, "err");
-            }
-          });
-        });
-      }
-
-      function fillBlogForm(b: Blog) {
-        const form = document.getElementById("blog-form") as HTMLFormElement;
-        document.getElementById("blog-form-title")!.textContent = "Edit post";
-        (form.elements.namedItem("slug") as HTMLInputElement).value = b.slug;
-        (form.elements.namedItem("title") as HTMLInputElement).value = b.title || "";
-        (form.elements.namedItem("tagline") as HTMLInputElement).value = b.tagline || "";
-        (form.elements.namedItem("publishedAt") as HTMLInputElement).value = (
-          b.publishedAt || ""
-        ).slice(0, 10);
-        (form.elements.namedItem("tags") as HTMLInputElement).value = (b.tags || []).join(", ");
-        (form.elements.namedItem("content") as HTMLTextAreaElement).value = b.content || "";
-        (form.elements.namedItem("coverImage") as HTMLInputElement).value = b.coverImage || "";
-      }
-
-      function resetBlogForm() {
-        const form = document.getElementById("blog-form") as HTMLFormElement;
-        form.reset();
-        (form.elements.namedItem("coverImage") as HTMLInputElement).value = "";
-        document.getElementById("blog-form-title")!.textContent = "New post";
-      }
+      // ============ doodles ============
 
       function renderDoodles() {
         const list = document.getElementById("doodle-list")!;
@@ -535,6 +1402,8 @@ import "../styles/admin.css";
         });
       }
 
+      // ============ comments ============
+
       function commentItemHtml(
         c: CommunityPost,
         byParent: Map<string, CommunityPost[]>,
@@ -542,15 +1411,18 @@ import "../styles/admin.css";
       ): string {
         const kids = byParent.get(c.id) || [];
         const own = `
-          <article class="admin-item admin-comment" style="margin-left: ${depth * 20}px" data-comment-id="${escapeAttr(c.id)}">
-            <div>
-              <strong>${escapeHtml(c.name || "traveler")}</strong>
-              <p class="small">${escapeHtml((c.timestamp || "").slice(0, 10))}${depth ? " · reply" : ""}</p>
-              <p class="small">${escapeHtml(c.message || "")}</p>
+          <article class="admin-row admin-comment" style="margin-left: ${depth * 18}px" data-comment-id="${escapeAttr(c.id)}">
+            <div class="admin-row-top">
+              <span class="admin-row-title">${escapeHtml(c.name || "traveler")}${depth ? ' <span class="admin-tag">reply</span>' : ""}</span>
+              <span class="admin-row-meta">${escapeHtml((c.timestamp || "").slice(0, 10))}</span>
             </div>
-            <div class="admin-item-actions">
-              <button type="button" class="pixel-btn admin-btn-ghost" data-reply-comment="${escapeAttr(c.id)}">REPLY</button>
-              <button type="button" class="pixel-btn admin-btn-danger" data-del-comment="${escapeAttr(c.id)}">DEL</button>
+            <p class="small admin-row-sub">${escapeHtml(c.message || "")}</p>
+            <div class="admin-row-foot">
+              <span></span>
+              <div class="admin-item-actions">
+                <button type="button" class="pixel-btn admin-btn-ghost" data-reply-comment="${escapeAttr(c.id)}">REPLY</button>
+                <button type="button" class="pixel-btn admin-btn-danger" data-del-comment="${escapeAttr(c.id)}">DEL</button>
+              </div>
             </div>
           </article>`;
         return own + kids.map((k) => commentItemHtml(k, byParent, depth + 1)).join("");
@@ -625,14 +1497,17 @@ import "../styles/admin.css";
         });
       }
 
+      // ============ confirm dialog ============
+
       const confirmOverlay = document.getElementById("confirm-overlay")!;
       const confirmMsg = document.getElementById("confirm-msg")!;
       const confirmOk = document.getElementById("confirm-ok") as HTMLButtonElement;
       const confirmCancel = document.getElementById("confirm-cancel") as HTMLButtonElement;
 
-      function confirmDialog(message: string): Promise<boolean> {
+      function confirmDialog(message: string, okLabel = "DELETE"): Promise<boolean> {
         return new Promise((resolve) => {
           confirmMsg.textContent = message;
+          confirmOk.textContent = okLabel;
           confirmOverlay.hidden = false;
 
           const done = (result: boolean) => {
@@ -660,37 +1535,7 @@ import "../styles/admin.css";
         });
       }
 
-      function escapeHtml(value: string) {
-        return value
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;");
-      }
-
-      function escapeAttr(value: string) {
-        return escapeHtml(value).replaceAll("'", "&#39;");
-      }
-
-      function describeAuthError(err: unknown, context: "login" | "password" = "login"): string {
-        const code = (err as { code?: string })?.code || "";
-        switch (code) {
-          case "auth/invalid-credential":
-          case "auth/wrong-password":
-          case "auth/user-not-found":
-            return context === "password" ? "Wrong current password" : "Wrong email or password";
-          case "auth/invalid-email":
-            return "That email doesn't look right";
-          case "auth/user-disabled":
-            return "This account has been disabled";
-          case "auth/too-many-requests":
-            return "Too many attempts — try again in a bit";
-          case "auth/network-request-failed":
-            return "Network error — check your connection";
-          default:
-            return "Something went wrong — try again";
-        }
-      }
+      // ============ event wiring ============
 
       document.getElementById("login-form")!.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -698,6 +1543,10 @@ import "../styles/admin.css";
         const form = e.target as HTMLFormElement;
         const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
         const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+        if (!auth) {
+          showMsg(loginMsg, "Auth is not configured — check PUBLIC_FIREBASE_* env vars", "err");
+          return;
+        }
         try {
           await signInWithEmailAndPassword(auth, email, password);
         } catch (err) {
@@ -710,19 +1559,22 @@ import "../styles/admin.css";
         void signOut(auth);
       });
 
-      document.querySelectorAll<HTMLButtonElement>(".admin-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-          const key = tab.dataset.tab!;
-          document.querySelectorAll(".admin-tab").forEach((t) => t.classList.remove("is-active"));
-          tab.classList.add("is-active");
-          document.querySelectorAll<HTMLElement>(".admin-tab-panel").forEach((panel) => {
-            panel.hidden = panel.dataset.panel !== key;
-          });
-        });
+      document.querySelectorAll<HTMLButtonElement>(".admin-nav-btn").forEach((btn) => {
+        btn.addEventListener("click", () => switchView(btn.dataset.view || "overview"));
+      });
+
+      document.querySelectorAll<HTMLButtonElement>("[data-goto]").forEach((btn) => {
+        btn.addEventListener("click", () => switchView(btn.dataset.goto || "overview"));
       });
 
       document.getElementById("work-reset")!.addEventListener("click", resetWorkForm);
       document.getElementById("blog-reset")!.addEventListener("click", resetBlogForm);
+
+      document.getElementById("blog-draft-discard")!.addEventListener("click", () => {
+        clearBlogDraft();
+        resetBlogForm();
+        showMsg(dashMsg, "Draft discarded");
+      });
 
       document.querySelectorAll<HTMLButtonElement>("[data-clear-cover]").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -732,11 +1584,142 @@ import "../styles/admin.css";
         });
       });
 
-      document.getElementById("work-form")!.addEventListener("submit", async (e) => {
+      // --- blog editor wiring ---
+
+      blogForm.addEventListener("input", () => {
+        blogDirty = true;
+        updateBlogStats();
+        if (editorMode === "preview") schedulePreview();
+        scheduleDraftSave();
+      });
+
+      blogTitleEl.addEventListener("input", () => {
+        if (!slugTouched) blogSlugEl.value = slugify(blogTitleEl.value);
+        updateSlugHint();
+      });
+
+      blogSlugEl.addEventListener("input", () => {
+        slugTouched = true;
+        updateSlugHint();
+      });
+
+      document.getElementById("blog-toolbar")!.addEventListener("click", (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-md]");
+        if (!btn) return;
+        applyMarkdownAction(btn.dataset.md || "");
+      });
+
+      blogImgFileEl.addEventListener("change", () => {
+        const file = blogImgFileEl.files?.[0];
+        blogImgFileEl.value = "";
+        if (file) void uploadContentImage(file);
+      });
+
+      document.querySelectorAll<HTMLButtonElement>(".admin-editor-tab").forEach((tab) => {
+        tab.addEventListener("click", () =>
+          setEditorMode(tab.dataset.mode === "preview" ? "preview" : "write"),
+        );
+      });
+
+      document.querySelectorAll<HTMLButtonElement>(".admin-seg-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const next = btn.dataset.status === "published" ? "published" : "draft";
+          if (next !== blogStatus) {
+            setBlogStatus(next);
+            blogDirty = true;
+          }
+        });
+      });
+
+      document.getElementById("blog-search")!.addEventListener("input", (e) => {
+        blogQuery = (e.target as HTMLInputElement).value.trim().toLowerCase();
+        renderBlogList();
+      });
+
+      document.getElementById("work-search")!.addEventListener("input", (e) => {
+        workQuery = (e.target as HTMLInputElement).value.trim().toLowerCase();
+        renderWorkList();
+      });
+
+      document.getElementById("blog-del")!.addEventListener("click", async () => {
+        if (!blogEditingSlug) return;
+        if (!(await confirmDialog(`Delete blog "${blogEditingSlug}"?`))) return;
+        try {
+          await api("/api/admin/blogs", {
+            method: "DELETE",
+            body: JSON.stringify({ slug: blogEditingSlug }),
+          });
+          showMsg(dashMsg, `Deleted blog ${blogEditingSlug}`);
+          resetBlogForm();
+          await refreshAll();
+        } catch (err) {
+          showMsg(dashMsg, (err as Error).message, "err");
+        }
+      });
+
+      document.getElementById("work-del")!.addEventListener("click", async () => {
+        if (!workEditingSlug) return;
+        if (!(await confirmDialog(`Delete project "${workEditingSlug}"?`))) return;
+        try {
+          await api("/api/admin/projects", {
+            method: "DELETE",
+            body: JSON.stringify({ slug: workEditingSlug }),
+          });
+          showMsg(dashMsg, `Deleted project ${workEditingSlug}`);
+          resetWorkForm();
+          await refreshAll();
+        } catch (err) {
+          showMsg(dashMsg, (err as Error).message, "err");
+        }
+      });
+
+      workForm.addEventListener("input", () => {
+        workDirty = true;
+      });
+
+      (workForm.elements.namedItem("slug") as HTMLInputElement).addEventListener("input", () => {
+        updateWorkSlugHint();
+      });
+
+      blogForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         clearMsg(dashMsg);
-        const form = e.target as HTMLFormElement;
-        const fd = new FormData(form);
+        const isDraft = blogStatus === "draft";
+        const fd = new FormData(blogForm);
+        try {
+          let coverImage = String(fd.get("coverImage") || "");
+          const file = fd.get("cover");
+          if (file instanceof File && file.size > 0) {
+            coverImage = await uploadCover(file, "blog-covers");
+          }
+          await api("/api/admin/blogs", {
+            method: "POST",
+            body: JSON.stringify({
+              slug: fd.get("slug"),
+              title: fd.get("title"),
+              tagline: fd.get("tagline"),
+              publishedAt: fd.get("publishedAt"),
+              tags: fd.get("tags"),
+              content: fd.get("content"),
+              coverImage: coverImage || undefined,
+              draft: isDraft,
+            }),
+          });
+          showMsg(
+            dashMsg,
+            isDraft ? "Draft saved — it stays off the site until you publish" : "Post published",
+          );
+          resetBlogForm();
+          await refreshAll();
+        } catch (err) {
+          showMsg(dashMsg, (err as Error).message, "err");
+        }
+      });
+
+      workForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearMsg(dashMsg);
+        const fd = new FormData(workForm);
         try {
           let coverImage = String(fd.get("coverImage") || "");
           const file = fd.get("cover");
@@ -766,41 +1749,10 @@ import "../styles/admin.css";
         }
       });
 
-      document.getElementById("blog-form")!.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        clearMsg(dashMsg);
-        const form = e.target as HTMLFormElement;
-        const fd = new FormData(form);
-        try {
-          let coverImage = String(fd.get("coverImage") || "");
-          const file = fd.get("cover");
-          if (file instanceof File && file.size > 0) {
-            coverImage = await uploadCover(file, "blog-covers");
-          }
-          await api("/api/admin/blogs", {
-            method: "POST",
-            body: JSON.stringify({
-              slug: fd.get("slug"),
-              title: fd.get("title"),
-              tagline: fd.get("tagline"),
-              publishedAt: fd.get("publishedAt"),
-              tags: fd.get("tags"),
-              content: fd.get("content"),
-              coverImage: coverImage || undefined,
-            }),
-          });
-          showMsg(dashMsg, "Blog saved");
-          resetBlogForm();
-          await refreshAll();
-        } catch (err) {
-          showMsg(dashMsg, (err as Error).message, "err");
-        }
-      });
-
       document.getElementById("password-form")!.addEventListener("submit", async (e) => {
         e.preventDefault();
         clearMsg(passwordMsg);
-        if (!currentUser?.email) {
+        if (!currentUser?.email || !auth) {
           showMsg(passwordMsg, "Not signed in", "err");
           return;
         }
@@ -824,7 +1776,23 @@ import "../styles/admin.css";
         }
       });
 
-      onAuthStateChanged(auth, setAuthed);
+      // Warn before closing the tab with unsaved editor edits.
+      window.addEventListener("beforeunload", (e) => {
+        if (blogDirty || workDirty) e.preventDefault();
+      });
+
+      // Sync editor chrome with the static markup defaults (DRAFT active).
+      setBlogStatus("draft");
+
+      // Firebase may be unavailable locally (missing PUBLIC_FIREBASE_* vars) —
+      // lib/firebase exports inert handles in that case, so guard all auth
+      // calls and leave the page on the login gate instead of throwing.
+      if (auth) {
+        onAuthStateChanged(auth, setAuthed);
+      } else {
+        devError("Firebase auth unavailable — check PUBLIC_FIREBASE_* env vars");
+        showMsg(loginMsg, "Auth is not configured — check PUBLIC_FIREBASE_* env vars", "err");
+      }
     </script>
   </body>
 </html>

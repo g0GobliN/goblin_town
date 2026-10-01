@@ -35,6 +35,8 @@ export type Blog = {
   publishedAt: string;
   coverImage?: string;
   tags: string[];
+  /** True = not public. Absent/false = published (legacy docs have no field). */
+  draft?: boolean;
 };
 
 export type Doodle = {
@@ -100,14 +102,17 @@ export async function getDbProject(slug: string): Promise<Project | null> {
   }
 }
 
-export async function getDbBlogs(): Promise<Blog[]> {
+export async function getDbBlogs(opts: { includeDrafts?: boolean } = {}): Promise<Blog[]> {
   try {
     const q = query(collection(db, "blogs"), orderBy("publishedAt", "desc"));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => {
+    const blogs = snap.docs.map((d) => {
       const data = d.data() as Blog;
       return { ...data, slug: data.slug || d.id };
     });
+    // Drafts are admin-only. Public surfaces (homepage, in-game library) get
+    // published posts; the admin list opts in with includeDrafts.
+    return opts.includeDrafts ? blogs : blogs.filter((b) => !b.draft);
   } catch (error) {
     devWarn("Failed to fetch blogs:", error);
     return [];
@@ -119,6 +124,7 @@ export async function getDbBlog(slug: string): Promise<Blog | null> {
     const snap = await getDoc(doc(db, "blogs", slug));
     if (snap.exists()) {
       const data = snap.data() as Blog;
+      if (data.draft) return null; // drafts are never readable publicly
       return { ...data, slug: data.slug || snap.id };
     }
     const all = await getDbBlogs();

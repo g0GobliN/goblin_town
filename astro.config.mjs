@@ -8,17 +8,21 @@ import basicSsl from "@vitejs/plugin-basic-ssl";
 // Firestore at request time), so the sitemap integration can't discover them
 // from the filesystem. Fetch the published slugs at build time instead —
 // projects/blogs are public-read in firestore.rules, so no auth is needed.
-async function fetchSlugUrls(projectId, collection, pathPrefix) {
+async function fetchSlugUrls(projectId, collection, pathPrefix, { skipDrafts = false } = {}) {
   try {
     const res = await fetch(
       `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${collection}`,
     );
     if (!res.ok) throw new Error(`Firestore REST ${collection} ${res.status}`);
     const body = await res.json();
-    return (body.documents || [])
-      .map((doc) => doc.fields?.slug?.stringValue)
-      .filter((slug) => typeof slug === "string" && slug.length > 0)
-      .map((slug) => `https://v1.monster${pathPrefix}${slug}/`);
+    return (
+      (body.documents || [])
+        // Draft posts must never appear in the sitemap.
+        .filter((doc) => !(skipDrafts && doc.fields?.draft?.booleanValue === true))
+        .map((doc) => doc.fields?.slug?.stringValue)
+        .filter((slug) => typeof slug === "string" && slug.length > 0)
+        .map((slug) => `https://v1.monster${pathPrefix}${slug}/`)
+    );
   } catch (err) {
     console.warn(`[sitemap] could not fetch ${collection} slugs, skipping:`, err.message);
     return [];
@@ -32,7 +36,7 @@ const dynamicPages = firebaseProjectId
   ? (
       await Promise.all([
         fetchSlugUrls(firebaseProjectId, "projects", "/work/"),
-        fetchSlugUrls(firebaseProjectId, "blogs", "/blog/"),
+        fetchSlugUrls(firebaseProjectId, "blogs", "/blog/", { skipDrafts: true }),
       ])
     ).flat()
   : [];

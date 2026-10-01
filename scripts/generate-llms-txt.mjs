@@ -31,6 +31,7 @@ async function listDocs(collection) {
       const fields = {};
       for (const [k, v] of Object.entries(doc.fields || {})) {
         if (v.stringValue !== undefined) fields[k] = v.stringValue;
+        else if (v.booleanValue !== undefined) fields[k] = v.booleanValue;
         else if (v.arrayValue?.values)
           fields[k] = v.arrayValue.values.map((x) => x.stringValue).filter(Boolean);
       }
@@ -50,7 +51,8 @@ function esc(s) {
 }
 
 const projects = await listDocs("projects");
-const blogs = await listDocs("blogs");
+// Draft posts stay out of llms.txt and the RSS feed.
+const blogs = (await listDocs("blogs")).filter((b) => b.fields.draft !== true);
 blogs.sort((a, b) =>
   String(b.fields.publishedAt || "").localeCompare(String(a.fields.publishedAt || "")),
 );

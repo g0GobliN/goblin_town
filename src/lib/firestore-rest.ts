@@ -280,6 +280,7 @@ export type RestBlog = {
   publishedAt: string;
   coverImage?: string;
   tags: string[];
+  draft?: boolean;
 };
 
 export async function fetchProjectsSsr(): Promise<RestProject[]> {
@@ -314,7 +315,8 @@ export async function fetchBlogsSsr(): Promise<RestBlog[]> {
         return { ...data, slug: (data.slug as string) || id } as RestBlog;
       });
       blogs.sort((a, b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")));
-      return blogs;
+      // Drafts stay out of every public surface (homepage list, SSR fallback).
+      return blogs.filter((b) => !b.draft);
     } catch {
       return [];
     }
@@ -326,6 +328,8 @@ export async function fetchBlogSsr(slug: string): Promise<RestBlog | null> {
     const doc = await publicGetRaw("blogs", slug);
     if (doc?.fields) {
       const data = fromPublicFields(doc.fields) as Record<string, unknown>;
+      // A draft's URL must act like a missing post for the public.
+      if (data.draft === true) return null;
       return { ...data, slug: (data.slug as string) || slug } as RestBlog;
     }
   } catch {

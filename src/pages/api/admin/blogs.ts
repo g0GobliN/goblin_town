@@ -26,6 +26,9 @@ function parseBlog(body: Record<string, unknown>): Blog | null {
     publishedAt: String(body.publishedAt || new Date().toISOString().slice(0, 10)),
     coverImage: body.coverImage ? String(body.coverImage) : undefined,
     tags,
+    // Always written explicitly (true/false) so toggling a post back to
+    // published clears the flag in Firestore instead of leaving stale `true`.
+    draft: body.draft === true,
   };
 }
 
@@ -45,7 +48,9 @@ export const POST: APIRoute = async ({ request }) => {
     if (!blog) return jsonError("slug and title are required", 400);
 
     await firestoreSet("blogs", blog.slug, { ...blog });
-    await pingIndexNow(`https://v1.monster/blog/${blog.slug}/`);
+    // IndexNow tells search engines a public URL changed; drafts aren't on the
+    // site, so only ping when the save publishes (or re-publishes) the post.
+    if (!blog.draft) await pingIndexNow(`https://v1.monster/blog/${blog.slug}/`);
     return json({ ok: true, slug: blog.slug });
   } catch (err) {
     return jsonError(err instanceof Error ? err.message : "Save failed", 500);
