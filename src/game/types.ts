@@ -40,7 +40,10 @@ export interface Npc {
   x: number;
   y: number;
   facing: 1 | -1;
-  line: string;
+  /** one-liner (legacy single line) */
+  line?: string;
+  /** personality dialogue — cycles on repeat talks */
+  lines?: string[];
 }
 
 export interface PlayerState {
@@ -65,6 +68,16 @@ export interface PlayerState {
 }
 
 export type EnemyKind = "ghoul" | "ghost" | "skeleton" | "hound";
+
+/** Quest wisp — drifts in the cemetery, caught by touching it. */
+export interface GhostFlame {
+  id: string;
+  x: number;
+  y: number;
+  /** drift phase */
+  phase: number;
+  caught: boolean;
+}
 
 export interface EnemyState {
   id: string;
@@ -123,5 +136,6 @@ export interface DrawContext {
   inTown: boolean;
   gateOpen: boolean;
   ghosts: GhostVisitor[];
+  flames: GhostFlame[];
   pickups: { id: string; x: number; y: number; taken: boolean; kind: "soul" | "heart" }[];
 }
