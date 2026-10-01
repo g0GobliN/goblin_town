@@ -1411,7 +1411,7 @@ import "../styles/admin.css";
       ): string {
         const kids = byParent.get(c.id) || [];
         const own = `
-          <article class="admin-row admin-comment" style="margin-left: ${depth * 18}px" data-comment-id="${escapeAttr(c.id)}">
+          <article class="admin-row admin-comment" data-comment-id="${escapeAttr(c.id)}">
             <div class="admin-row-top">
               <span class="admin-row-title">${escapeHtml(c.name || "traveler")}${depth ? ' <span class="admin-tag">reply</span>' : ""}</span>
               <span class="admin-row-meta">${escapeHtml((c.timestamp || "").slice(0, 10))}</span>
@@ -1425,7 +1425,14 @@ import "../styles/admin.css";
               </div>
             </div>
           </article>`;
-        return own + kids.map((k) => commentItemHtml(k, byParent, depth + 1)).join("");
+        if (!kids.length) return own;
+        // Reddit-style: replies nest in their own container with a connecting thread line.
+        return (
+          own +
+          `<div class="admin-comment-children">${kids
+            .map((k) => commentItemHtml(k, byParent, depth + 1))
+            .join("")}</div>`
+        );
       }
 
       function renderComments() {
@@ -1474,9 +1481,6 @@ import "../styles/admin.css";
             Array.from(list.querySelectorAll<HTMLElement>("[data-comment-id]")).find(
               (el) => el.dataset.commentId === targetId,
             ) || null,
-          onCreated: (form, anchor) => {
-            form.style.marginLeft = (anchor as HTMLElement).style.marginLeft || "0";
-          },
           buildFormHtml: () => `
               <p class="small">Reply as <strong>goblin</strong></p>
               <textarea name="message" maxlength="280" required rows="3" placeholder="write a reply..."></textarea>

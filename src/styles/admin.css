@@ -844,6 +844,20 @@
   line-height: 1.6;
 }
 
+/* Reddit-style connecting thread line: replies nest in a container
+   whose left border visually links them to their parent comment. */
+.admin-comment-children {
+  display: grid;
+  gap: 10px;
+  margin-left: 8px;
+  padding-left: 14px;
+  border-left: 2px solid #5a3048;
+}
+
+.admin-comment-children:hover {
+  border-left-color: #8a4868;
+}
+
 .admin-reply-form {
   display: grid;
   gap: 8px;
@@ -947,6 +961,11 @@
 /* --- mobile --- */
 
 @media (max-width: 860px) {
+  .admin-comment-children {
+    margin-left: 5px;
+    padding-left: 10px;
+  }
+
   .admin-shell {
     display: block;
   }
