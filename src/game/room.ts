@@ -2,22 +2,8 @@
 // Art: ansimuz Gothicvania Town + Church (public domain / free for commercial use).
 
 import { loadAssets } from "./assets";
-import { tickAtmosphere } from "./atmosphere";
-import { activeShockwaves, tickBoss, tickShockwaves } from "./boss";
 import { BOSS_INTRO, type CineKind, creditRollHtml, slidesFor } from "./cinematics";
 import { createEnemies, enemiesKilled, makePlayer, resolveCombat } from "./combat";
-import { attackBox } from "./combat";
-import { burst, floatText, flash, hitStop, shake, shakeOffset, tickFx } from "./fx";
-import {
-  catchFlame,
-  FLAMES_REQUIRED,
-  loadQuest,
-  questRewardPaid,
-  questState,
-  saveQuest,
-} from "./quests";
-import { checkSecrets, goldenGemPos, loadSecrets, saveSecrets, secretState } from "./secrets";
-import { createGhostFlames, ledgeAt } from "./world";
 import { CREDITS_MUSIC_SRC, GROUND_Y, MUSIC_SRC, SCALE, VIEW_H, VIEW_W } from "./constants";
 import { loadSectionContent } from "./content";
 import { initDoodlePad } from "./doodle";
@@ -25,9 +11,6 @@ import { devError } from "../lib/log";
 import { cameraFollow, ladderAt, movePlayer, tryAttack, tryJump, updateEnemy } from "./physics";
 import { drawLoading, drawWorld } from "./render";
 import { loadGameSave, saveGameSave, type GameSave } from "./save";
-import { newRun, nextSpawn, spawnInterval, tickWaves, waveComposition, waveSpeed } from "./arcade";
-import type { ArcadeRun } from "./arcade";
-import type { EnemyKind } from "./types";
 import { startPresence, setGhostX } from "../lib/presence";
 import type { GhostVisitor } from "./types";
 import { SECTION_ICONS, SECTION_KEYS, titleFor } from "./sections";
@@ -145,21 +128,8 @@ export function initPixelRoom() {
   const restoredSouls = restored.gems.length;
   for (const id of restored.doors) found.add(id);
 
-  // Bonus gems (quest +5, golden +3) share this counter — cap it so the HUD
-  // and gate dialogues can never read above the 12 the gate asks for.
-  let souls = Math.min(restoredSouls, GEMS_TO_OPEN_GATE);
+  let souls = restoredSouls;
   let bossDown = restored.kills.includes("g12"); // Hell-gato
-
-  // ── new systems state ─────────────────────────────────
-  loadQuest(restored);
-  loadSecrets(restored);
-  let arcadeBest = restored.arcadeBest ?? 0;
-  const flames = createGhostFlames();
-  let arcade: ArcadeRun | null = null;
-  let arcadeBag: EnemyKind[] = [];
-  let arcadeSpawnTimer = 0;
-  let siegePending = false; // double-talks must not double-book the apocalypse
-  const npcTalkCounts = new Map<string, number>();
 
   let open: SectionKey | null = null;
   let assets: Assets | null = null;
@@ -180,14 +150,7 @@ export function initPixelRoom() {
   let bossFightReady = false;
 
   const player = makePlayer();
-  if (restored.x > 180) {
-    player.x = restored.x; // resume where you left off
-    // Land exactly on the ledge under you (or let gravity settle the street) —
-    // old saves may point at geometry that no longer exists.
-    const ledge = ledgeAt(player.x + player.w / 2);
-    if (ledge) player.y = ledge.y - player.h;
-    player.onGround = true;
-  }
+  if (restored.x > 180) player.x = restored.x; // resume where you left off
   const enemies = createEnemies();
   const hellGato = () => enemies.find((e) => e.kind === "hound");
 
@@ -305,10 +268,6 @@ export function initPixelRoom() {
 
   const updateKillHud = () => {
     if (!killEl) return;
-    if (arcade?.active) {
-      killEl.textContent = `WAVE ${arcade.wave} · ${arcade.score} KILLS`;
-      return;
-    }
     const n = enemiesKilled(enemies);
     killEl.textContent = `KILLS ${n}/${enemies.length}`;
   };
@@ -323,14 +282,6 @@ export function initPixelRoom() {
 
   // ── progress persistence ────────────────────────────────
   const killedIds = new Set(restored.kills);
-  // enemies stay dead across visits — the save remembers your kills, the boss
-  // included (bossDown above already reads the same list)
-  for (const e of enemies) {
-    if (killedIds.has(e.id)) {
-      e.alive = false;
-      e.dying = false;
-    }
-  }
   const takenGemIds = new Set(restored.gems);
   const takenHeartIds = new Set(restored.hearts);
 
@@ -342,9 +293,6 @@ export function initPixelRoom() {
       doors: [...found].filter((id) => id.startsWith("door-")),
       x: Math.round(player.x),
       finished: sawCredits,
-      arcadeBest,
-      ...saveQuest(),
-      ...saveSecrets(),
     };
     saveGameSave(save);
   };
@@ -354,10 +302,6 @@ export function initPixelRoom() {
     if (document.visibilityState === "hidden") persist();
   });
   window.addEventListener("beforeunload", persist);
-
-  // …and every few seconds while walking, so a crash can't eat your spot
-  let positionSaveT = 0;
-  let lastSavedX = restored.x;
 
   updateHpHud();
   updateKillHud();
@@ -606,44 +550,8 @@ export function initPixelRoom() {
     // Townsfolk first — crumbs nearby were stealing SPACE
     const npc = nearbyNpc(player);
     if (npc) {
-      // multi-line personalities cycle on repeat talks
-      const lines = npc.lines?.length ? npc.lines : npc.line ? [npc.line] : [];
-      const talkCounts = npcTalkCounts;
-      const idx = talkCounts.get(npc.name) ?? 0;
-      talkCounts.set(npc.name, idx + 1);
-      const line = lines[idx % Math.max(1, lines.length)] ?? "...";
-      showDialogue(line.replaceAll("{KEY}", actKey), npc.name);
+      showDialogue(npc.line.replaceAll("{KEY}", actKey), npc.name);
       playSfx("talk");
-      // quest giver hooks the flames task — reward persists, so it pays once
-      if (npc.name === "GRAVEDIGGER" && questState().done && !questState().rewarded) {
-        questRewardPaid();
-        souls = Math.min(GEMS_TO_OPEN_GATE, souls + 5);
-        updateGemHud();
-        persist();
-        window.setTimeout(
-          () =>
-            showDialogue(
-              "Three flames, clean caught. As promised — five gems. Spend 'em well.",
-              "GRAVEDIGGER",
-            ),
-          2200,
-        );
-      }
-      // the siege: once Hell-gato is down, the gravedigger can raise the waves
-      if (npc.name === "GRAVEDIGGER" && bossDown && !arcade?.active && !siegePending) {
-        siegePending = true;
-        window.setTimeout(() => {
-          siegePending = false;
-          startSiege();
-        }, 2600); // let his line land first
-      }
-      // mid-siege talks become status reports instead of small talk
-      if (npc.name === "GRAVEDIGGER" && arcade?.active) {
-        showDialogue(
-          `They keep coming! Wave ${arcade.wave} — ${arcade.score} down so far. West if you need out!`,
-          "GRAVEDIGGER",
-        );
-      }
       return;
     }
 
@@ -1031,17 +939,7 @@ export function initPixelRoom() {
       event.key === "Z"
     ) {
       event.preventDefault();
-      if (tryJump(player)) {
-        burst(player.x + player.w / 2, player.y + player.h, {
-          colors: ["#c8b09a", "#8a6a78"],
-          count: 6,
-          speed: 60,
-          up: true,
-          gravity: 300,
-          life: 0.35,
-        });
-        playSfx("jump");
-      }
+      if (tryJump(player)) playSfx("jump");
     }
   });
 
@@ -1307,179 +1205,6 @@ export function initPixelRoom() {
     if (phase === "credits") endCine();
   });
 
-  // ── cemetery siege: wave defense fought IN the main town ──
-  // Hell-gato isn't the end. Talk to the gravedigger after the boss falls and
-  // the restless dead hit the church gate in endless waves. Walk west of the
-  // cemetery sign to bail out. Same town, same world — no mode switch.
-  const startSiege = () => {
-    arcade = newRun();
-    arcadeBag = waveComposition(1).flatMap((c) => Array(c.count).fill(c.kind) as EnemyKind[]);
-    arcadeSpawnTimer = 1.5; // first ghoul arrives after the warning lands
-    player.hp = player.maxHp;
-    updateHpHud();
-    updateKillHud();
-    showDialogue(
-      "You hear that? The graves are opening! Stand with me — walk back west if it's too much.",
-      "GRAVEDIGGER",
-    );
-    playSfx("secret");
-  };
-
-  const endSiege = (died: boolean) => {
-    const run = arcade;
-    arcade = null;
-    // sweep every siege spawn off the field
-    for (let i = enemies.length - 1; i >= 0; i--) {
-      if (enemies[i]!.id.startsWith("arc-")) enemies.splice(i, 1);
-    }
-    if (!run) return;
-    if (died) {
-      player.x = 180;
-      player.y = GROUND_Y - 50;
-      player.vx = 0;
-      player.vy = 0;
-    }
-    player.hp = player.maxHp; // dying in the siege must not also fire the town respawn
-    if (run.score > arcadeBest) arcadeBest = run.score;
-    persist();
-    // submit to the leaderboard (best-effort) — signed with the visitor's
-    // goblin name from the info page's comment form, when they've set one
-    let goblinName = "traveler";
-    try {
-      goblinName = localStorage.getItem("gt-goblin-name")?.slice(0, 16) || "traveler";
-    } catch {
-      /* private mode — keep the default */
-    }
-    void import("../lib/firebase").then(({ ensureAnonAuth }) =>
-      ensureAnonAuth()
-        .then(() =>
-          import("./arcade").then(({ submitScore }) => submitScore(goblinName, run.score)),
-        )
-        .catch(() => null),
-    );
-    updateHpHud();
-    updateKillHud();
-    showDialogue(
-      died
-        ? `The dead dragged you back west… wave ${run.wave}, ${run.score} kills. Best: ${arcadeBest}. Rest up.`
-        : `Good fight, traveler. Wave ${run.wave}, ${run.score} kills. Best: ${arcadeBest}. The graves are quiet — for now.`,
-      "GRAVEDIGGER",
-    );
-    playSfx(died ? "deny" : "win");
-  };
-
-  const CEMETERY_WEST = 4150; // west of the cemetery sign — walk here to bail
-
-  const tickArcade = (dt: number) => {
-    const run = arcade;
-    if (!run) return;
-
-    movePlayer(player, keys, dt);
-
-    // bail hatch: retreat west of the cemetery and the siege ends, score kept
-    if (player.x + player.w / 2 < CEMETERY_WEST) {
-      endSiege(false);
-      return;
-    }
-
-    // spawn from the wave bag — the dead rise from the graves east of town
-    arcadeSpawnTimer -= dt;
-    if (arcadeBag.length && arcadeSpawnTimer <= 0) {
-      const kind = nextSpawn(run, arcadeBag);
-      if (kind) {
-        const fromEast = Math.random() < 0.5;
-        const x = fromEast ? 5720 : 4700;
-        const hp = kind === "hound" ? 6 : kind === "skeleton" ? 3 : 2;
-        enemies.push({
-          id: `arc-${run.wave}-${enemies.length}`,
-          kind,
-          x,
-          y: GROUND_Y - (kind === "hound" ? 48 : kind === "ghost" ? 56 : 52),
-          w: kind === "hound" ? 80 : kind === "ghost" ? 40 : 48,
-          h: kind === "hound" ? 48 : kind === "ghost" ? 56 : 52,
-          facing: fromEast ? -1 : 1,
-          frame: 0,
-          frameT: 0,
-          alive: true,
-          hp,
-          maxHp: hp,
-          hurtT: 0,
-          minX: x - 200,
-          maxX: x + 200,
-          speed: waveSpeed(run.wave),
-          dying: false,
-          deathFrame: 0,
-          deathT: 0,
-        } as (typeof enemies)[number]);
-        arcadeSpawnTimer = spawnInterval(run.wave);
-      }
-    }
-
-    for (const e of enemies) {
-      if (!e.alive && !e.dying) continue;
-      // siege spawns home in across the whole east end — the shared patrol AI
-      // only walks between minX/maxX, so widen it and aim it at the player
-      if (e.id.startsWith("arc-")) {
-        e.minX = 4200;
-        e.maxX = getSceneWorldW() - 40;
-        const dx = player.x + player.w / 2 - (e.x + e.w / 2);
-        if (Math.abs(dx) > 6) e.facing = dx > 0 ? 1 : -1;
-      }
-      updateEnemy(e, dt);
-    }
-
-    // opening grace — the first wave gives you a beat to get your bearings
-    if (run.graceT > 0) {
-      run.graceT -= dt;
-      if (player.invulnT < 0.1) player.invulnT = 0.1;
-    }
-
-    const combat = resolveCombat(player, enemies, dt);
-    if (combat === "hit") {
-      playSfx("hit");
-      hitStop(0.04);
-    }
-    if (combat === "hurt") {
-      playSfx("hurt");
-      shake(7, 0.3);
-      updateHpHud();
-    }
-    if (combat === "kill") {
-      playSfx("kill");
-      hitStop(0.08);
-      shake(4, 0.18);
-      run.score += 1;
-      updateKillHud();
-    }
-
-    // wave flow: respite after a cleared field, then the next wave heals you
-    // (tickWaves must run every frame — on kills only it would stall forever,
-    // because a cleared field produces no further kill events)
-    const waveBefore = run.wave;
-    const aliveCount = enemies.filter((e) => e.alive || e.dying).length;
-    tickWaves(run, aliveCount, arcadeBag.length === 0, dt);
-    if (run.wave !== waveBefore) {
-      player.hp = player.maxHp;
-      updateHpHud();
-      updateKillHud();
-      arcadeBag = waveComposition(run.wave).flatMap(
-        (c) => Array(c.count).fill(c.kind) as EnemyKind[],
-      );
-      floatText(player.x + player.w / 2, player.y - 14, `WAVE ${run.wave}`, "#ffd93d");
-      playSfx("secret");
-    }
-
-    // prune fully-dead arcade spawns to keep the array small
-    if (enemies.length > 40) {
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i]!;
-        if (e.id.startsWith("arc-") && !e.alive && !e.dying) enemies.splice(i, 1);
-      }
-    }
-
-    if (player.hp <= 0) endSiege(true);
-  };
-
   const update = (dt: number) => {
     if (phase === "credits") {
       updateCreditsRoll(dt);
@@ -1487,14 +1212,6 @@ export function initPixelRoom() {
     }
 
     if (open || phase !== "play") return;
-
-    // ── cemetery siege: waves run inside the main town loop ──
-    if (arcade?.active) {
-      tickArcade(dt);
-      cameraX = cameraFollow(player); // the siege runs in the town — the camera must follow
-      updateHint();
-      return;
-    }
 
     const boss = hellGato();
     const bossAlive = Boolean(boss && boss.alive && !boss.dying);
@@ -1533,29 +1250,6 @@ export function initPixelRoom() {
       // Hell-gato waits until the talk ends
       if (enemy.kind === "hound" && !bossFightReady) continue;
       updateEnemy(enemy, dt);
-      // Boss phase brain (charge/leap/slam) once the fight is on
-      if (enemy.kind === "hound" && bossFightReady && !enemy.dying) {
-        const bossEvent = tickBoss(enemy, player, dt);
-        if (bossEvent === "hit") {
-          shake(9, 0.35);
-        }
-      }
-    }
-
-    // slam shockwaves push the player back + hurt via room-level check
-    for (const sw of activeShockwaves()) {
-      const pcx = player.x + player.w / 2;
-      if (pcx > sw.x - 10 && pcx < sw.x + sw.w + 10 && player.onGround && player.invulnT <= 0) {
-        player.hp = Math.max(0, player.hp - 1);
-        player.invulnT = 0.9;
-        player.hurtT = 0.35;
-        player.vx = player.x < sw.x + sw.w / 2 ? -170 : 170;
-        player.vy = -200;
-        shake(8, 0.3);
-        flash("#ff8a3d", 0.1);
-        updateHpHud();
-        playSfx("hurt");
-      }
     }
 
     const combatFoes =
@@ -1563,30 +1257,14 @@ export function initPixelRoom() {
     const bossBefore = hellGato();
     const bossWasUp = Boolean(bossBefore && bossBefore.alive && !bossBefore.dying);
     const combat = resolveCombat(player, combatFoes, dt);
-    if (combat === "hit") {
-      playSfx("hit");
-      const atk = attackBox(player);
-      if (atk) {
-        burst(atk.x + atk.w / 2, atk.y + atk.h / 2, {
-          colors: ["#ffd93d", "#fff", "#ff8a8a"],
-          count: 8,
-          speed: 130,
-        });
-      }
-      hitStop(0.05);
-    }
+    if (combat === "hit") playSfx("hit");
     if (combat === "hurt") {
       playSfx("hurt");
-      shake(7, 0.32);
-      flash("#ff3b3b", 0.1);
       updateHpHud();
     }
     if (combat === "kill") {
       playSfx("kill");
-      hitStop(0.09);
-      shake(4, 0.2);
       updateKillHud();
-      if (arcade) arcade.score += 1;
       for (const e of enemies) {
         if (!e.alive || e.dying) killedIds.add(e.id);
       }
@@ -1627,18 +1305,13 @@ export function initPixelRoom() {
         takenHeartIds.add(p.id);
         persist();
         player.hp = Math.min(player.maxHp, player.hp + 1);
-        burst(p.x, p.y, { colors: ["#ff6b6b", "#ffb0b0", "#fff"], count: 12, up: true });
-        floatText(p.x, p.y - 14, "+♥", "#ff8a8a");
         updateHpHud();
         playSfx("secret");
       } else {
         p.taken = true;
-        const before = souls;
-        souls = Math.min(GEMS_TO_OPEN_GATE, souls + 1);
+        souls += 1;
         takenGemIds.add(p.id);
         persist();
-        burst(p.x, p.y, { colors: ["#b794f6", "#e0c5ff", "#fff"], count: 14, up: true });
-        floatText(p.x, p.y - 14, "+1", "#b794f6");
         updateGemHud();
         // Gem also tops up a heart if you're hurt
         if (player.hp < player.maxHp) {
@@ -1646,70 +1319,9 @@ export function initPixelRoom() {
           updateHpHud();
         }
         playSfx("select");
-        if (before < GEMS_TO_OPEN_GATE && souls >= GEMS_TO_OPEN_GATE && bossDown) {
+        if (souls === GEMS_TO_OPEN_GATE && bossDown) {
           showDialogue("That's enough gems — the church gate will open now.");
           playSfx("win");
-        }
-      }
-    }
-
-    // ── secrets discovery ─────────────────────────────────
-    const secret = checkSecrets(player.x + player.w / 2, player.y + player.h / 2);
-    if (secret) {
-      persist();
-      playSfx("secret");
-      flash("#ffd93d", 0.14);
-      burst(player.x + player.w / 2, player.y, {
-        colors: ["#ffd93d", "#fff"],
-        count: 22,
-        up: true,
-      });
-      const labels: Record<string, string> = {
-        "dev-island": "A hidden note from the developer…",
-        "vine-alcove": "Something glints behind the vines…",
-      };
-      showDialogue(labels[secret.id] ?? "You found a secret!", "SECRET");
-    }
-
-    // golden gem (dev island reward, worth 3)
-    if (!secretState().goldenGem) {
-      const g = goldenGemPos();
-      const pcx = player.x + player.w / 2;
-      if (Math.abs(pcx - g.x) < 26 && player.y + player.h > g.y - 40 && player.y < g.y + 20) {
-        secretState().goldenGem = true;
-        souls = Math.min(GEMS_TO_OPEN_GATE, souls + 3);
-        takenGemIds.add("golden");
-        persist();
-        updateGemHud();
-        burst(g.x, g.y, { colors: ["#ffd93d", "#fff7cc", "#ffb100"], count: 26, up: true });
-        floatText(g.x, g.y - 16, "+3 GOLDEN", "#ffd93d");
-        playSfx("win");
-      }
-    }
-
-    // ── quest: catch ghost flames by touch ──────────────────
-    if (!questState().done) {
-      for (const f of flames) {
-        if (f.caught) continue;
-        // drift
-        f.phase += dt;
-        f.x += Math.sin(f.phase * 1.4) * 26 * dt;
-        f.y = Math.sin(f.phase * 0.9) * 14 + (f.y > 0 ? 0 : f.y);
-        // flee slowly when player is near
-        const pcx = player.x + player.w / 2;
-        const dx = f.x - pcx;
-        if (Math.abs(dx) < 70) f.x += Math.sign(dx) * 34 * dt;
-        f.x = Math.max(4150, Math.min(5050, f.x));
-      }
-      const pcx = player.x + player.w / 2;
-      const got = catchFlame(flames, pcx, player.y + player.h / 2);
-      if (got) {
-        persist();
-        burst(got.x, got.y, { colors: ["#7de0ff", "#d0f6ff", "#fff"], count: 18, up: true });
-        floatText(got.x, got.y - 12, `FLAME ${questState().caught}/${FLAMES_REQUIRED}`, "#7de0ff");
-        playSfx("secret");
-        if (questState().done) {
-          showDialogue("That's all three! Take them to the gravedigger.", "BLUE FLAME");
         }
       }
     }
@@ -1725,14 +1337,7 @@ export function initPixelRoom() {
       player.y = GROUND_Y - 50;
       player.vx = 0;
       player.vy = 0;
-      player.invulnT = 2.5; // long enough to flee whoever camped the square
-      // …and shove respawn-campers home, so waking at the square can't be an
-      // instant death loop
-      for (const e of enemies) {
-        if (e.alive && !e.dying && e.kind !== "hound" && Math.abs(e.x - 180) < 500) {
-          e.x = (e.minX + e.maxX) / 2;
-        }
-      }
+      player.invulnT = 1.2;
       updateHpHud();
       showDialogue("Darkness takes you… you wake at the square. Try again.");
     }
@@ -1745,16 +1350,6 @@ export function initPixelRoom() {
     if (gateBumpT > 0) gateBumpT -= dt;
 
     cameraX = cameraFollow(player);
-
-    // periodic position save (the event-based saves can miss a long walk)
-    positionSaveT += dt;
-    if (positionSaveT >= 4) {
-      positionSaveT = 0;
-      if (Math.abs(player.x - lastSavedX) > 48 && !arcade?.active) {
-        lastSavedX = Math.round(player.x);
-        persist();
-      }
-    }
 
     const zone = zoneLabel(cameraX + VIEW_W / 2);
     if (zoneEl && zone !== lastZone) {
@@ -1778,18 +1373,16 @@ export function initPixelRoom() {
     }
 
     setGhostX(player.x);
-    const off = shakeOffset();
     drawWorld({
       ctx,
       assets,
-      cameraX: cameraX + off.x,
+      cameraX,
       player,
       enemies,
       found,
       inTown: true,
       gateOpen: gateUnlocked(),
       ghosts,
-      flames,
       pickups,
     });
   };
@@ -1797,12 +1390,8 @@ export function initPixelRoom() {
   let last = performance.now();
 
   const loop = (time: number) => {
-    const rawDt = Math.min(0.033, (time - last) / 1000);
+    const dt = Math.min(0.033, (time - last) / 1000);
     last = time;
-    // hit-stop eats dt; fx still animate at quarter speed inside tickFx
-    const dt = tickFx(rawDt);
-    tickAtmosphere(rawDt, cameraX);
-    tickShockwaves(rawDt);
     update(dt);
     draw();
     requestAnimationFrame(loop);
@@ -1853,19 +1442,4 @@ export function initPixelRoom() {
     });
 
   initDoodlePad();
-
-  // debug/automation handle — lets tooling read live game state from the console
-  (window as unknown as Record<string, unknown>).__gt = {
-    state: () => ({
-      player: { x: Math.round(player.x), y: Math.round(player.y), hp: player.hp },
-      arcade: arcade
-        ? { wave: arcade.wave, score: arcade.score, graceT: Math.round(arcade.graceT * 10) / 10 }
-        : null,
-      bag: arcadeBag.length,
-      siegeSpawns: enemies.filter((e) => e.id.startsWith("arc-")).length,
-      aliveSpawns: enemies.filter((e) => e.id.startsWith("arc-") && e.alive).length,
-      bossDown,
-      cameraX: Math.round(cameraX),
-    }),
-  };
 }

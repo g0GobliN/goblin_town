@@ -43,6 +43,10 @@ function exitCrumb(key: SectionKey, x = 36): Crumb {
   };
 }
 
+function plat(x: number, y: number, w: number): Rect {
+  return { x, y, w, h: 12 };
+}
+
 const TOWN: Scene = {
   id: "town",
   label: "GOBLIN TOWN",
@@ -75,8 +79,11 @@ const SCENES: Record<SectionKey, Scene> = {
     showEnemies: false,
     showColumns: false,
     churchMode: false,
-    platforms: [ground()],
-    ladders: [],
+    platforms: [ground(), plat(280, 170, 72), plat(400, 140, 56), plat(720, 165, 80)],
+    ladders: [
+      { x: 298, y: 140, w: 18, h: GROUND_Y - 140 },
+      { x: 738, y: 165, w: 18, h: GROUND_Y - 165 },
+    ],
     props: [
       { img: "street-lamp", x: 70, y: GROUND_Y - 96 },
       { img: "house-a", x: 220, y: GROUND_Y - 175 },
@@ -117,8 +124,11 @@ const SCENES: Record<SectionKey, Scene> = {
     showEnemies: false,
     showColumns: false,
     churchMode: false,
-    platforms: [ground()],
-    ladders: [],
+    platforms: [ground(), plat(320, 165, 96), plat(520, 135, 64), plat(780, 155, 88)],
+    ladders: [
+      { x: 340, y: 165, w: 18, h: GROUND_Y - 165 },
+      { x: 538, y: 135, w: 18, h: GROUND_Y - 135 },
+    ],
     props: [
       { img: "crate-stack", x: 60, y: GROUND_Y - 70 },
       { img: "sign", x: 180, y: GROUND_Y - 64 },
@@ -161,8 +171,11 @@ const SCENES: Record<SectionKey, Scene> = {
     showEnemies: false,
     showColumns: false,
     churchMode: false,
-    platforms: [ground()],
-    ladders: [],
+    platforms: [ground(), plat(260, 160, 80), plat(420, 130, 72), plat(700, 150, 96)],
+    ladders: [
+      { x: 278, y: 160, w: 18, h: GROUND_Y - 160 },
+      { x: 718, y: 150, w: 18, h: GROUND_Y - 150 },
+    ],
     props: [
       { img: "street-lamp", x: 80, y: GROUND_Y - 96 },
       { img: "house-c", x: 200, y: GROUND_Y - 175 },
@@ -203,8 +216,8 @@ const SCENES: Record<SectionKey, Scene> = {
     showEnemies: false,
     showColumns: false,
     churchMode: false,
-    platforms: [ground()],
-    ladders: [],
+    platforms: [ground(), plat(300, 155, 88), plat(540, 125, 64), plat(800, 160, 72)],
+    ladders: [{ x: 318, y: 155, w: 18, h: GROUND_Y - 155 }],
     props: [
       { img: "street-lamp", x: 60, y: GROUND_Y - 96 },
       { img: "wagon", x: 220, y: GROUND_Y - 64 },
@@ -245,8 +258,17 @@ const SCENES: Record<SectionKey, Scene> = {
     showEnemies: false,
     showColumns: false,
     churchMode: false,
-    platforms: [ground()],
-    ladders: [],
+    platforms: [
+      ground(),
+      plat(280, 168, 64),
+      plat(480, 140, 80),
+      plat(720, 155, 96),
+      plat(900, 120, 56),
+    ],
+    ladders: [
+      { x: 498, y: 140, w: 18, h: GROUND_Y - 140 },
+      { x: 918, y: 120, w: 18, h: GROUND_Y - 120 },
+    ],
     props: [
       { img: "crate-stack", x: 50, y: GROUND_Y - 70 },
       { img: "barrel", x: 160, y: GROUND_Y - 28 },
@@ -289,8 +311,8 @@ const SCENES: Record<SectionKey, Scene> = {
     showEnemies: false,
     showColumns: true,
     churchMode: true,
-    platforms: [ground()],
-    ladders: [],
+    platforms: [ground(), plat(360, 160, 72), plat(560, 130, 64), plat(760, 150, 80)],
+    ladders: [{ x: 378, y: 160, w: 18, h: GROUND_Y - 160 }],
     props: [
       { img: "street-lamp", x: 80, y: GROUND_Y - 96 },
       { img: "sign", x: 200, y: GROUND_Y - 64 },

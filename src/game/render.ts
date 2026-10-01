@@ -1,13 +1,8 @@
-import { activeShockwaves } from "./boss";
-import { drawAtmosphere } from "./atmosphere";
 import { enemyBody } from "./combat";
 import { ENEMY_HURT_DURATION, GROUND_Y, SCALE, VIEW_H, VIEW_W } from "./constants";
-import { drawFx } from "./fx";
 import { solidAt } from "./physics";
-import { questState } from "./quests";
 import { getActiveScene } from "./scenes";
-import { goldenGemPos, secretState } from "./secrets";
-import type { DrawContext, EnemyState, GhostFlame, SectionKey } from "./types";
+import type { DrawContext, EnemyState, SectionKey } from "./types";
 import { CRUMBS, EAST_GATE } from "./world";
 
 /** Short tags painted on the wooden door boards */
@@ -557,9 +552,7 @@ function drawPlayer(ctx: DrawContext) {
   const pw = 40;
   const ph = 34;
   const pdx = player.x - cameraX + player.w / 2;
-  // Sprite frames keep 2 transparent bottom rows of 48 — sink the art so the
-  // painted feet rest on the same surface the physics box stands on.
-  const pdy = player.y + player.h - ph + (2 / 48) * ph;
+  const pdy = player.y + player.h - ph;
 
   c.save();
   if (player.facing < 0) {
@@ -649,66 +642,6 @@ function drawPickups(ctx: DrawContext) {
   }
 }
 
-/** Ghost flames — blue quest wisps drifting in the graveyard. */
-function drawGhostFlames(ctx: DrawContext, flames: GhostFlame[]) {
-  if (questState().done) return;
-  const { ctx: c, cameraX } = ctx;
-  const now = performance.now() / 1000;
-  for (const f of flames) {
-    if (f.caught) continue;
-    const dx = f.x - cameraX;
-    if (dx < -20 || dx > VIEW_W + 20) continue;
-    const bob = Math.sin(now * 2.4 + f.phase) * 5;
-    c.save();
-    c.globalAlpha = 0.85;
-    c.fillStyle = "#7de0ff";
-    c.fillRect(dx - 3, f.y - 14 + bob, 6, 10);
-    c.fillStyle = "#d0f6ff";
-    c.fillRect(dx - 2, f.y - 10 + bob, 4, 6);
-    c.globalAlpha = 0.35;
-    c.fillStyle = "#7de0ff";
-    c.fillRect(dx - 5, f.y - 12 + bob, 10, 12);
-    c.restore();
-  }
-}
-
-/** Secret reward still waiting: the golden gem on dev island. */
-function drawSecrets(ctx: DrawContext) {
-  const { ctx: c, cameraX } = ctx;
-  if (secretState().goldenGem) return;
-  const g = goldenGemPos();
-  const dx = g.x - cameraX;
-  if (dx <= -20 || dx >= VIEW_W + 20) return;
-  const t = performance.now() / 1000;
-  const bob = Math.sin(t * 2.2) * 3;
-  c.save();
-  c.fillStyle = "#ffd93d";
-  c.fillRect(dx - 4, g.y - 14 + bob, 8, 10);
-  c.fillStyle = "#fff7cc";
-  c.fillRect(dx - 2, g.y - 12 + bob, 4, 5);
-  c.globalAlpha = 0.3 + 0.12 * Math.sin(t * 3.4);
-  c.fillStyle = "#ffd93d";
-  c.fillRect(dx - 7, g.y - 16 + bob, 14, 16);
-  c.restore();
-}
-
-/** Hell-gato slam shockwaves — expanding ground cracks. */
-function drawShockwaves(ctx: DrawContext) {
-  const { ctx: c, cameraX } = ctx;
-  for (const sw of activeShockwaves()) {
-    const dx = sw.x - cameraX;
-    const progress = 1 - sw.t / 0.42;
-    const width = sw.w * (0.5 + progress);
-    c.save();
-    c.globalAlpha = Math.max(0, 1 - progress) * 0.8;
-    c.fillStyle = "#ff8a3d";
-    c.fillRect(dx - (width - sw.w) / 2, GROUND_Y - 4, width, 3);
-    c.fillStyle = "#ffd93d";
-    c.fillRect(dx - (width - sw.w) / 4, GROUND_Y - 2, width / 2, 2);
-    c.restore();
-  }
-}
-
 export function drawWorld(draw: DrawContext) {
   const { ctx } = draw;
 
@@ -726,15 +659,10 @@ export function drawWorld(draw: DrawContext) {
   drawPlatforms(draw);
   drawLadders(draw);
   drawPickups(draw);
-  drawSecrets(draw);
-  drawGhostFlames(draw, draw.flames);
   drawNpcs(draw);
   drawEnemies(draw);
   drawGhosts(draw);
-  drawShockwaves(draw);
   drawPlayerShadow(draw);
   drawPlayer(draw);
-  drawFx(ctx, draw.cameraX, performance.now());
   drawSceneChrome(draw);
-  drawAtmosphere(ctx, draw.cameraX);
 }

@@ -63,22 +63,10 @@ const firebaseConfig = {
 // inert handles — every consumer already treats failed requests as "no data".
 let _db: Firestore | null = null;
 let _auth: Auth | null = null;
-// Only initialize when the project is actually configured — otherwise the SDK
-// happily connects to "projects/undefined" and spams failing WebChannel
-// requests (seen as `database=projects/undefined` in the network log).
-const firebaseConfigured = Boolean(
-  firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.appId,
-);
 try {
-  if (firebaseConfigured) {
-    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-    _db = getFirestore(app);
-    _auth = getAuth(app);
-  } else {
-    devWarn(
-      "Firebase not configured (PUBLIC_FIREBASE_* missing) — running without cloud features.",
-    );
-  }
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  _db = getFirestore(app);
+  _auth = getAuth(app);
 } catch (error) {
   devWarn("Firebase unavailable — check PUBLIC_FIREBASE_* vars in .env.local:", error);
 }
