@@ -39,6 +39,40 @@ const hasMermaid = contentHtml.includes('class="language-mermaid"');
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://v1.monster/og/goblin-town-og.png" />
     <meta name="theme-color" content="#000000" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Goblin Town RSS"
+      href="https://v1.monster/rss.xml"
+    />
+    {
+      blog && (
+        <script
+          is:inline
+          type="application/ld+json"
+          set:html={JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            headline: blog.title,
+            description: blog.tagline || description,
+            url: canonical,
+            ...(blog.coverImage ? { image: blog.coverImage } : {}),
+            ...(blog.publishedAt ? { datePublished: blog.publishedAt } : {}),
+            ...(blog.tags?.length ? { keywords: blog.tags.join(", ") } : {}),
+            author: {
+              "@type": "Person",
+              name: "Vishal Gurung",
+              url: "https://v1.monster/",
+            },
+            publisher: {
+              "@type": "Organization",
+              name: "Goblin Town",
+              url: "https://v1.monster/",
+            },
+          })}
+        />
+      )
+    }
     <link rel="icon" href="/logo/favicon-48.png" type="image/png" sizes="48x48" />
     <link rel="icon" href="/logo/favicon-96.png" type="image/png" sizes="96x96" />
     <link rel="icon" href="/favicon.ico" sizes="any" />

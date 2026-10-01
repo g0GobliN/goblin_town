@@ -34,6 +34,29 @@ const canonical = `https://v1.monster/work/${slug}/`;
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://v1.monster/og/goblin-town-og.png" />
     <meta name="theme-color" content="#000000" />
+    {
+      project && (
+        <script
+          is:inline
+          type="application/ld+json"
+          set:html={JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CreativeWork",
+            name: project.name || project.slug,
+            description: project.tagline || project.summary,
+            url: canonical,
+            ...(project.coverImage ? { image: project.coverImage } : {}),
+            ...(project.year ? { dateCreated: project.year } : {}),
+            author: {
+              "@type": "Person",
+              name: "Vishal Gurung",
+              url: "https://v1.monster/",
+            },
+            ...(project.stack?.length ? { keywords: project.stack.join(", ") } : {}),
+          })}
+        />
+      )
+    }
     <link rel="icon" href="/logo/favicon-48.png" type="image/png" sizes="48x48" />
     <link rel="icon" href="/logo/favicon-96.png" type="image/png" sizes="96x96" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
