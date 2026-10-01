@@ -19,6 +19,16 @@ export type GameSave = {
   x: number;
   /** saw the credits roll at least once */
   finished: boolean;
+  /** arcade mode high score (kills in one run) */
+  arcadeBest: number;
+  /** side quest: ghost flames caught / done */
+  questCaught?: number;
+  questDone?: boolean;
+  /** gravedigger's gem reward has been paid out */
+  questRewarded?: boolean;
+  /** secrets discovered + golden gem */
+  secretsFound?: string[];
+  goldenGem?: boolean;
 };
 
 const EMPTY: GameSave = {
@@ -28,6 +38,7 @@ const EMPTY: GameSave = {
   doors: [],
   x: 0,
   finished: false,
+  arcadeBest: 0,
 };
 
 function isStringArray(v: unknown): v is string[] {
@@ -48,6 +59,18 @@ export function loadGameSave(): GameSave {
       doors: isStringArray(data.doors) ? data.doors : [],
       x: typeof data.x === "number" && Number.isFinite(data.x) ? data.x : 0,
       finished: data.finished === true,
+      arcadeBest:
+        typeof data.arcadeBest === "number" && Number.isFinite(data.arcadeBest)
+          ? Math.max(0, Math.floor(data.arcadeBest))
+          : 0,
+      questCaught:
+        typeof data.questCaught === "number" && Number.isFinite(data.questCaught)
+          ? Math.max(0, Math.floor(data.questCaught))
+          : 0,
+      questDone: data.questDone === true,
+      questRewarded: data.questRewarded === true,
+      secretsFound: isStringArray(data.secretsFound) ? data.secretsFound : [],
+      goldenGem: data.goldenGem === true,
     };
   } catch {
     return { ...EMPTY };

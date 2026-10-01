@@ -79,6 +79,21 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Arcade leaderboard — anonymous writes via REST, shape-validated.
+    match /arcade/{scoreId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['name', 'score', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 16
+        && request.resource.data.score is int
+        && request.resource.data.score >= 0
+        && request.resource.data.score <= 100000
+        && request.resource.data.at is string
+        && request.resource.data.at.size() <= 10;
+      allow update, delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
