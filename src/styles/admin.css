@@ -2,8 +2,34 @@
   min-height: 100vh;
   color: var(--pixel-fg);
   background: #0c0610;
+  /* Readable UI type — Press Start 2P stays only on short chrome accents. */
+  font-family: Poppins, Lato, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: normal;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.admin-kicker,
+.admin-gate-sub,
+.admin-stat-num,
+.pixel-btn,
+.admin-editor-tab,
+.admin-tool,
+.admin-seg-btn {
+  font-family: "Press Start 2P", ui-monospace, monospace;
+  letter-spacing: 0.02em;
+}
+
+.admin-body .small {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.admin-body .pixel-btn {
+  font-size: 11px;
+  padding: 10px 14px;
 }
 
 .admin-sky {
@@ -135,7 +161,7 @@
 }
 
 .admin-gate-sub {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.18em;
   color: #a89888;
   margin-bottom: 22px;
@@ -217,8 +243,8 @@
   gap: 10px;
   justify-content: space-between;
   font-family: inherit;
-  font-size: 9px;
-  padding: 12px;
+  font-size: 13px;
+  padding: 11px 12px;
   background: transparent;
   border: 2px solid transparent;
   color: #c9b8a8;
@@ -247,10 +273,10 @@
 }
 
 .admin-nav-count {
-  font-size: 8px;
+  font-size: 11px;
   color: #a89888;
   border: 1px solid #5a3048;
-  padding: 2px 6px;
+  padding: 1px 6px;
   min-width: 20px;
   text-align: center;
   line-height: 1.4;
@@ -265,7 +291,7 @@
 }
 
 .admin-email {
-  font-size: 8px;
+  font-size: 12px;
   color: #a89888;
   overflow-wrap: anywhere;
   line-height: 1.5;
@@ -289,8 +315,8 @@
 }
 
 .admin-kicker {
-  font-size: 8px;
-  letter-spacing: 0.22em;
+  font-size: 9px;
+  letter-spacing: 0.18em;
   color: #c9a44f;
   margin-bottom: 8px;
 }
@@ -304,9 +330,9 @@
 }
 
 .admin-view-sub {
-  font-size: 9px;
+  font-size: 13px;
   color: #a89888;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .admin-header-actions {
@@ -332,10 +358,11 @@
 }
 
 .admin-card h3 {
-  font-size: 10px;
+  font-size: 13px;
+  font-weight: 700;
   margin-bottom: 12px;
   color: #ff8a8a;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
 }
 
 .admin-stats {
@@ -360,9 +387,9 @@
 }
 
 .admin-stat-label {
-  font-size: 8px;
+  font-size: 12px;
   color: #a89888;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
 }
 
 .admin-overview-grid {
@@ -397,10 +424,11 @@
 
 .admin-form label {
   display: grid;
-  gap: 7px;
-  font-size: 9px;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
   color: #c9b8a8;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
 }
 
 .admin-form-row {
@@ -410,8 +438,10 @@
 }
 
 .admin-field-hint {
-  opacity: 0.65;
-  letter-spacing: 0.02em;
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.75;
+  letter-spacing: 0.01em;
   text-transform: none;
 }
 
@@ -422,9 +452,9 @@
   border: 1px solid #5a3048;
   color: var(--pixel-fg);
   font-family: inherit;
-  font-size: 10px;
-  line-height: 1.5;
-  padding: 11px 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  padding: 10px 12px;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
@@ -444,7 +474,7 @@
 
 .admin-form input[type="file"] {
   padding: 8px;
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .admin-actions {
@@ -456,8 +486,8 @@
 
 .admin-msg {
   margin-top: 12px;
-  font-size: 9px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.55;
   color: #8fd48f;
 }
 
@@ -476,9 +506,10 @@
 }
 
 .admin-list-head h2 {
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 700;
   color: #ff8a8a;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
 }
 
 .admin-search {
@@ -487,7 +518,7 @@
   border: 1px solid #5a3048;
   color: var(--pixel-fg);
   font-family: inherit;
-  font-size: 9px;
+  font-size: 13px;
   padding: 10px 12px;
   margin-bottom: 12px;
 }
@@ -525,13 +556,14 @@
 }
 
 .admin-row-title {
-  font-size: 10px;
+  font-size: 14px;
+  font-weight: 600;
   color: #f0e4d4;
   overflow-wrap: anywhere;
 }
 
 .admin-row-meta {
-  font-size: 8px;
+  font-size: 12px;
   color: #a89888;
   flex-shrink: 0;
 }
@@ -550,11 +582,12 @@
 }
 
 .admin-tag {
-  font-size: 7px;
-  padding: 3px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
   border: 1px solid #5a3048;
   color: #c9a44f;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
 .admin-row-foot {
@@ -660,9 +693,10 @@
 }
 
 .admin-status-label {
-  font-size: 9px;
+  font-size: 12px;
+  font-weight: 600;
   color: #c9b8a8;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
 }
 
 .admin-segment {
@@ -671,9 +705,9 @@
 
 .admin-seg-btn {
   font-family: inherit;
-  font-size: 8px;
-  padding: 8px 12px;
-  min-height: 30px;
+  font-size: 9px;
+  padding: 9px 12px;
+  min-height: 32px;
   background: rgba(18, 10, 24, 0.9);
   border: 2px solid #5a3048;
   color: #c9b8a8;
@@ -707,6 +741,8 @@
   width: 100%;
   min-height: 320px;
   resize: vertical;
+  font-family: Consolas, "Courier New", ui-monospace, monospace;
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -728,9 +764,9 @@
 
 .admin-tool {
   font-family: inherit;
-  font-size: 8px;
-  padding: 7px 8px;
-  min-height: 30px;
+  font-size: 9px;
+  padding: 9px 10px;
+  min-height: 32px;
   background: rgba(18, 10, 24, 0.9);
   border: 1px solid #5a3048;
   color: #c9b8a8;
@@ -749,7 +785,7 @@
 .admin-tool strong,
 .admin-tool em,
 .admin-tool del {
-  font-size: 8px;
+  font-size: 9px;
 }
 
 .admin-editor-tabs {
@@ -759,8 +795,8 @@
 
 .admin-editor-tab {
   font-family: inherit;
-  font-size: 8px;
-  padding: 8px 12px;
+  font-size: 9px;
+  padding: 10px 12px;
   background: rgba(18, 10, 24, 0.9);
   border: 2px solid #5a3048;
   color: #c9b8a8;
@@ -783,7 +819,7 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  font-size: 8px;
+  font-size: 12px;
   color: #a89888;
 }
 
@@ -815,11 +851,11 @@
   padding: 12px;
   border: 1px solid #5a3048;
   background: #120a18;
-  font-size: 9px;
+  font-size: 13px;
 }
 
 .admin-reply-form .small {
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .admin-reply-form textarea {
@@ -827,7 +863,7 @@
   min-height: 64px;
   resize: vertical;
   font-family: inherit;
-  font-size: 10px;
+  font-size: 13px;
   line-height: 1.5;
   color: inherit;
   background: #0a0610;
@@ -898,7 +934,7 @@
 }
 
 .admin-confirm-msg {
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.6;
   color: var(--pixel-fg);
   margin-bottom: 18px;
@@ -975,8 +1011,9 @@
     min-height: 56px;
     border: none;
     border-top: 2px solid transparent;
-    font-size: 7px;
-    letter-spacing: 0.02em;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: normal;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
@@ -989,10 +1026,11 @@
 
   .admin-nav-count {
     position: absolute;
-    top: 3px;
-    right: 6px;
+    top: 4px;
+    right: 8px;
     min-width: 0;
-    padding: 1px 4px;
+    font-size: 10px;
+    padding: 1px 5px;
     border-color: #c9a44f;
     color: #ffe08a;
     background: rgba(201, 164, 79, 0.12);
