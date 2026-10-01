@@ -1,5 +1,5 @@
 import { GROUND_Y, WORLD_W } from "./constants.ts";
-import type { Crumb, Npc, Prop, Rect } from "./types.ts";
+import type { Crumb, GhostFlame, Npc, Prop, Rect } from "./types.ts";
 
 /**
  * Town layout — add props / crates / wells here to grow the run.
@@ -9,6 +9,8 @@ import type { Crumb, Npc, Prop, Rect } from "./types.ts";
 
 const props: Prop[] = [];
 const platforms: Rect[] = [{ x: 0, y: GROUND_Y, w: WORLD_W, h: 48 }];
+// No ladders — climbing volumes read as climbing thin air. Keep the world honest:
+// everything standable matches visible art (crate tops, wagon roof, sign boards).
 const ladders: Rect[] = [];
 
 function lamp(x: number) {
@@ -17,14 +19,10 @@ function lamp(x: number) {
 function barrel(x: number) {
   props.push({ img: "barrel", x, y: GROUND_Y - 30 });
 }
-/** Hanging shop sign — climbable, stand on the board */
+/** Hanging shop sign — jump onto its visible board */
 function sign(x: number) {
   const y = GROUND_Y - 64;
-  // sign.png is only 45px tall — a taller climb zone reaches below the
-  // art into blank canvas, which reads as climbing on thin air.
-  const artH = 45;
   props.push({ img: "sign", x, y });
-  ladders.push({ x: x + 11, y, w: 14, h: artH });
   platforms.push({ x: x + 2, y: y + 10, w: 32, h: 8, hidden: true });
 }
 function well(x: number) {
@@ -32,6 +30,9 @@ function well(x: number) {
 }
 function wagon(x: number) {
   props.push({ img: "wagon", x, y: GROUND_Y - 64 });
+  // Stand on the cover hem / body shoulder (sprite row 29 = full-width edge)
+  // — also blocks walking through the wheels, same height as a crate top.
+  platforms.push({ x: x + 2, y: GROUND_Y - 35, w: 88, h: 8, hidden: true });
 }
 function houseA(x: number) {
   props.push({ img: "house-a", x, y: GROUND_Y - 175 });
@@ -50,7 +51,10 @@ function crate(x: number) {
 }
 function crateStack(x: number) {
   props.push({ img: "crate-stack", x, y: GROUND_Y - 68 });
-  platforms.push({ x: x + 6, y: GROUND_Y - 68, w: 58, h: 8, hidden: true });
+  // Bottom row is a solid crate you bonk into; only the top crate is standable
+  // (its art spans sprite px 17..55).
+  platforms.push({ x: x + 1, y: GROUND_Y - 35, w: 70, h: 8, hidden: true });
+  platforms.push({ x: x + 17, y: GROUND_Y - 68, w: 38, h: 8, hidden: true });
 }
 function tree(x: number, variant: 1 | 2 | 3 = 1) {
   const h = variant === 3 ? 171 : 117;
@@ -157,9 +161,22 @@ lamp(5620);
 stone(5800, 3);
 bush(5900);
 
+/** Standable hidden ledges (dev island etc. render as ground). */
+platforms.push({ x: 5920, y: GROUND_Y, w: 180, h: 48, hidden: true }); // dev island ground
+
 export const PROPS: Prop[] = props;
 export const PLATFORMS: Rect[] = platforms;
 export const LADDERS: Rect[] = ladders;
+
+/** Highest elevated ledge whose span covers this world-x (boot placement). */
+export function ledgeAt(cx: number): Rect | null {
+  let best: Rect | null = null;
+  for (const p of platforms) {
+    if (p.y >= GROUND_Y) continue; // ground strip, not a ledge
+    if (cx > p.x && cx < p.x + p.w && (!best || p.y < best.y)) best = p;
+  }
+  return best;
+}
 
 /** Wells restore HP on SPACE when nearby */
 export const HEALS: Rect[] = [
@@ -341,7 +358,11 @@ export const NPCS: Npc[] = [
     x: 320,
     y: GROUND_Y,
     facing: 1,
-    line: "Evening, traveler! That's Goblin's house right there. Walk up, press {KEY}, and have a peek at his diary — he won't mind.",
+    lines: [
+      "Evening, traveler! That's Goblin's house right there.",
+      "Walk up, press {KEY}, and have a peek at his diary — he won't mind.",
+      "He built this whole town, you know. Every pixel. Slightly worrying, honestly.",
+    ],
   },
   {
     name: "HAT GUY",
@@ -354,7 +375,11 @@ export const NPCS: Npc[] = [
     x: 1000,
     y: GROUND_Y,
     facing: -1,
-    line: "The workshop's next door — {KEY} takes you inside. Oh, and if you get banged up out there, any well and a press of {KEY} patches you right up.",
+    lines: [
+      "The workshop's next door — {KEY} takes you inside.",
+      "Oh, and if you get banged up out there, any well and a press of {KEY} patches you right up.",
+      "I hop on those crate stacks for the view sometimes. Don't tell the owners.",
+    ],
   },
   {
     name: "OLD MAN",
@@ -367,7 +392,11 @@ export const NPCS: Npc[] = [
     x: 1450,
     y: GROUND_Y,
     facing: 1,
-    line: "See those purple gems glinting on the road? Just walk into 'em. Gather every last one, see off that Hell-gato beast, and the church gate opens.",
+    lines: [
+      "See those purple gems glinting on the road? Just walk into 'em.",
+      "Gather every last one, see off that Hell-gato beast, and the church gate opens.",
+      "Back in my day the gate was never locked. Then the cat showed up.",
+    ],
   },
   {
     name: "WOMAN",
@@ -380,7 +409,11 @@ export const NPCS: Npc[] = [
     x: 1900,
     y: GROUND_Y,
     facing: -1,
-    line: "Sketch Alley's just ahead — leave us a little doodle, won't you? But past the market it gets dangerous… do watch for monsters.",
+    lines: [
+      "Sketch Alley's just ahead — leave us a little doodle, won't you?",
+      "But past the market it gets dangerous… do watch for monsters.",
+      "My cat ran into the graveyard last week. Came back glowing. I've decided not to ask.",
+    ],
   },
   {
     name: "NEIGHBOR",
@@ -393,7 +426,10 @@ export const NPCS: Npc[] = [
     x: 3400,
     y: GROUND_Y,
     facing: -1,
-    line: "Ugh, monsters all over the east road. Someone brave ought to clear them out… say, you look the type.",
+    lines: [
+      "Ugh, monsters all over the east road. Someone brave ought to clear them out.",
+      "Say — you look the type. There's a story about you already, I can feel it.",
+    ],
   },
   {
     name: "HAT GUY",
@@ -406,9 +442,39 @@ export const NPCS: Npc[] = [
     x: 4600,
     y: GROUND_Y,
     facing: 1,
-    line: "Nearly there! The church gate sits just east. Press {KEY} at the gate for Goblin's email and GitHub — go on, say hello.",
+    lines: [
+      "Nearly there! The church gate sits just east.",
+      "Press {KEY} at the gate for Goblin's email and GitHub — go on, say hello.",
+    ],
+  },
+  {
+    // quest giver — Restless Flames
+    name: "GRAVEDIGGER",
+    sheetIdle: "oldman-idle",
+    sheetWalk: "oldman-walk",
+    idleFrames: 8,
+    walkFrames: 12,
+    fw: 34,
+    fh: 42,
+    x: 5080,
+    y: GROUND_Y,
+    facing: -1,
+    lines: [
+      "The dead here don't rest easy. Little blue flames keep slipping out of their graves.",
+      "Catch me three of 'em — {KEY} near a wisp grabs it — and I'll pay in gems.",
+      "They flee when you get close. Sneak up. Or don't. They're not fast.",
+    ],
   },
 ];
+
+/** Ghost flames — quest wisps drifting in the graveyard (x 4200–5000). */
+export function createGhostFlames(): GhostFlame[] {
+  return [
+    { id: "flame-1", x: 4300, y: GROUND_Y - 60, phase: 0.3, caught: false },
+    { id: "flame-2", x: 4650, y: GROUND_Y - 90, phase: 2.1, caught: false },
+    { id: "flame-3", x: 4950, y: GROUND_Y - 50, phase: 4.4, caught: false },
+  ];
+}
 
 /** East exit — barred until Hell-gato falls. */
 export const EAST_GATE = {
