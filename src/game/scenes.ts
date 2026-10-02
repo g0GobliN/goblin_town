@@ -350,3 +350,40 @@ export function getSceneLadders(): Rect[] {
 export function getSceneWorldW(): number {
   return active.worldW;
 }
+
+/**
+ * Which way each NPC's artwork is drawn in its own source files.
+ *
+ * As with the enemy sheets, the townsfolk art is not all authored facing the
+ * same way: the bearded neighbour, hat guy and woman are drawn facing left,
+ * while the old man faces right. Mirroring purely on `facing` therefore turned
+ * most of them inside out, so 10 of the 13 NPC definitions faced the opposite
+ * way to the one they asked for. Verified by measuring which side of its
+ * bounding box each frame's head sits on, across both the idle and walk sheets
+ * of every character (see tools/sprite-npc-facing.mjs and
+ * tools/sprite-npc-sensitivity.mjs).
+ *
+ * Keyed by sheet base name so one entry covers a character's idle and walk
+ * art, which are always drawn facing the same way.
+ */
+const NPC_ART_FACES_LEFT: Record<string, boolean> = {
+  bearded: true,
+  "hat-man": true,
+  oldman: false,
+  woman: true,
+};
+
+/** The character key a sheet name belongs to ("bearded-walk" -> "bearded"). */
+function npcArtKey(sheet: string): string {
+  const dash = sheet.lastIndexOf("-");
+  return dash === -1 ? sheet : sheet.slice(0, dash);
+}
+
+/**
+ * Whether an NPC's sprite must be mirrored for them to face the way their
+ * `facing` asks for. Unknown sheets default to right-facing art, matching the
+ * player, so a newly added character renders unflipped until measured.
+ */
+export function npcArtFlip(sheet: string, facing: 1 | -1): boolean {
+  return NPC_ART_FACES_LEFT[npcArtKey(sheet)] ? facing > 0 : facing < 0;
+}

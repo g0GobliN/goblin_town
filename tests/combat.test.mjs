@@ -4,6 +4,7 @@ import {
   attackBox,
   createEnemies,
   enemiesKilled,
+  enemyArtFlip,
   enemyBody,
   makePlayer,
   playerBody,
@@ -48,6 +49,7 @@ test("createEnemies spawns the full roster with positive hp", () => {
     assert.ok(e.hp > 0);
     assert.ok(e.alive);
     assert.ok(e.w > 0 && e.h > 0);
+    assert.ok(Number.isFinite(e.animPhase));
   }
   // exactly one boss (hound)
   assert.equal(enemies.filter((e) => e.kind === "hound").length, 1);
@@ -116,4 +118,31 @@ test("invulnerable player takes no contact damage", () => {
   const event = resolveCombat(p, enemies, 1 / 60);
   assert.notEqual(event, "hurt");
   assert.equal(p.hp, hpBefore);
+});
+
+test("left-facing art is mirrored when the enemy moves right", () => {
+  // The ghost, skeleton and hell-gato sheets are authored facing left, so
+  // walking right has to mirror them. Flipping on `facing` alone left these
+  // three walking backwards.
+  assert.equal(enemyArtFlip("ghost", 1), true);
+  assert.equal(enemyArtFlip("skeleton", 1), true);
+  assert.equal(enemyArtFlip("hound", 1), true);
+  // ...and unmirrored the other way, so they still look where they are going.
+  assert.equal(enemyArtFlip("ghost", -1), false);
+  assert.equal(enemyArtFlip("skeleton", -1), false);
+  assert.equal(enemyArtFlip("hound", -1), false);
+});
+
+test("burning-head ghoul art is mirrored when moving right", () => {
+  // The in-game burning-head ghoul was walking backwards without this flip.
+  assert.equal(enemyArtFlip("ghoul", 1), true);
+  assert.equal(enemyArtFlip("ghoul", -1), false);
+});
+
+test("every enemy kind has a defined art direction", () => {
+  for (const kind of ["ghoul", "ghost", "skeleton", "hound"]) {
+    assert.equal(typeof enemyArtFlip(kind, 1), "boolean");
+    // Flipping must be symmetric: the two facings are mirror images.
+    assert.notEqual(enemyArtFlip(kind, 1), enemyArtFlip(kind, -1));
+  }
 });

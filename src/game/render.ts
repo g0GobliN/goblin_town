@@ -1,11 +1,11 @@
 import { activeShockwaves } from "./boss";
 import { drawAtmosphere } from "./atmosphere";
-import { enemyBody } from "./combat";
+import { enemyArtFlip, enemyBody } from "./combat";
 import { ENEMY_HURT_DURATION, GROUND_Y, SCALE, VIEW_H, VIEW_W } from "./constants";
 import { drawFx } from "./fx";
 import { solidAt } from "./physics";
 import { questState } from "./quests";
-import { getActiveScene } from "./scenes";
+import { getActiveScene, npcArtFlip } from "./scenes";
 import { goldenGemPos, secretState } from "./secrets";
 import type { DrawContext, EnemyState, GhostFlame, SectionKey } from "./types";
 import { CRUMBS, EAST_GATE } from "./world";
@@ -28,13 +28,13 @@ function drawSheetFrame(
   frame: number,
   dx: number,
   dy: number,
-  facing: 1 | -1,
+  flip: boolean,
 ): void {
   const cols = Math.max(1, Math.floor(sheet.width / fw));
   const sx = (frame % cols) * fw;
 
   ctx.save();
-  if (facing < 0) {
+  if (flip) {
     ctx.translate(dx + fw / 2, dy);
     ctx.scale(-1, 1);
     ctx.drawImage(sheet, sx, 0, fw, fh, -fw / 2, 0, fw, fh);
@@ -393,7 +393,7 @@ function drawNpcs(ctx: DrawContext) {
       frame,
       Math.floor(dx),
       Math.floor(npc.y - npc.fh),
-      npc.facing,
+      npcArtFlip(npc.sheetIdle, npc.facing),
     );
   }
 }
@@ -488,11 +488,19 @@ function drawEnemies(ctx: DrawContext) {
           : enemy.kind === "hound"
             ? assets.hound
             : assets.ghoul;
-    const frame = frames[enemy.frame % frames.length];
+    const frameIndex = enemy.frame % frames.length;
+    const frame = frames[frameIndex];
     if (!frame) continue;
 
-    const float = enemy.kind === "ghost" ? Math.sin(performance.now() / 280 + enemy.x) * 4 : 0;
-    const dy = GROUND_Y - frame.height + 2 + float;
+    const float =
+      enemy.kind === "ghost" ? Math.sin(performance.now() / 280 + enemy.animPhase) * 4 : 0;
+    // Ghost PNGs share a 37x65 canvas, but their painted feet end at rows
+    // 59, 57, 56 and 57. Register the frames to the same ground baseline.
+    // Snap enemy coordinates to whole game pixels; fractional positions shimmer
+    // when the world is scaled by the 2x canvas transform.
+    const ghostFrameLift = enemy.kind === "ghost" ? ([0, 2, 3, 2][frameIndex] ?? 0) : 0;
+    const drawX = Math.floor(dx);
+    const dy = Math.floor(GROUND_Y - frame.height + 2 + float + ghostFrameLift);
 
     // Fresh hit → sprite blazes white, then the tint fades out with hurtT
     const hurt = enemy.hurtT > 0;
@@ -502,12 +510,14 @@ function drawEnemies(ctx: DrawContext) {
 
     c.save();
     if (enemy.kind === "ghost") c.globalAlpha = 0.85;
-    if (enemy.facing < 0) {
-      c.translate(dx + frame.width / 2, dy);
+    // Flip for the direction the enemy is moving, allowing for sheets whose
+    // art is drawn facing the other way.
+    if (enemyArtFlip(enemy.kind, enemy.facing)) {
+      c.translate(drawX + frame.width / 2, dy);
       c.scale(-1, 1);
       c.drawImage(img, -frame.width / 2, 0);
     } else {
-      c.drawImage(img, dx, dy);
+      c.drawImage(img, drawX, dy);
     }
     c.restore();
 

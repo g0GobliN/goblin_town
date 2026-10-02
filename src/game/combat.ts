@@ -48,6 +48,28 @@ export function enemyFrameCount(kind: EnemyKind): number {
   return 8;
 }
 
+/**
+ * Which way each enemy's artwork is drawn in its own source files.
+ *
+ * The sheets were not all authored facing the same way, so each kind has its
+ * own art direction. The burning-head ghoul uses the left-facing art rule.
+ */
+const ART_FACES_LEFT: Record<EnemyKind, boolean> = {
+  ghoul: true,
+  ghost: true,
+  skeleton: true,
+  hound: true,
+};
+
+/**
+ * Whether an enemy's sprite must be mirrored for it to appear to face the way
+ * it is moving. Accounts for the art's own direction, so `facing` alone stays
+ * the single source of truth for movement direction.
+ */
+export function enemyArtFlip(kind: EnemyKind, facing: 1 | -1): boolean {
+  return ART_FACES_LEFT[kind] ? facing > 0 : facing < 0;
+}
+
 function spawn(
   id: string,
   kind: EnemyKind,
@@ -68,6 +90,7 @@ function spawn(
     facing: -1,
     frame: 0,
     frameT: 0,
+    animPhase: Math.random() * Math.PI * 2,
     alive: true,
     hp,
     maxHp: hp,

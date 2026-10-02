@@ -69,6 +69,22 @@ export function tryAttack(player: PlayerState): boolean {
   return true;
 }
 
+export function resetPlayerAfterDeath(player: PlayerState, x: number, y: number): void {
+  player.x = x;
+  player.y = y;
+  player.vx = 0;
+  player.vy = 0;
+  player.hurtT = 0;
+  player.invulnT = 2.5;
+  player.attackT = 0;
+  player.attackHit = false;
+  player.climbing = false;
+  player.onGround = false;
+  player.anim = "idle";
+  player.frame = 0;
+  player.frameT = 0;
+}
+
 export function movePlayer(player: PlayerState, keys: Set<string>, dt: number): void {
   if (player.hurtT > 0) {
     player.hurtT -= dt;
@@ -203,7 +219,13 @@ function tickAnim(player: PlayerState, dt: number, rate: number) {
   }
 }
 
-export function updateEnemy(enemy: EnemyState, dt: number): void {
+/**
+ * move = false ticks the hurt timer and walk animation but leaves position and
+ * patrol clamping alone — for enemies whose movement is driven elsewhere (the
+ * boss brain owns Hell-gato's; running both walked it twice a frame and made
+ * it snap back at its bounds whenever it turned around).
+ */
+export function updateEnemy(enemy: EnemyState, dt: number, move = true): void {
   if (enemy.dying) {
     enemy.deathT += dt;
     if (enemy.deathT > 0.08) {
@@ -222,7 +244,7 @@ export function updateEnemy(enemy: EnemyState, dt: number): void {
 
   if (enemy.hurtT > 0) {
     enemy.hurtT -= dt;
-  } else {
+  } else if (move) {
     enemy.x += enemy.facing * enemy.speed * dt;
     // Clamp at patrol ends — bare flip causes stuck jitter on the edge
     if (enemy.x <= enemy.minX) {

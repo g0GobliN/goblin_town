@@ -60,6 +60,23 @@ export default defineConfig({
   server: { port: 4321, host: true },
   // HTTPS so phone LAN testing can use Fullscreen API (blocked on plain http://)
   vite: {
-    plugins: [basicSsl()],
+    plugins: [
+      basicSsl(),
+      {
+        // The Cloudflare workerd SSR runtime can discover Astro's manifest
+        // only after the first request. That triggers a dependency re-optimize
+        // and may leave its `sequence` chunk referenced under an old hash.
+        // Prebundle it before requests so the worker doesn't reload mid-request.
+        name: "prebundle-astro-ssr-manifest",
+        configEnvironment(environmentName) {
+          if (environmentName === "client") return;
+          return {
+            optimizeDeps: {
+              include: ["astro/app/manifest"],
+            },
+          };
+        },
+      },
+    ],
   },
 });

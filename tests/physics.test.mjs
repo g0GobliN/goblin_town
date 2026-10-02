@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cameraFollow, ladderAt, movePlayer, solidAt, tryJump } from "../src/game/physics.ts";
+import {
+  cameraFollow,
+  ladderAt,
+  movePlayer,
+  resetPlayerAfterDeath,
+  solidAt,
+  tryJump,
+  updateEnemy,
+} from "../src/game/physics.ts";
 import { GROUND_Y, JUMP_V, VIEW_W } from "../src/game/constants.ts";
 import { enterTownScene } from "../src/game/scenes.ts";
 
@@ -93,10 +101,96 @@ test("cameraFollow clamps to world edges", () => {
   assert.ok(Math.abs(mid - (VIEW_W + 12 - VIEW_W / 2)) <= 1);
 });
 
+test("death reset clears knockback, hurt and attack state", () => {
+  enterTownScene();
+  const p = playerAt(420, GROUND_Y - 34);
+  p.vx = -160;
+  p.vy = -180;
+  p.hurtT = 0.35;
+  p.attackT = 0.4;
+  p.attackHit = true;
+  p.climbing = true;
+  p.frame = 5;
+  p.frameT = 0.2;
+
+  resetPlayerAfterDeath(p, 180, GROUND_Y - 50);
+
+  assert.equal(p.x, 180);
+  assert.equal(p.y, GROUND_Y - 50);
+  assert.equal(p.vx, 0);
+  assert.equal(p.vy, 0);
+  assert.equal(p.hurtT, 0);
+  assert.equal(p.invulnT, 2.5);
+  assert.equal(p.attackT, 0);
+  assert.equal(p.attackHit, false);
+  assert.equal(p.climbing, false);
+  assert.equal(p.onGround, false);
+  assert.equal(p.anim, "idle");
+  assert.equal(p.frame, 0);
+  assert.equal(p.frameT, 0);
+
+  movePlayer(p, new Set(), 0.1);
+  assert.equal(p.x, 180, "no leftover knockback moves the respawned player");
+});
+
 test("movePlayer applies gravity when airborne", () => {
   enterTownScene();
   const p = playerAt(300, GROUND_Y - 120);
   const keys = new Set();
   movePlayer(p, keys, 1 / 60);
   assert.ok(p.vy > 0, "gravity pulls down");
+});
+
+function enemyAt(x) {
+  return {
+    x,
+    y: GROUND_Y - 34,
+    w: 24,
+    h: 34,
+    kind: "ghoul",
+    facing: 1,
+    frame: 0,
+    frameT: 0,
+    animPhase: 0,
+    alive: true,
+    hp: 3,
+    maxHp: 3,
+    hurtT: 0,
+    minX: x - 100,
+    maxX: x + 100,
+    speed: 60,
+    dying: false,
+    deathFrame: 0,
+    deathT: 0,
+  };
+}
+
+test("enemies patrol between their bounds and turn around", () => {
+  const e = enemyAt(500);
+  updateEnemy(e, 1 / 60);
+  assert.ok(e.x > 500, "walks right while facing right");
+
+  // pinned at the far end it turns, then walks back without escaping the bound
+  e.x = e.maxX;
+  updateEnemy(e, 1 / 60);
+  assert.equal(e.facing, -1);
+  updateEnemy(e, 1 / 60);
+  assert.ok(e.x < e.maxX, "walks back left");
+  assert.ok(e.x >= e.minX, "never past the near bound");
+
+  e.x = e.minX;
+  updateEnemy(e, 1 / 60);
+  assert.equal(e.facing, 1);
+  updateEnemy(e, 1 / 60);
+  assert.ok(e.x > e.minX, "turns back at the near bound");
+  assert.ok(e.x <= e.maxX, "never past the far bound");
+});
+
+test("updateEnemy with move=false leaves position to its driver (boss brain)", () => {
+  const e = enemyAt(500);
+  e.x = e.maxX; // would normally snap + flip here
+  updateEnemy(e, 0.5, false);
+  assert.equal(e.x, e.maxX, "position untouched");
+  assert.equal(e.facing, 1, "facing untouched");
+  assert.equal(e.frame, 1, "walk animation still advances");
 });

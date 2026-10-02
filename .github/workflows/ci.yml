@@ -171,6 +171,12 @@ jobs:
       - name: Run tests
         run: ${{ steps.pm-test.outputs.run }} test
 
+      # Prints a sprite-facing report for eyeballing. It is advisory only and
+      # always exits 0: the silhouette metric is unreliable on hunched or
+      # high-contrast art, so it must not gate a build. See the tool's header.
+      - name: Sprite facing report
+        run: ${{ steps.pm-test.outputs.run }} test:sprites
+
   build:
     name: Build
     runs-on: ubuntu-latest

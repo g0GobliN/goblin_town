@@ -282,9 +282,37 @@ body {
 #room-canvas {
   image-rendering: pixelated;
   display: block;
-  width: min(960px, calc(100vw - 40px));
+  /* intrinsic 960x540 — the max-* pair keeps the 16:9 ratio while letting the
+     canvas shrink to fit short windows instead of forcing the page to scroll */
+  width: auto;
   height: auto;
+  max-width: min(960px, calc(100vw - 40px));
+  max-height: calc(100dvh - 270px);
   vertical-align: top;
+}
+
+/* short windows (laptop with browser chrome, small desktop): trim the chrome
+   around the game so the canvas still gets the room */
+@media (max-height: 720px) {
+  .stage {
+    gap: 10px;
+    padding: 12px 16px 16px;
+  }
+
+  .brand {
+    gap: 6px;
+  }
+
+  /* the brand keeps its full size here — only the padding around the game
+     shrinks, so the title never gets smaller on a shorter window */
+
+  .controls-hint {
+    gap: 5px;
+  }
+
+  #room-canvas {
+    max-height: calc(100dvh - 235px);
+  }
 }
 
 .hud-zone {
@@ -292,7 +320,7 @@ body {
   top: 8px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 8px;
+  font-size: clamp(8px, 0.95vw, 10px);
   color: #ffd93d;
   background: rgba(10, 4, 14, 0.8);
   border: 1px solid #4a2038;
@@ -305,7 +333,7 @@ body {
   position: absolute;
   top: 30px;
   left: 8px;
-  font-size: 8px;
+  font-size: clamp(8px, 0.95vw, 10px);
   background: rgba(10, 4, 14, 0.8);
   padding: 4px 7px;
   border: 1px solid #4a2038;
@@ -316,9 +344,9 @@ body {
 
 .hud-kills {
   position: absolute;
-  top: 52px;
+  top: 56px;
   left: 8px;
-  font-size: 8px;
+  font-size: clamp(8px, 0.95vw, 10px);
   background: rgba(10, 4, 14, 0.8);
   padding: 4px 7px;
   border: 1px solid #4a2038;
@@ -328,9 +356,9 @@ body {
 
 .hud-gems {
   position: absolute;
-  top: 74px;
+  top: 82px;
   left: 8px;
-  font-size: 8px;
+  font-size: clamp(8px, 0.95vw, 10px);
   background: rgba(10, 4, 14, 0.8);
   padding: 4px 7px;
   border: 1px solid #4a2038;
@@ -342,7 +370,7 @@ body {
   position: absolute;
   top: 8px;
   right: 8px;
-  font-size: 8px;
+  font-size: clamp(8px, 0.95vw, 10px);
   background: rgba(10, 4, 14, 0.75);
   padding: 4px 7px;
   border: 1px solid #4a2038;
@@ -426,7 +454,7 @@ body {
   left: 8px;
   z-index: 40;
   font-family: inherit;
-  font-size: 8px;
+  font-size: clamp(9px, 1vw, 11px);
   color: #f2d9c0;
   background: rgba(10, 4, 14, 0.8);
   border: 1px solid #4a2038;
@@ -474,7 +502,7 @@ body {
 .menu-panel .pixel-btn {
   width: 100%;
   text-align: left;
-  font-size: 8px;
+  font-size: clamp(9px, 1vw, 11px);
   padding: 7px 8px;
   background: #1a0e18;
   border: 1px solid #5a3048;
@@ -981,7 +1009,8 @@ a.card-link:hover {
 }
 
 .cine-panel {
-  width: min(440px, 100%);
+  /* 448 not 440: a hair wider so the 10px intro body still sets on one line */
+  width: min(448px, 100%);
   padding: 28px 24px 20px;
   background: rgba(14, 8, 18, 0.92);
   border: 2px solid #6a3048;
@@ -1027,13 +1056,13 @@ a.card-link:hover {
 }
 
 .cine-body p {
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.7;
   color: #e0cbb4;
 }
 
 .cine-prompt {
-  font-size: 8px;
+  font-size: 9px;
   color: #ff8a8a;
   animation: blink 1.2s steps(2, jump-none) infinite;
 }
@@ -1387,10 +1416,6 @@ html.is-touch .dialogue {
     font-size: clamp(1rem, 5vw, 1.5rem);
   }
 
-  .controls-hint {
-    font-size: 7px;
-  }
-
   .modal-overlay {
     padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
       max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
@@ -1468,7 +1493,6 @@ html.is-touch .dialogue {
   }
 
   .hud-zone {
-    font-size: 7px;
     padding: 4px 8px;
     max-width: calc(100% - 96px);
     overflow: hidden;
@@ -1479,7 +1503,6 @@ html.is-touch .dialogue {
   .hud-kills,
   .hud-gems,
   .hud-crumbs {
-    font-size: 7px;
     padding: 3px 6px;
   }
 
@@ -1503,18 +1526,15 @@ html.is-touch .dialogue {
   }
 
   .dialogue-name {
-    font-size: 6px;
     margin-bottom: 3px;
   }
 
   #dialogue-text {
-    font-size: 7px;
     line-height: 1.4;
   }
 
   .dialogue-prompt {
     margin-top: 4px;
-    font-size: 6px;
   }
 
   .menu-panel {
@@ -1526,7 +1546,6 @@ html.is-touch .dialogue {
   .menu-panel .pixel-btn {
     min-height: 0;
     padding: 7px 8px;
-    font-size: 7px;
   }
 
   .pixel-btn {
@@ -1598,7 +1617,6 @@ html.is-touch .dialogue {
   .game-page .menu-toggle {
     top: 4px;
     left: 4px;
-    font-size: 6px;
     padding: 3px 6px;
     min-height: 0;
   }
@@ -1614,14 +1632,12 @@ html.is-touch .dialogue {
   }
 
   .game-page .menu-panel .pixel-btn {
-    font-size: 6px;
     min-height: 0;
     padding: 5px 6px;
   }
 
   .game-page .hud-zone {
     top: 4px;
-    font-size: 5px;
     padding: 2px 5px;
     max-width: 40%;
   }
@@ -1630,21 +1646,20 @@ html.is-touch .dialogue {
   .game-page .hud-kills,
   .game-page .hud-gems,
   .game-page .hud-crumbs {
-    font-size: 5px;
     padding: 2px 4px;
     letter-spacing: 0;
   }
 
   .game-page .hud-hp {
-    top: 20px;
+    top: 18px;
     left: 4px;
   }
   .game-page .hud-kills {
-    top: 34px;
+    top: 36px;
     left: 4px;
   }
   .game-page .hud-gems {
-    top: 48px;
+    top: 54px;
     left: 4px;
   }
   .game-page .hud-crumbs {
@@ -1663,23 +1678,19 @@ html.is-touch .dialogue {
   }
 
   .game-page .dialogue-name {
-    font-size: 5px;
     margin-bottom: 2px;
   }
 
   .game-page #dialogue-text {
-    font-size: 6px;
     line-height: 1.35;
   }
 
   .game-page .dialogue-prompt {
     margin-top: 3px;
-    font-size: 5px;
   }
 
   .game-page .hint {
     bottom: 6px;
-    font-size: 5px;
     padding: 3px 6px;
     max-width: calc(100% - 12px);
     white-space: normal;

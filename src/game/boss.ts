@@ -11,6 +11,7 @@
  */
 
 import { GROUND_Y } from "./constants.ts";
+import { BOSS_ARENA } from "./world.ts";
 import type { EnemyState, PlayerState } from "./types.ts";
 
 export type BossPhase = "pursue" | "windup" | "charge" | "leap" | "slam" | "recover";
@@ -67,6 +68,14 @@ const WINDUP_TIME = 0.55;
 const RECOVER_TIME = 0.9;
 const LEAP_AIR_TIME = 0.62;
 
+function bossMinX(): number {
+  return BOSS_ARENA.minX;
+}
+
+function bossMaxX(enemy: EnemyState): number {
+  return BOSS_ARENA.maxX - enemy.w;
+}
+
 /**
  * Per-frame boss brain. Returns "hit" when the boss's body damages the
  * player this frame (charge contact / slam shockwave), else null. Actual
@@ -90,13 +99,16 @@ export function tickBoss(enemy: EnemyState, player: PlayerState, dt: number): "h
     case "pursue": {
       enemy.facing = dir as 1 | -1;
       enemy.speed = enraged ? CHASE_SPEED * 1.3 : CHASE_SPEED;
-      // walk toward the player within patrol bounds
-      const next = enemy.x + dir * enemy.speed * dt;
-      if (next > enemy.minX - 60 && next < enemy.maxX + 60) enemy.x = next;
+      // Use the whole boss arena, not the hound's short spawn patrol. Stopping
+      // at the patrol cap left Hell-gato unable to follow players to the gate.
+      enemy.x = Math.max(bossMinX(), Math.min(bossMaxX(enemy), enemy.x + dir * enemy.speed * dt));
 
-      const ranged = dist < 240 && dist > 70;
+      // Include close range: when Hell-gato reaches the east arena edge, the
+      // player can still be within 70px but behind the gate boundary. Requiring
+      // dist > 70 there leaves it pursuing forever without moving or attacking.
+      const inAttackRange = dist < 240;
       const think = enraged ? 0.8 : 1.4;
-      if (rt.phaseT > think && ranged) {
+      if (rt.phaseT > think && inAttackRange) {
         // pick: leap if unlocked and player is far-ish, else charge
         if (enemy.hp <= enemy.maxHp * 0.66 && Math.random() < 0.45) {
           rt.phase = "windup";
@@ -128,10 +140,9 @@ export function tickBoss(enemy: EnemyState, player: PlayerState, dt: number): "h
     }
 
     case "charge": {
-      enemy.x += rt.lungeVx * dt;
-      enemy.x = Math.max(enemy.minX - 80, Math.min(enemy.maxX + 80, enemy.x));
-      // contact damage reported by normal overlap; end charge on wall/time
-      if (rt.phaseT > 0.55 || enemy.x <= enemy.minX - 80 || enemy.x >= enemy.maxX + 80) {
+      enemy.x = Math.max(bossMinX(), Math.min(bossMaxX(enemy), enemy.x + rt.lungeVx * dt));
+      // contact damage reported by normal overlap; end charge on arena edge/time
+      if (rt.phaseT > 0.55 || enemy.x <= bossMinX() || enemy.x >= bossMaxX(enemy)) {
         rt.phase = "recover";
         rt.phaseT = 0;
         rt.slamX = 0;
@@ -143,7 +154,13 @@ export function tickBoss(enemy: EnemyState, player: PlayerState, dt: number): "h
       // ballistic arc toward slamX
       const t = rt.phaseT / LEAP_AIR_TIME;
       enemy.y = GROUND_Y - enemy.h - Math.sin(Math.min(1, t) * Math.PI) * 90;
-      enemy.x += ((rt.slamX ?? player.x) - (enemy.x + enemy.w / 2)) * dt * 2.4;
+      enemy.x = Math.max(
+        bossMinX(),
+        Math.min(
+          bossMaxX(enemy),
+          enemy.x + ((rt.slamX ?? player.x) - (enemy.x + enemy.w / 2)) * dt * 2.4,
+        ),
+      );
       enemy.facing = ((rt.slamX ?? player.x) > enemy.x ? 1 : -1) as 1 | -1;
       if (t >= 1) {
         enemy.y = GROUND_Y - enemy.h;

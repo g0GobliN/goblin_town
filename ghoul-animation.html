@@ -1,0 +1,59 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Burning ghoul animation order</title>
+<style>
+  body {
+    background: #17111f;
+    color: #eee;
+    font: 16px system-ui;
+    margin: 24px;
+  }
+  h1 {
+    font-size: 20px;
+  }
+  .row {
+    display: flex;
+    gap: 4px;
+    margin: 12px 0 28px;
+  }
+  figure {
+    margin: 0;
+    padding: 8px;
+    background: #302638;
+    text-align: center;
+  }
+  img {
+    display: block;
+    width: 114px;
+    height: 120px;
+    object-fit: contain;
+    image-rendering: pixelated;
+  }
+  figcaption {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+</style>
+<h1>Burning ghoul animation order</h1>
+<h2>Forward frame order</h2>
+<div id="forward" class="row"></div>
+<h2>Reverse frame order</h2>
+<div id="reverse" class="row"></div>
+<script>
+  const base = "public/img/gothicvania/church/ghoul/burning-ghoul";
+  for (const [id, seq] of [
+    ["forward", [1, 2, 3, 4, 5, 6, 7, 8]],
+    ["reverse", [8, 7, 6, 5, 4, 3, 2, 1]],
+  ]) {
+    const row = document.getElementById(id);
+    for (const n of seq) {
+      const f = document.createElement("figure"),
+        i = document.createElement("img"),
+        c = document.createElement("figcaption");
+      i.src = base + n + ".png";
+      c.textContent = "frame " + n;
+      f.append(i, c);
+      row.append(f);
+    }
+  }
+</script>

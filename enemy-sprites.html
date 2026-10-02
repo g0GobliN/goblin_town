@@ -1,0 +1,76 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Enemy sprite contact sheet</title>
+<style>
+  body {
+    background: #17111f;
+    color: #fff;
+    font: 16px system-ui;
+    margin: 20px;
+  }
+  h1 {
+    font-size: 20px;
+  }
+  .group {
+    margin: 20px 0;
+  }
+  .row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  figure {
+    margin: 0;
+    padding: 8px;
+    background: #302638;
+    text-align: center;
+  }
+  img {
+    width: 114px;
+    height: 130px;
+    object-fit: contain;
+    image-rendering: pixelated;
+  }
+  figcaption {
+    font-size: 12px;
+  }
+</style>
+<h1>Enemy sprites (each enemy type)</h1>
+<div id="root"></div>
+<script>
+  const groups = {
+    Ghoul: Array.from(
+      { length: 8 },
+      (_, i) => `public/img/gothicvania/church/ghoul/burning-ghoul${i + 1}.png`,
+    ),
+    Ghost: Array.from(
+      { length: 4 },
+      (_, i) => `public/img/gothicvania/cemetery/ghost/ghost-${i + 1}.png`,
+    ),
+    Skeleton: Array.from(
+      { length: 8 },
+      (_, i) => `public/img/gothicvania/cemetery/skeleton/skeleton-${i + 1}.png`,
+    ),
+    Hellgato: Array.from(
+      { length: 4 },
+      (_, i) => `public/img/gothicvania/cemetery/hell-gato/hell-gato-${i + 1}.png`,
+    ),
+  };
+  const root = document.getElementById("root");
+  for (const [name, files] of Object.entries(groups)) {
+    const section = document.createElement("section");
+    section.className = "group";
+    section.innerHTML = `<h2>${name}</h2><div class="row"></div>`;
+    const row = section.querySelector(".row");
+    files.forEach((src, i) => {
+      const f = document.createElement("figure"),
+        img = document.createElement("img"),
+        cap = document.createElement("figcaption");
+      img.src = src;
+      cap.textContent = `frame ${i + 1}`;
+      f.append(img, cap);
+      row.append(f);
+    });
+    root.append(section);
+  }
+</script>

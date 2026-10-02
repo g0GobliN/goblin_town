@@ -89,6 +89,8 @@ export interface EnemyState {
   facing: 1 | -1;
   frame: number;
   frameT: number;
+  /** Stable animation phase; must not depend on moving world position. */
+  animPhase: number;
   alive: boolean;
   hp: number;
   maxHp: number;

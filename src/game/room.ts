@@ -8,23 +8,24 @@ import { BOSS_INTRO, type CineKind, creditRollHtml, slidesFor } from "./cinemati
 import { createEnemies, enemiesKilled, makePlayer, resolveCombat } from "./combat";
 import { attackBox } from "./combat";
 import { burst, floatText, flash, hitStop, shake, shakeOffset, tickFx } from "./fx";
-import {
-  catchFlame,
-  FLAMES_REQUIRED,
-  loadQuest,
-  questRewardPaid,
-  questState,
-  saveQuest,
-} from "./quests";
-import { checkSecrets, goldenGemPos, loadSecrets, saveSecrets, secretState } from "./secrets";
-import { createGhostFlames, ledgeAt } from "./world";
+import { catchFlame, FLAMES_REQUIRED, loadQuest, questRewardPaid, questState } from "./quests";
+import { checkSecrets, goldenGemPos, loadSecrets, secretState } from "./secrets";
+import { createGhostFlames } from "./world";
 import { CREDITS_MUSIC_SRC, GROUND_Y, MUSIC_SRC, SCALE, VIEW_H, VIEW_W } from "./constants";
 import { loadSectionContent } from "./content";
 import { initDoodlePad } from "./doodle";
 import { devError } from "../lib/log";
-import { cameraFollow, ladderAt, movePlayer, tryAttack, tryJump, updateEnemy } from "./physics";
+import {
+  cameraFollow,
+  ladderAt,
+  movePlayer,
+  resetPlayerAfterDeath,
+  tryAttack,
+  tryJump,
+  updateEnemy,
+} from "./physics";
 import { drawLoading, drawWorld } from "./render";
-import { loadGameSave, saveGameSave, type GameSave } from "./save";
+import { clearGameSave } from "./save";
 import { newRun, nextSpawn, spawnInterval, tickWaves, waveComposition, waveSpeed } from "./arcade";
 import type { ArcadeRun } from "./arcade";
 import type { EnemyKind } from "./types";
@@ -67,14 +68,6 @@ function nearbyCrumb(player: PlayerState): Crumb | null {
   return null;
 }
 
-function nearbyNpc(player: PlayerState): Npc | null {
-  const px = player.x + player.w / 2;
-  for (const npc of NPCS) {
-    if (Math.abs(px - npc.x) < 36) return npc;
-  }
-  return null;
-}
-
 export function initPixelRoom() {
   const canvas = document.getElementById("room-canvas") as HTMLCanvasElement;
   const hint = document.getElementById("room-hint")!;
@@ -84,6 +77,14 @@ export function initPixelRoom() {
   const modalTitle = document.getElementById("modal-title")!;
   const modalClose = document.getElementById("modal-close")!;
   const modalBody = overlay.querySelector<HTMLElement>(".modal-body")!;
+
+  const nearbyNpc = (player: PlayerState): Npc | null => {
+    const px = player.x + player.w / 2;
+    for (const npc of NPCS) {
+      if (Math.abs(px - npc.x) < 36) return npc;
+    }
+    return null;
+  };
   const modalBox = overlay.querySelector<HTMLElement>(".modal")!;
   const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-section]"));
   const crumbsEl = document.getElementById("crumb-count");
@@ -136,24 +137,18 @@ export function initPixelRoom() {
   const found = new Set<string>();
   const pickups = createPickups();
 
-  // Restore progress from a previous visit (localStorage)
-  const restored = loadGameSave();
-  for (const p of pickups) {
-    if (p.kind === "soul" && restored.gems.includes(p.id)) p.taken = true;
-    if (p.kind === "heart" && restored.hearts.includes(p.id)) p.taken = true;
-  }
-  const restoredSouls = restored.gems.length;
-  for (const id of restored.doors) found.add(id);
+  // Every visit starts a fresh playthrough; discard any save from older versions.
+  clearGameSave();
 
   // Bonus gems (quest +5, golden +3) share this counter — cap it so the HUD
   // and gate dialogues can never read above the 12 the gate asks for.
-  let souls = Math.min(restoredSouls, GEMS_TO_OPEN_GATE);
-  let bossDown = restored.kills.includes("g12"); // Hell-gato
+  let souls = 0;
+  let bossDown = false;
 
   // ── new systems state ─────────────────────────────────
-  loadQuest(restored);
-  loadSecrets(restored);
-  let arcadeBest = restored.arcadeBest ?? 0;
+  loadQuest({});
+  loadSecrets({});
+  let arcadeBest = 0;
   const flames = createGhostFlames();
   let arcade: ArcadeRun | null = null;
   let arcadeBag: EnemyKind[] = [];
@@ -178,16 +173,9 @@ export function initPixelRoom() {
   let bossIntroIndex = 0;
   let sawBossIntro = false;
   let bossFightReady = false;
+  let respawnPromptActive = false;
 
   const player = makePlayer();
-  if (restored.x > 180) {
-    player.x = restored.x; // resume where you left off
-    // Land exactly on the ledge under you (or let gravity settle the street) —
-    // old saves may point at geometry that no longer exists.
-    const ledge = ledgeAt(player.x + player.w / 2);
-    if (ledge) player.y = ledge.y - player.h;
-    player.onGround = true;
-  }
   const enemies = createEnemies();
   const hellGato = () => enemies.find((e) => e.kind === "hound");
 
@@ -217,7 +205,6 @@ export function initPixelRoom() {
   const startCreditsRoll = () => {
     if (!cineOverlay || !creditsRoll || !creditsTrack) return;
     sawCredits = true;
-    persist();
     open = null;
     overlay.classList.remove("open");
     setMenuOpen(false, false);
@@ -321,44 +308,6 @@ export function initPixelRoom() {
   // Gate: last boss + enough gems — other mobs optional
   const gateUnlocked = () => bossDown && souls >= GEMS_TO_OPEN_GATE;
 
-  // ── progress persistence ────────────────────────────────
-  const killedIds = new Set(restored.kills);
-  // enemies stay dead across visits — the save remembers your kills, the boss
-  // included (bossDown above already reads the same list)
-  for (const e of enemies) {
-    if (killedIds.has(e.id)) {
-      e.alive = false;
-      e.dying = false;
-    }
-  }
-  const takenGemIds = new Set(restored.gems);
-  const takenHeartIds = new Set(restored.hearts);
-
-  const persist = () => {
-    const save: GameSave = {
-      gems: [...takenGemIds],
-      hearts: [...takenHeartIds],
-      kills: [...killedIds],
-      doors: [...found].filter((id) => id.startsWith("door-")),
-      x: Math.round(player.x),
-      finished: sawCredits,
-      arcadeBest,
-      ...saveQuest(),
-      ...saveSecrets(),
-    };
-    saveGameSave(save);
-  };
-
-  // Position + any pending state is saved when the tab is hidden or closed
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") persist();
-  });
-  window.addEventListener("beforeunload", persist);
-
-  // …and every few seconds while walking, so a crash can't eat your spot
-  let positionSaveT = 0;
-  let lastSavedX = restored.x;
-
   updateHpHud();
   updateKillHud();
   updateGemHud();
@@ -381,6 +330,7 @@ export function initPixelRoom() {
   };
 
   const hideDialogue = () => {
+    respawnPromptActive = false;
     if (dialogueBox) {
       dialogueBox.hidden = true;
       dialogueBox.classList.remove("is-boss-talk");
@@ -619,7 +569,6 @@ export function initPixelRoom() {
         questRewardPaid();
         souls = Math.min(GEMS_TO_OPEN_GATE, souls + 5);
         updateGemHud();
-        persist();
         window.setTimeout(
           () =>
             showDialogue(
@@ -651,7 +600,6 @@ export function initPixelRoom() {
     if (crumb) {
       const isNew = !found.has(crumb.id);
       found.add(crumb.id);
-      if (isNew) persist();
       updateCrumbHud();
       hideDialogue();
       if (isNew) playSfx("secret");
@@ -894,7 +842,24 @@ export function initPixelRoom() {
   let cheatBuffer = "";
   const CHEAT_OUTRO = "outro";
 
+  const MOVEMENT_KEYS = new Set(["a", "A", "ArrowLeft", "d", "D", "ArrowRight", "Shift"]);
+  const movementKeysBlockedUntilRelease = new Set<string>();
+
   window.addEventListener("keydown", (event) => {
+    // Never let a key held through a death/talk prompt restart movement after
+    // dismissal. Keep it blocked until its matching keyup arrives.
+    if (
+      MOVEMENT_KEYS.has(event.key) &&
+      (movementKeysBlockedUntilRelease.has(event.key) || respawnPromptActive || dialogueShowing())
+    ) {
+      if (respawnPromptActive || dialogueShowing()) {
+        movementKeysBlockedUntilRelease.add(event.key);
+      }
+      keys.delete(event.key);
+      event.preventDefault();
+      return;
+    }
+
     keys.add(event.key);
     startMusic();
 
@@ -1046,6 +1011,7 @@ export function initPixelRoom() {
   });
 
   window.addEventListener("keyup", (event) => {
+    movementKeysBlockedUntilRelease.delete(event.key);
     keys.delete(event.key);
     if (event.key === " " || event.key === "Enter") creditFast = false;
   });
@@ -1183,7 +1149,7 @@ export function initPixelRoom() {
 
       moveZone.addEventListener("pointerdown", (event) => {
         if (!isGesturePointer(event)) return;
-        if (open || phase === "credits") return;
+        if (open || phase === "credits" || respawnPromptActive || dialogueShowing()) return;
         event.preventDefault();
         tryPlayFullscreen();
         startMusic();
@@ -1240,6 +1206,7 @@ export function initPixelRoom() {
       btn.addEventListener("gesturestart", blockZoom as EventListener);
 
       btn.addEventListener("pointerdown", (event) => {
+        if (action === "run" && (respawnPromptActive || dialogueShowing())) return;
         event.preventDefault();
         event.stopPropagation();
         tryPlayFullscreen();
@@ -1273,11 +1240,21 @@ export function initPixelRoom() {
   // "stuck" and the goblin keeps running on its own. Force-clear on blur.
   const releaseAllControls = () => {
     keys.clear();
+    movementKeysBlockedUntilRelease.clear();
     clearMoveKeys();
     hideStick();
     gestureId = null;
     stickDragging = false;
     runHeld = false;
+  };
+
+  // Respawn must never inherit a held movement key: if death happens before
+  // keyup (including OS key-repeat or focus/input edge cases), clear input and
+  // consume the current release event before resuming the game.
+  const suppressMovementUntilRelease = () => {
+    const held = [...keys].filter((key) => MOVEMENT_KEYS.has(key));
+    releaseAllControls();
+    for (const key of held) movementKeysBlockedUntilRelease.add(key);
   };
   window.addEventListener("blur", releaseAllControls);
   document.addEventListener("visibilitychange", () => {
@@ -1334,14 +1311,12 @@ export function initPixelRoom() {
     }
     if (!run) return;
     if (died) {
-      player.x = 180;
-      player.y = GROUND_Y - 50;
-      player.vx = 0;
-      player.vy = 0;
+      respawnPromptActive = true;
+      suppressMovementUntilRelease();
+      resetPlayerAfterDeath(player, 180, GROUND_Y - 50);
     }
     player.hp = player.maxHp; // dying in the siege must not also fire the town respawn
     if (run.score > arcadeBest) arcadeBest = run.score;
-    persist();
     // submit to the leaderboard (best-effort) — signed with the visitor's
     // goblin name from the info page's comment form, when they've set one
     let goblinName = "traveler";
@@ -1400,6 +1375,7 @@ export function initPixelRoom() {
           facing: fromEast ? -1 : 1,
           frame: 0,
           frameT: 0,
+          animPhase: Math.random() * Math.PI * 2,
           alive: true,
           hp,
           maxHp: hp,
@@ -1486,7 +1462,7 @@ export function initPixelRoom() {
       return;
     }
 
-    if (open || phase !== "play") return;
+    if (open || phase !== "play" || respawnPromptActive) return;
 
     // ── cemetery siege: waves run inside the main town loop ──
     if (arcade?.active) {
@@ -1532,9 +1508,11 @@ export function initPixelRoom() {
     for (const enemy of enemies) {
       // Hell-gato waits until the talk ends
       if (enemy.kind === "hound" && !bossFightReady) continue;
-      updateEnemy(enemy, dt);
-      // Boss phase brain (charge/leap/slam) once the fight is on
-      if (enemy.kind === "hound" && bossFightReady && !enemy.dying) {
+      // Boss phase brain (charge/leap/slam) once the fight is on — it owns
+      // movement, so the shared patrol step stands down for that enemy
+      const bossDriving = enemy.kind === "hound" && bossFightReady && !enemy.dying;
+      updateEnemy(enemy, dt, !bossDriving);
+      if (bossDriving) {
         const bossEvent = tickBoss(enemy, player, dt);
         if (bossEvent === "hit") {
           shake(9, 0.35);
@@ -1587,10 +1565,6 @@ export function initPixelRoom() {
       shake(4, 0.2);
       updateKillHud();
       if (arcade) arcade.score += 1;
-      for (const e of enemies) {
-        if (!e.alive || e.dying) killedIds.add(e.id);
-      }
-      persist();
       const bossNow = hellGato();
       if (!bossDown && bossWasUp && bossNow && (bossNow.dying || !bossNow.alive)) {
         bossDown = true;
@@ -1624,8 +1598,6 @@ export function initPixelRoom() {
       if (p.kind === "heart") {
         if (player.hp >= player.maxHp) continue;
         p.taken = true;
-        takenHeartIds.add(p.id);
-        persist();
         player.hp = Math.min(player.maxHp, player.hp + 1);
         burst(p.x, p.y, { colors: ["#ff6b6b", "#ffb0b0", "#fff"], count: 12, up: true });
         floatText(p.x, p.y - 14, "+♥", "#ff8a8a");
@@ -1635,8 +1607,6 @@ export function initPixelRoom() {
         p.taken = true;
         const before = souls;
         souls = Math.min(GEMS_TO_OPEN_GATE, souls + 1);
-        takenGemIds.add(p.id);
-        persist();
         burst(p.x, p.y, { colors: ["#b794f6", "#e0c5ff", "#fff"], count: 14, up: true });
         floatText(p.x, p.y - 14, "+1", "#b794f6");
         updateGemHud();
@@ -1656,7 +1626,6 @@ export function initPixelRoom() {
     // ── secrets discovery ─────────────────────────────────
     const secret = checkSecrets(player.x + player.w / 2, player.y + player.h / 2);
     if (secret) {
-      persist();
       playSfx("secret");
       flash("#ffd93d", 0.14);
       burst(player.x + player.w / 2, player.y, {
@@ -1678,8 +1647,6 @@ export function initPixelRoom() {
       if (Math.abs(pcx - g.x) < 26 && player.y + player.h > g.y - 40 && player.y < g.y + 20) {
         secretState().goldenGem = true;
         souls = Math.min(GEMS_TO_OPEN_GATE, souls + 3);
-        takenGemIds.add("golden");
-        persist();
         updateGemHud();
         burst(g.x, g.y, { colors: ["#ffd93d", "#fff7cc", "#ffb100"], count: 26, up: true });
         floatText(g.x, g.y - 16, "+3 GOLDEN", "#ffd93d");
@@ -1704,7 +1671,6 @@ export function initPixelRoom() {
       const pcx = player.x + player.w / 2;
       const got = catchFlame(flames, pcx, player.y + player.h / 2);
       if (got) {
-        persist();
         burst(got.x, got.y, { colors: ["#7de0ff", "#d0f6ff", "#fff"], count: 18, up: true });
         floatText(got.x, got.y - 12, `FLAME ${questState().caught}/${FLAMES_REQUIRED}`, "#7de0ff");
         playSfx("secret");
@@ -1720,12 +1686,10 @@ export function initPixelRoom() {
     }
 
     if (player.hp <= 0) {
+      respawnPromptActive = true;
+      suppressMovementUntilRelease();
       player.hp = player.maxHp;
-      player.x = 180;
-      player.y = GROUND_Y - 50;
-      player.vx = 0;
-      player.vy = 0;
-      player.invulnT = 2.5; // long enough to flee whoever camped the square
+      resetPlayerAfterDeath(player, 180, GROUND_Y - 50); // room to flee whoever camped the square
       // …and shove respawn-campers home, so waking at the square can't be an
       // instant death loop
       for (const e of enemies) {
@@ -1745,16 +1709,6 @@ export function initPixelRoom() {
     if (gateBumpT > 0) gateBumpT -= dt;
 
     cameraX = cameraFollow(player);
-
-    // periodic position save (the event-based saves can miss a long walk)
-    positionSaveT += dt;
-    if (positionSaveT >= 4) {
-      positionSaveT = 0;
-      if (Math.abs(player.x - lastSavedX) > 48 && !arcade?.active) {
-        lastSavedX = Math.round(player.x);
-        persist();
-      }
-    }
 
     const zone = zoneLabel(cameraX + VIEW_W / 2);
     if (zoneEl && zone !== lastZone) {

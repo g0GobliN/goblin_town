@@ -13,6 +13,7 @@
     "preview": "astro preview",
     "lint": "prettier --check . && astro check",
     "test": "node --test --experimental-strip-types",
+    "test:sprites": "node --experimental-strip-types tools/verify-facing.mjs",
     "deploy": "npm run build && wrangler pages deploy ./dist --project-name=goblin-town",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"
